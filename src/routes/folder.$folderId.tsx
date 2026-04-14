@@ -15,7 +15,7 @@ export const Route = createFileRoute("/folder/$folderId")({
 interface Quiz {
   id: string;
   title: string;
-  description: string;
+  description: string | null;
   total_points: number;
   questionCount: number;
 }

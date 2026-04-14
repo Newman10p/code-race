@@ -184,7 +184,7 @@ function LaunchRoom() {
                     <div className="flex items-center gap-3">
                       <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${i === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{i + 1}</span>
                       <span className="font-medium">{p.student_name}</span>
-                      {p.is_flagged && <AlertTriangle className="h-4 w-4 text-destructive" title={`Tab switches: ${p.tab_switch_count}`} />}
+                      {p.is_flagged && <span title={`Tab switches: ${p.tab_switch_count}`}><AlertTriangle className="h-4 w-4 text-destructive" /></span>}
                     </div>
                     <div className="flex items-center gap-1 font-mono text-sm font-bold text-primary">
                       <Zap className="h-3 w-3" />{p.current_score}

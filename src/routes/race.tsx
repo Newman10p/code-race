@@ -131,13 +131,11 @@ function RaceView() {
     }
 
     // Increment tab switch count
-    await supabase.rpc("increment_tab_switches" as any, { p_id: participantId }).catch(() => {
-      // Fallback: direct update
-      supabase.from("participants").update({
-        tab_switch_count: leaderboard.find(l => l.id === participantId) ? 1 : 1,
-        is_flagged: true,
-      }).eq("id", participantId);
-    });
+    const current = leaderboard.find(l => l.id === participantId);
+    await supabase.from("participants").update({
+      tab_switch_count: (current as any)?.tab_switch_count ? (current as any).tab_switch_count + 1 : 1,
+      is_flagged: true,
+    }).eq("id", participantId);
   }, [currentQIndex, questions, participantId]);
 
   const submitAnswer = async (isTabSwitch = false) => {
