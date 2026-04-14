@@ -9,22 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
-import { Route as LobbyRouteImport } from './routes/lobby'
+import { Route as ManualRouteImport } from './routes/manual'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as JoinRouteImport } from './routes/join'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RaceRoute = RaceRouteImport.update({
   id: '/race',
   path: '/race',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LobbyRoute = LobbyRouteImport.update({
-  id: '/lobby',
-  path: '/lobby',
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LaunchRoute = LaunchRouteImport.update({
@@ -35,6 +48,11 @@ const LaunchRoute = LaunchRouteImport.update({
 const JoinRoute = JoinRouteImport.update({
   id: '/join',
   path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,29 +73,38 @@ const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
+  '/login': typeof LoginRoute
+  '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
+  '/register': typeof RegisterRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
+  '/login': typeof LoginRoute
+  '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
+  '/register': typeof RegisterRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
+  '/login': typeof LoginRoute
+  '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
+  '/register': typeof RegisterRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
@@ -85,44 +112,63 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
+    | '/login'
+    | '/manual'
     | '/race'
+    | '/register'
     | '/folder/$folderId'
     | '/quiz/create'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
+    | '/login'
+    | '/manual'
     | '/race'
+    | '/register'
     | '/folder/$folderId'
     | '/quiz/create'
   id:
     | '__root__'
     | '/'
+    | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
+    | '/login'
+    | '/manual'
     | '/race'
+    | '/register'
     | '/folder/$folderId'
     | '/quiz/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
   LaunchRoute: typeof LaunchRoute
-  LobbyRoute: typeof LobbyRoute
+  LoginRoute: typeof LoginRoute
+  ManualRoute: typeof ManualRoute
   RaceRoute: typeof RaceRoute
+  RegisterRoute: typeof RegisterRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
   QuizCreateRoute: typeof QuizCreateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/race': {
       id: '/race'
       path: '/race'
@@ -130,11 +176,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RaceRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/lobby': {
-      id: '/lobby'
-      path: '/lobby'
-      fullPath: '/lobby'
-      preLoaderRoute: typeof LobbyRouteImport
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/launch': {
@@ -149,6 +202,13 @@ declare module '@tanstack/react-router' {
       path: '/join'
       fullPath: '/join'
       preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -177,10 +237,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
   LaunchRoute: LaunchRoute,
-  LobbyRoute: LobbyRoute,
+  LoginRoute: LoginRoute,
+  ManualRoute: ManualRoute,
   RaceRoute: RaceRoute,
+  RegisterRoute: RegisterRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
   QuizCreateRoute: QuizCreateRoute,
 }
