@@ -1,11 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { Zap, FolderOpen, Play, Users } from "lucide-react";
+import { FolderOpen, Play, HelpCircle } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const navItems = [
-  { label: "Dashboard", to: "/", icon: FolderOpen },
+  { label: "Dashboard", to: "/dashboard", icon: FolderOpen },
   { label: "Launch", to: "/launch", icon: Play },
-  { label: "Join Race", to: "/join", icon: Users },
+  { label: "Manual", to: "/manual", icon: HelpCircle },
 ];
 
 export function Navbar() {
@@ -14,10 +15,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary glow-btn">
-            <Zap className="h-4 w-4 text-primary-foreground" />
-          </div>
+        <Link to="/dashboard" className="flex items-center gap-2 group">
+          <Logo className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight text-foreground">
             Code<span className="text-primary">Race</span>
           </span>
@@ -25,7 +24,7 @@ export function Navbar() {
 
         <nav className="flex items-center gap-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.to;
+            const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
             return (
               <Link
                 key={item.to}
