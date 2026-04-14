@@ -9,38 +9,148 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RaceRouteImport } from './routes/race'
+import { Route as LobbyRouteImport } from './routes/lobby'
+import { Route as LaunchRouteImport } from './routes/launch'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuizCreateRouteImport } from './routes/quiz.create'
+import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 
+const RaceRoute = RaceRouteImport.update({
+  id: '/race',
+  path: '/race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LobbyRoute = LobbyRouteImport.update({
+  id: '/lobby',
+  path: '/lobby',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaunchRoute = LaunchRouteImport.update({
+  id: '/launch',
+  path: '/launch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuizCreateRoute = QuizCreateRouteImport.update({
+  id: '/quiz/create',
+  path: '/quiz/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
+  id: '/folder/$folderId',
+  path: '/folder/$folderId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/join': typeof JoinRoute
+  '/launch': typeof LaunchRoute
+  '/lobby': typeof LobbyRoute
+  '/race': typeof RaceRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/quiz/create': typeof QuizCreateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/join': typeof JoinRoute
+  '/launch': typeof LaunchRoute
+  '/lobby': typeof LobbyRoute
+  '/race': typeof RaceRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/quiz/create': typeof QuizCreateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/join': typeof JoinRoute
+  '/launch': typeof LaunchRoute
+  '/lobby': typeof LobbyRoute
+  '/race': typeof RaceRoute
+  '/folder/$folderId': typeof FolderFolderIdRoute
+  '/quiz/create': typeof QuizCreateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/join'
+    | '/launch'
+    | '/lobby'
+    | '/race'
+    | '/folder/$folderId'
+    | '/quiz/create'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/join'
+    | '/launch'
+    | '/lobby'
+    | '/race'
+    | '/folder/$folderId'
+    | '/quiz/create'
+  id:
+    | '__root__'
+    | '/'
+    | '/join'
+    | '/launch'
+    | '/lobby'
+    | '/race'
+    | '/folder/$folderId'
+    | '/quiz/create'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  JoinRoute: typeof JoinRoute
+  LaunchRoute: typeof LaunchRoute
+  LobbyRoute: typeof LobbyRoute
+  RaceRoute: typeof RaceRoute
+  FolderFolderIdRoute: typeof FolderFolderIdRoute
+  QuizCreateRoute: typeof QuizCreateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/race': {
+      id: '/race'
+      path: '/race'
+      fullPath: '/race'
+      preLoaderRoute: typeof RaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lobby': {
+      id: '/lobby'
+      path: '/lobby'
+      fullPath: '/lobby'
+      preLoaderRoute: typeof LobbyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/launch': {
+      id: '/launch'
+      path: '/launch'
+      fullPath: '/launch'
+      preLoaderRoute: typeof LaunchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +158,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quiz/create': {
+      id: '/quiz/create'
+      path: '/quiz/create'
+      fullPath: '/quiz/create'
+      preLoaderRoute: typeof QuizCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/folder/$folderId': {
+      id: '/folder/$folderId'
+      path: '/folder/$folderId'
+      fullPath: '/folder/$folderId'
+      preLoaderRoute: typeof FolderFolderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  JoinRoute: JoinRoute,
+  LaunchRoute: LaunchRoute,
+  LobbyRoute: LobbyRoute,
+  RaceRoute: RaceRoute,
+  FolderFolderIdRoute: FolderFolderIdRoute,
+  QuizCreateRoute: QuizCreateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
