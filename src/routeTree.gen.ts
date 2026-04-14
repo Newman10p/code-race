@@ -13,7 +13,6 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as LobbyRouteImport } from './routes/lobby'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -39,11 +38,6 @@ const ManualRoute = ManualRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LobbyRoute = LobbyRouteImport.update({
-  id: '/lobby',
-  path: '/lobby',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LaunchRoute = LaunchRouteImport.update({
@@ -82,7 +76,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -95,7 +88,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -109,7 +101,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/lobby': typeof LobbyRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -124,7 +115,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
     | '/login'
     | '/manual'
     | '/race'
@@ -137,7 +127,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
     | '/login'
     | '/manual'
     | '/race'
@@ -150,7 +139,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/lobby'
     | '/login'
     | '/manual'
     | '/race'
@@ -164,7 +152,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
   LaunchRoute: typeof LaunchRoute
-  LobbyRoute: typeof LobbyRoute
   LoginRoute: typeof LoginRoute
   ManualRoute: typeof ManualRoute
   RaceRoute: typeof RaceRoute
@@ -201,13 +188,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lobby': {
-      id: '/lobby'
-      path: '/lobby'
-      fullPath: '/lobby'
-      preLoaderRoute: typeof LobbyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/launch': {
@@ -260,7 +240,6 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
   LaunchRoute: LaunchRoute,
-  LobbyRoute: LobbyRoute,
   LoginRoute: LoginRoute,
   ManualRoute: ManualRoute,
   RaceRoute: RaceRoute,
