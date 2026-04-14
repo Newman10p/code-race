@@ -117,7 +117,7 @@ function FolderView() {
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Quizzes</h2>
-          <Link to="/quiz/create" search={{ folderId }}>
+          <Link to="/quiz/create" search={{ folderId, quizId: "" }}>
             <Button variant="neon" size="sm">
               <Plus className="h-4 w-4" />
               Create Quiz
