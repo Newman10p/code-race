@@ -39,6 +39,10 @@ export const Route = createRootRoute({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "CodeRace: The Techy ICT Arena" },
+      { name: "twitter:description", content: "A competitive real-time quiz racing platform for ICT education" },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/012e44a1-23c1-44de-83dd-9831fab02128" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/012e44a1-23c1-44de-83dd-9831fab02128" },
     ],
     links: [
       {
