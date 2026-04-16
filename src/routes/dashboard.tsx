@@ -226,6 +226,7 @@ function Dashboard() {
           </div>
         )}
       </main>
+      <AiAssistant />
     </HoneycombLayout>
   );
 }
