@@ -22,6 +22,7 @@ interface Question {
   type: "mcq" | "code";
   content: string;
   points: number;
+  timeLimit: number;
   options?: string[];
   correctOption?: number;
   starterCode?: string;
