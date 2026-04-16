@@ -232,6 +232,11 @@ function QuizCreator() {
                     <input type="number" value={q.points} onChange={(e) => updateQuestion(q.id, { points: parseInt(e.target.value) || 0 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={1} />
                     <span className="text-xs text-muted-foreground">pts</span>
                   </div>
+                  <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
+                    <Clock className="h-3 w-3 text-primary" />
+                    <input type="number" value={q.timeLimit} onChange={(e) => updateQuestion(q.id, { timeLimit: parseInt(e.target.value) || 30 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={5} max={300} />
+                    <span className="text-xs text-muted-foreground">sec</span>
+                  </div>
                   <Button variant="ghost" size="icon" onClick={() => removeQuestion(q.id)} className="text-destructive hover:text-destructive">
                     <Trash2 className="h-4 w-4" />
                   </Button>
