@@ -71,6 +71,7 @@ function QuizCreator() {
           type: q.type as "mcq" | "code",
           content: q.content,
           points: q.points,
+          timeLimit: (q as any).time_limit ?? 30,
           options: (q.options as string[]) || ["", "", "", ""],
           correctOption: q.correct_option || 0,
           starterCode: q.starter_code || "",
