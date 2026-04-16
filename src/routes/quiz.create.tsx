@@ -151,6 +151,7 @@ function QuizCreator() {
             type: q.type,
             content: q.content,
             points: q.points,
+            time_limit: q.timeLimit,
             options: q.type === "mcq" ? q.options : [],
             correct_option: q.type === "mcq" ? q.correctOption : 0,
             starter_code: q.type === "code" ? q.starterCode : "",
