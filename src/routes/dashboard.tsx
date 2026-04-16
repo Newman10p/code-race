@@ -8,6 +8,7 @@ import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle } f
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { AiAssistant } from "@/components/AiAssistant";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
