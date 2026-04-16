@@ -78,16 +78,34 @@ function RaceView() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [sessionStatus, submitted, currentQIndex, questions]);
 
-  // Timer
+  // Countdown timer
   useEffect(() => {
     if (sessionStatus !== "active" || submitted) return;
-    const interval = setInterval(() => setTimer((t) => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, [sessionStatus, submitted, currentQIndex]);
+    const q = questions[currentQIndex];
+    if (!q) return;
+    setTimer(q.time_limit);
+  }, [sessionStatus, currentQIndex, questions, submitted]);
 
   useEffect(() => {
-    setTimer(0);
-  }, [currentQIndex]);
+    if (sessionStatus !== "active" || submitted || timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sessionStatus, submitted, timer > 0]);
+
+  // Auto-submit when timer hits 0
+  useEffect(() => {
+    if (timer === 0 && sessionStatus === "active" && !submitted && questions[currentQIndex]) {
+      submitAnswer(false);
+    }
+  }, [timer]);
 
   const loadSession = async () => {
     const { data: session } = await supabase.from("game_sessions").select("*").eq("id", sessionId).single();
