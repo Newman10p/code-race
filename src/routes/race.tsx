@@ -264,7 +264,7 @@ function RaceView() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className={`flex items-center gap-1 text-sm ${timer <= 5 ? "text-destructive animate-pulse" : timer <= 10 ? "text-yellow-400" : "text-muted-foreground"}`}>
               <Clock className="h-4 w-4" />
               <span className="font-mono">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}</span>
             </div>
