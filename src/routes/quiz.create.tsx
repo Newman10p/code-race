@@ -5,7 +5,7 @@ import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
