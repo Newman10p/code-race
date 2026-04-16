@@ -204,6 +204,7 @@ export type Database = {
           quiz_id: string
           solution: string | null
           starter_code: string | null
+          time_limit: number
           type: string
         }
         Insert: {
@@ -217,6 +218,7 @@ export type Database = {
           quiz_id: string
           solution?: string | null
           starter_code?: string | null
+          time_limit?: number
           type?: string
         }
         Update: {
@@ -230,6 +232,7 @@ export type Database = {
           quiz_id?: string
           solution?: string | null
           starter_code?: string | null
+          time_limit?: number
           type?: string
         }
         Relationships: [

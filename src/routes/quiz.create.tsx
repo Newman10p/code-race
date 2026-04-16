@@ -5,7 +5,7 @@ import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,6 +22,7 @@ interface Question {
   type: "mcq" | "code";
   content: string;
   points: number;
+  timeLimit: number;
   options?: string[];
   correctOption?: number;
   starterCode?: string;
@@ -70,6 +71,7 @@ function QuizCreator() {
           type: q.type as "mcq" | "code",
           content: q.content,
           points: q.points,
+          timeLimit: (q as any).time_limit ?? 30,
           options: (q.options as string[]) || ["", "", "", ""],
           correctOption: q.correct_option || 0,
           starterCode: q.starter_code || "",
@@ -85,6 +87,7 @@ function QuizCreator() {
       type,
       content: "",
       points: 10,
+      timeLimit: 30,
       ...(type === "mcq"
         ? { options: ["", "", "", ""], correctOption: 0 }
         : { starterCode: "// Write your code here\n", solution: "" }),
@@ -107,6 +110,7 @@ function QuizCreator() {
         type: item.type || "mcq",
         content: item.content || "",
         points: item.points || 10,
+        timeLimit: item.timeLimit ?? 30,
         options: item.options || ["", "", "", ""],
         correctOption: item.correctOption ?? 0,
         starterCode: item.starterCode || "",
@@ -147,6 +151,7 @@ function QuizCreator() {
             type: q.type,
             content: q.content,
             points: q.points,
+            time_limit: q.timeLimit,
             options: q.type === "mcq" ? q.options : [],
             correct_option: q.type === "mcq" ? q.correctOption : 0,
             starter_code: q.type === "code" ? q.starterCode : "",
@@ -226,6 +231,11 @@ function QuizCreator() {
                     <Zap className="h-3 w-3 text-primary" />
                     <input type="number" value={q.points} onChange={(e) => updateQuestion(q.id, { points: parseInt(e.target.value) || 0 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={1} />
                     <span className="text-xs text-muted-foreground">pts</span>
+                  </div>
+                  <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
+                    <Clock className="h-3 w-3 text-primary" />
+                    <input type="number" value={q.timeLimit} onChange={(e) => updateQuestion(q.id, { timeLimit: parseInt(e.target.value) || 30 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={5} max={300} />
+                    <span className="text-xs text-muted-foreground">sec</span>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => removeQuestion(q.id)} className="text-destructive hover:text-destructive">
                     <Trash2 className="h-4 w-4" />

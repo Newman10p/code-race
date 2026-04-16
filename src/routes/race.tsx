@@ -22,6 +22,7 @@ interface QuestionData {
   options: string[];
   correct_option: number;
   starter_code: string;
+  time_limit: number;
 }
 
 interface LeaderboardEntry {
@@ -77,16 +78,34 @@ function RaceView() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [sessionStatus, submitted, currentQIndex, questions]);
 
-  // Timer
+  // Countdown timer
   useEffect(() => {
     if (sessionStatus !== "active" || submitted) return;
-    const interval = setInterval(() => setTimer((t) => t + 1), 1000);
-    return () => clearInterval(interval);
-  }, [sessionStatus, submitted, currentQIndex]);
+    const q = questions[currentQIndex];
+    if (!q) return;
+    setTimer(q.time_limit);
+  }, [sessionStatus, currentQIndex, questions, submitted]);
 
   useEffect(() => {
-    setTimer(0);
-  }, [currentQIndex]);
+    if (sessionStatus !== "active" || submitted || timer <= 0) return;
+    const interval = setInterval(() => {
+      setTimer((t) => {
+        if (t <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [sessionStatus, submitted, timer > 0]);
+
+  // Auto-submit when timer hits 0
+  useEffect(() => {
+    if (timer === 0 && sessionStatus === "active" && !submitted && questions[currentQIndex]) {
+      submitAnswer(false);
+    }
+  }, [timer]);
 
   const loadSession = async () => {
     const { data: session } = await supabase.from("game_sessions").select("*").eq("id", sessionId).single();
@@ -96,7 +115,7 @@ function RaceView() {
 
     const { data: qs } = await supabase
       .from("questions")
-      .select("id, type, content, points, options, correct_option, starter_code")
+      .select("id, type, content, points, options, correct_option, starter_code, time_limit")
       .eq("quiz_id", session.quiz_id)
       .order("order_index");
     if (qs) {
@@ -105,6 +124,7 @@ function RaceView() {
         options: (q.options as string[]) || [],
         correct_option: q.correct_option || 0,
         starter_code: q.starter_code || "",
+        time_limit: (q as any).time_limit ?? 30,
       })));
     }
     if (session.status === "active") {
@@ -244,7 +264,7 @@ function RaceView() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            <div className={`flex items-center gap-1 text-sm ${timer <= 5 ? "text-destructive animate-pulse" : timer <= 10 ? "text-yellow-400" : "text-muted-foreground"}`}>
               <Clock className="h-4 w-4" />
               <span className="font-mono">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}</span>
             </div>

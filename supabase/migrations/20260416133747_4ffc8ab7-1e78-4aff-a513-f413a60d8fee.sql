@@ -1,0 +1,1 @@
+ALTER TABLE public.questions ADD COLUMN time_limit integer NOT NULL DEFAULT 30;
