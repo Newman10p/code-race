@@ -87,6 +87,7 @@ function QuizCreator() {
       type,
       content: "",
       points: 10,
+      timeLimit: 30,
       ...(type === "mcq"
         ? { options: ["", "", "", ""], correctOption: 0 }
         : { starterCode: "// Write your code here\n", solution: "" }),
