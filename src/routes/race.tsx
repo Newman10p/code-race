@@ -34,7 +34,7 @@ interface LeaderboardEntry {
 function RaceView() {
   const { sessionId, participantId } = Route.useSearch();
   const [questions, setQuestions] = useState<QuestionData[]>([]);
-  const [currentQIndex, setCurrentQIndex] = useState(-1);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
   const [sessionStatus, setSessionStatus] = useState("lobby");
   const [selected, setSelected] = useState<number | null>(null);
   const [code, setCode] = useState("");
@@ -42,30 +42,27 @@ function RaceView() {
   const [timer, setTimer] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [tabWarning, setTabWarning] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [quizEndTime, setQuizEndTime] = useState<number | null>(null);
+  const [quizTimeLeft, setQuizTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     loadSession();
     loadLeaderboard();
   }, [sessionId]);
 
-  // Realtime subscription for session updates
+  // Realtime subscription for session updates (lobby → active, active → finished)
   useEffect(() => {
     const channel = supabase
       .channel(`race-${sessionId}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "game_sessions", filter: `id=eq.${sessionId}` }, (payload) => {
         const updated = payload.new as any;
         setSessionStatus(updated.status);
-        if (updated.current_question_index !== currentQIndex) {
-          setCurrentQIndex(updated.current_question_index);
-          setSelected(null);
-          setCode("");
-          setSubmitted(false);
-        }
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "participants", filter: `session_id=eq.${sessionId}` }, () => loadLeaderboard())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [sessionId, currentQIndex]);
+  }, [sessionId]);
 
   // Anti-cheat: tab switch detection
   useEffect(() => {
@@ -78,7 +75,7 @@ function RaceView() {
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [sessionStatus, submitted, currentQIndex, questions]);
 
-  // Countdown timer
+  // Per-question countdown timer
   useEffect(() => {
     if (sessionStatus !== "active" || submitted) return;
     const q = questions[currentQIndex];
@@ -100,18 +97,56 @@ function RaceView() {
     return () => clearInterval(interval);
   }, [sessionStatus, submitted, timer > 0]);
 
-  // Auto-submit when timer hits 0
+  // Auto-submit when per-question timer hits 0
   useEffect(() => {
     if (timer === 0 && sessionStatus === "active" && !submitted && questions[currentQIndex]) {
       submitAnswer(false);
     }
   }, [timer]);
 
+  // Overall quiz timer countdown
+  useEffect(() => {
+    if (!quizEndTime || sessionStatus !== "active") return;
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.round((quizEndTime - Date.now()) / 1000));
+      setQuizTimeLeft(remaining);
+      if (remaining <= 0) {
+        clearInterval(interval);
+        setSessionStatus("finished");
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [quizEndTime, sessionStatus]);
+
+  // Auto-advance after showing result for 2 seconds
+  useEffect(() => {
+    if (!showResult) return;
+    const timeout = setTimeout(() => {
+      setShowResult(false);
+      const nextIdx = currentQIndex + 1;
+      if (nextIdx >= questions.length) {
+        setSessionStatus("finished");
+      } else {
+        setCurrentQIndex(nextIdx);
+        setSelected(null);
+        setCode(questions[nextIdx]?.starter_code || "");
+        setSubmitted(false);
+      }
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [showResult, currentQIndex, questions]);
+
   const loadSession = async () => {
     const { data: session } = await supabase.from("game_sessions").select("*").eq("id", sessionId).single();
     if (!session) return;
     setSessionStatus(session.status);
     setCurrentQIndex(session.current_question_index);
+
+    // Calculate quiz end time from session start + duration
+    if ((session as any).duration_minutes > 0 && session.status === "active") {
+      const startTime = new Date(session.updated_at).getTime();
+      setQuizEndTime(startTime + (session as any).duration_minutes * 60 * 1000);
+    }
 
     const { data: qs } = await supabase
       .from("questions")
@@ -144,13 +179,9 @@ function RaceView() {
   const handleTabSwitch = useCallback(async () => {
     setTabWarning(true);
     setTimeout(() => setTabWarning(false), 3000);
-
-    // Auto-submit current answer
     if (questions[currentQIndex]) {
       await submitAnswer(true);
     }
-
-    // Increment tab switch count
     const current = leaderboard.find(l => l.id === participantId);
     await supabase.from("participants").update({
       tab_switch_count: (current as any)?.tab_switch_count ? (current as any).tab_switch_count + 1 : 1,
@@ -182,6 +213,8 @@ function RaceView() {
     }
 
     loadLeaderboard();
+    // Show the correct answer briefly, then auto-advance
+    setShowResult(true);
   };
 
   const currentQ = questions[currentQIndex];
@@ -264,6 +297,12 @@ function RaceView() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {quizTimeLeft !== null && (
+              <div className={`flex items-center gap-1 text-xs font-mono rounded-full border px-2 py-0.5 ${quizTimeLeft <= 60 ? "border-destructive/50 text-destructive animate-pulse" : "border-border text-muted-foreground"}`}>
+                <Clock className="h-3 w-3" />
+                {Math.floor(quizTimeLeft / 60)}:{(quizTimeLeft % 60).toString().padStart(2, "0")} total
+              </div>
+            )}
             <div className={`flex items-center gap-1 text-sm ${timer <= 5 ? "text-destructive animate-pulse" : timer <= 10 ? "text-yellow-400" : "text-muted-foreground"}`}>
               <Clock className="h-4 w-4" />
               <span className="font-mono">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}</span>
@@ -328,10 +367,16 @@ function RaceView() {
 
             <div className="mt-6 flex items-center justify-between">
               <span className="text-sm text-muted-foreground">
-                {submitted ? (currentQ.type === "mcq" && selected === currentQ.correct_option ? "✅ Correct!" : "Submitted. Waiting for next question...") : ""}
+                {submitted
+                  ? showResult
+                    ? currentQ.type === "mcq" && selected === currentQ.correct_option
+                      ? "✅ Correct! Moving on..."
+                      : "❌ Wrong. Moving on..."
+                    : "Loading next..."
+                  : ""}
               </span>
               <Button variant="neon" size="xl" onClick={() => submitAnswer(false)} disabled={submitted || (currentQ.type === "mcq" && selected === null)}>
-                {submitted ? "Submitted" : "Submit Answer"}
+                {submitted ? "Next..." : "Submit Answer"}
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </div>

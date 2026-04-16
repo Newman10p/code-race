@@ -42,6 +42,7 @@ export type Database = {
         Row: {
           created_at: string
           current_question_index: number
+          duration_minutes: number
           host_id: string
           id: string
           pin_code: string
@@ -52,6 +53,7 @@ export type Database = {
         Insert: {
           created_at?: string
           current_question_index?: number
+          duration_minutes?: number
           host_id: string
           id?: string
           pin_code: string
@@ -62,6 +64,7 @@ export type Database = {
         Update: {
           created_at?: string
           current_question_index?: number
+          duration_minutes?: number
           host_id?: string
           id?: string
           pin_code?: string

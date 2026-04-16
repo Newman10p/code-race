@@ -3,8 +3,9 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { useState, useEffect } from "react";
-import { Copy, Users, Zap, Trophy, AlertTriangle } from "lucide-react";
+import { Copy, Users, Zap, Trophy, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -39,7 +40,7 @@ function LaunchRoom() {
   const [copied, setCopied] = useState(false);
   const [status, setStatus] = useState("lobby");
   const [questions, setQuestions] = useState<QuestionData[]>([]);
-  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [durationMinutes, setDurationMinutes] = useState(0);
 
   useEffect(() => {
     if (!sessionId) { navigate({ to: "/dashboard" }); return; }
@@ -52,6 +53,10 @@ function LaunchRoom() {
       .channel(`session-${sessionId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "participants", filter: `session_id=eq.${sessionId}` }, () => loadParticipants())
       .on("postgres_changes", { event: "*", schema: "public", table: "participant_answers" }, () => loadParticipants())
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "game_sessions", filter: `id=eq.${sessionId}` }, (payload) => {
+        const updated = payload.new as any;
+        setStatus(updated.status);
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [sessionId]);
@@ -61,7 +66,6 @@ function LaunchRoom() {
     if (!session) return;
     setPin(session.pin_code);
     setStatus(session.status);
-    setCurrentQIndex(session.current_question_index);
 
     const { data: qs } = await supabase
       .from("questions")
@@ -88,20 +92,12 @@ function LaunchRoom() {
   };
 
   const startRace = async () => {
-    await supabase.from("game_sessions").update({ status: "active", current_question_index: 0 }).eq("id", sessionId);
+    await supabase.from("game_sessions").update({
+      status: "active",
+      current_question_index: 0,
+      duration_minutes: durationMinutes,
+    } as any).eq("id", sessionId);
     setStatus("active");
-    setCurrentQIndex(0);
-  };
-
-  const nextQuestion = async () => {
-    const next = currentQIndex + 1;
-    if (next >= questions.length) {
-      await supabase.from("game_sessions").update({ status: "finished" }).eq("id", sessionId);
-      setStatus("finished");
-    } else {
-      await supabase.from("game_sessions").update({ current_question_index: next }).eq("id", sessionId);
-      setCurrentQIndex(next);
-    }
   };
 
   const endRace = async () => {
@@ -136,6 +132,26 @@ function LaunchRoom() {
                 ))}
                 {participants.length === 0 && <p className="text-sm text-muted-foreground">Waiting for students to join...</p>}
               </div>
+
+              {/* Duration setting */}
+              <div className="mb-4 flex items-center gap-3 rounded-lg border border-border bg-background p-3">
+                <Clock className="h-4 w-4 text-primary shrink-0" />
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-muted-foreground">Overall Quiz Duration</label>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      type="number"
+                      value={durationMinutes}
+                      onChange={(e) => setDurationMinutes(parseInt(e.target.value) || 0)}
+                      className="h-8 w-20 bg-background text-center"
+                      min={0}
+                      max={180}
+                    />
+                    <span className="text-sm text-muted-foreground">minutes (0 = no limit)</span>
+                  </div>
+                </div>
+              </div>
+
               <Button variant="neon" size="xl" className="w-full" onClick={startRace} disabled={participants.length === 0}>
                 <Zap className="h-5 w-5" /> Start Race ({questions.length} questions)
               </Button>
@@ -150,28 +166,26 @@ function LaunchRoom() {
                 {status === "finished" ? (
                   <><Trophy className="inline h-5 w-5 text-primary mr-2" />Race Complete</>
                 ) : (
-                  <>Question {currentQIndex + 1} / {questions.length}</>
+                  <>🏁 Race In Progress</>
                 )}
               </h2>
               {status === "active" && (
                 <div className="flex gap-2">
-                  <Button variant="neon" onClick={nextQuestion}>
-                    {currentQIndex + 1 >= questions.length ? "Finish Race" : "Next Question →"}
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={endRace}>End</Button>
+                  <span className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-primary">
+                    <Users className="h-3 w-3" /> {participants.length} racers
+                  </span>
+                  <Button variant="destructive" size="sm" onClick={endRace}>End Race</Button>
                 </div>
               )}
             </div>
 
-            {status === "active" && questions[currentQIndex] && (
-              <GlowCard className="mb-6">
-                <p className="text-lg font-medium">{questions[currentQIndex].content}</p>
-                <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="rounded bg-primary/20 px-2 py-0.5 text-xs text-primary">{questions[currentQIndex].type.toUpperCase()}</span>
-                  <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-primary" />{questions[currentQIndex].points} pts</span>
-                </div>
-              </GlowCard>
-            )}
+            <GlowCard className="mb-6">
+              <p className="text-sm text-muted-foreground mb-2">
+                {status === "active"
+                  ? "Students are self-pacing through questions. Monitor the leaderboard below."
+                  : "The race has ended. Final results are below."}
+              </p>
+            </GlowCard>
 
             {/* Leaderboard */}
             <GlowCard>
