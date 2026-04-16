@@ -110,6 +110,7 @@ function QuizCreator() {
         type: item.type || "mcq",
         content: item.content || "",
         points: item.points || 10,
+        timeLimit: item.timeLimit ?? 30,
         options: item.options || ["", "", "", ""],
         correctOption: item.correctOption ?? 0,
         starterCode: item.starterCode || "",
