@@ -97,7 +97,7 @@ function RaceView() {
 
     const { data: qs } = await supabase
       .from("questions")
-      .select("id, type, content, points, options, correct_option, starter_code")
+      .select("id, type, content, points, options, correct_option, starter_code, time_limit")
       .eq("quiz_id", session.quiz_id)
       .order("order_index");
     if (qs) {
@@ -106,6 +106,7 @@ function RaceView() {
         options: (q.options as string[]) || [],
         correct_option: q.correct_option || 0,
         starter_code: q.starter_code || "",
+        time_limit: (q as any).time_limit ?? 30,
       })));
     }
     if (session.status === "active") {
