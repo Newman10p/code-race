@@ -22,6 +22,7 @@ interface QuestionData {
   options: string[];
   correct_option: number;
   starter_code: string;
+  time_limit: number;
 }
 
 interface LeaderboardEntry {
