@@ -4,8 +4,9 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock, Trophy, Users, Percent } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -23,11 +24,20 @@ interface Question {
   content: string;
   points: number;
   timeLimit: number;
+  roundNumber: number;
   options?: string[];
   correctOption?: number;
   starterCode?: string;
   solution?: string;
   dbId?: string;
+}
+
+interface RoundConfig {
+  roundNumber: number;
+  name: string;
+  durationSeconds: number;
+  cutoffType: "top_n" | "top_pct";
+  cutoffValue: number;
 }
 
 function QuizCreator() {
@@ -37,15 +47,17 @@ function QuizCreator() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [rounds, setRounds] = useState<RoundConfig[]>([
+    { roundNumber: 1, name: "Round 1", durationSeconds: 300, cutoffType: "top_n", cutoffValue: 10 },
+  ]);
+  const [tournamentMode, setTournamentMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkData, setBulkData] = useState("");
   const isEditing = !!quizId;
 
   useEffect(() => {
-    if (!authLoading && (!user || !isAdmin)) {
-      navigate({ to: "/login" });
-    }
+    if (!authLoading && (!user || !isAdmin)) navigate({ to: "/login" });
   }, [user, authLoading, isAdmin]);
 
   useEffect(() => {
@@ -72,6 +84,7 @@ function QuizCreator() {
           content: q.content,
           points: q.points,
           timeLimit: (q as any).time_limit ?? 30,
+          roundNumber: (q as any).round_number ?? 1,
           options: (q.options as string[]) || ["", "", "", ""],
           correctOption: q.correct_option || 0,
           starterCode: q.starter_code || "",
@@ -79,15 +92,33 @@ function QuizCreator() {
         }))
       );
     }
+    const { data: rs } = await (supabase as any)
+      .from("quiz_rounds")
+      .select("*")
+      .eq("quiz_id", quizId)
+      .order("round_number");
+    if (rs && rs.length > 0) {
+      setTournamentMode(true);
+      setRounds(
+        rs.map((r: any) => ({
+          roundNumber: r.round_number,
+          name: r.name || `Round ${r.round_number}`,
+          durationSeconds: r.duration_seconds,
+          cutoffType: r.cutoff_type as "top_n" | "top_pct",
+          cutoffValue: r.cutoff_value,
+        }))
+      );
+    }
   };
 
-  const addQuestion = (type: "mcq" | "code") => {
+  const addQuestion = (type: "mcq" | "code", roundNumber = 1) => {
     const q: Question = {
-      id: Date.now().toString(),
+      id: Date.now().toString() + Math.random(),
       type,
       content: "",
       points: 10,
       timeLimit: 30,
+      roundNumber,
       ...(type === "mcq"
         ? { options: ["", "", "", ""], correctOption: 0 }
         : { starterCode: "// Write your code here\n", solution: "" }),
@@ -96,9 +127,21 @@ function QuizCreator() {
   };
 
   const removeQuestion = (id: string) => setQuestions(questions.filter((q) => q.id !== id));
-
   const updateQuestion = (id: string, updates: Partial<Question>) => {
     setQuestions(questions.map((q) => (q.id === id ? { ...q, ...updates } : q)));
+  };
+
+  const addRound = () => {
+    const next = rounds.length + 1;
+    setRounds([...rounds, { roundNumber: next, name: `Round ${next}`, durationSeconds: 300, cutoffType: "top_n", cutoffValue: 5 }]);
+  };
+  const removeRound = (n: number) => {
+    if (rounds.length <= 1) return;
+    setRounds(rounds.filter((r) => r.roundNumber !== n).map((r, i) => ({ ...r, roundNumber: i + 1 })));
+    setQuestions(questions.map((q) => (q.roundNumber === n ? { ...q, roundNumber: 1 } : q.roundNumber > n ? { ...q, roundNumber: q.roundNumber - 1 } : q)));
+  };
+  const updateRound = (n: number, updates: Partial<RoundConfig>) => {
+    setRounds(rounds.map((r) => (r.roundNumber === n ? { ...r, ...updates } : r)));
   };
 
   const importBulk = () => {
@@ -111,6 +154,7 @@ function QuizCreator() {
         content: item.content || "",
         points: item.points || 10,
         timeLimit: item.timeLimit ?? 30,
+        roundNumber: item.roundNumber ?? 1,
         options: item.options || ["", "", "", ""],
         correctOption: item.correctOption ?? 0,
         starterCode: item.starterCode || "",
@@ -134,6 +178,7 @@ function QuizCreator() {
       if (isEditing) {
         await supabase.from("quizzes").update({ title, description, total_points: totalPoints }).eq("id", quizId);
         await supabase.from("questions").delete().eq("quiz_id", quizId);
+        await (supabase as any).from("quiz_rounds").delete().eq("quiz_id", quizId);
       } else {
         const { data } = await supabase
           .from("quizzes")
@@ -152,11 +197,25 @@ function QuizCreator() {
             content: q.content,
             points: q.points,
             time_limit: q.timeLimit,
+            round_number: tournamentMode ? q.roundNumber : 1,
             options: q.type === "mcq" ? q.options : [],
             correct_option: q.type === "mcq" ? q.correctOption : 0,
             starter_code: q.type === "code" ? q.starterCode : "",
             solution: q.type === "code" ? q.solution : "",
             order_index: i,
+          })) as any
+        );
+      }
+
+      if (tournamentMode && rounds.length > 0) {
+        await (supabase as any).from("quiz_rounds").insert(
+          rounds.map((r) => ({
+            quiz_id: targetQuizId,
+            round_number: r.roundNumber,
+            name: r.name,
+            duration_seconds: r.durationSeconds,
+            cutoff_type: r.cutoffType,
+            cutoff_value: r.cutoffValue,
           }))
         );
       }
@@ -168,6 +227,11 @@ function QuizCreator() {
       setSaving(false);
     }
   };
+
+  // Group questions by round when tournament mode is on
+  const questionsByRound = (roundNum: number) =>
+    questions.filter((q) => q.roundNumber === roundNum);
+  const ungroupedQuestions = tournamentMode ? [] : questions;
 
   return (
     <HoneycombLayout>
@@ -192,8 +256,97 @@ function QuizCreator() {
               <label className="mb-1 block text-sm font-medium text-muted-foreground">Description</label>
               <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Brief description" className="bg-background" />
             </div>
+
+            {/* Game mode toggle */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Tournament Rounds Mode</p>
+                  <p className="text-xs text-muted-foreground">
+                    {tournamentMode
+                      ? "Players are eliminated after each round based on cutoff"
+                      : "Standard mode — all players answer all questions"}
+                  </p>
+                </div>
+              </div>
+              <Switch checked={tournamentMode} onCheckedChange={setTournamentMode} />
+            </div>
           </div>
         </GlowCard>
+
+        {/* Round configuration */}
+        {tournamentMode && (
+          <GlowCard className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="flex items-center gap-2 font-semibold">
+                <Trophy className="h-4 w-4 text-primary" /> Round Settings
+              </h3>
+              <Button variant="neon-outline" size="sm" onClick={addRound}>
+                <Plus className="h-3 w-3" /> Add Round
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {rounds.map((r) => (
+                <div key={r.roundNumber} className="rounded-lg border border-border bg-background p-3">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs font-bold text-primary">
+                      ROUND {r.roundNumber}
+                    </span>
+                    <Input
+                      value={r.name}
+                      onChange={(e) => updateRound(r.roundNumber, { name: e.target.value })}
+                      placeholder={`Round ${r.roundNumber} name`}
+                      className="h-8 flex-1 bg-card text-sm"
+                    />
+                    {rounds.length > 1 && (
+                      <Button variant="ghost" size="icon" onClick={() => removeRound(r.roundNumber)} className="h-8 w-8 text-destructive">
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    <div className="flex items-center gap-1 rounded border border-input bg-card px-2">
+                      <Clock className="h-3 w-3 text-primary" />
+                      <input
+                        type="number"
+                        value={r.durationSeconds}
+                        onChange={(e) => updateRound(r.roundNumber, { durationSeconds: parseInt(e.target.value) || 60 })}
+                        className="w-full bg-transparent py-1 text-sm focus:outline-none"
+                        min={30}
+                        max={3600}
+                      />
+                      <span className="text-xs text-muted-foreground">sec</span>
+                    </div>
+                    <select
+                      value={r.cutoffType}
+                      onChange={(e) => updateRound(r.roundNumber, { cutoffType: e.target.value as "top_n" | "top_pct" })}
+                      className="rounded border border-input bg-card px-2 py-1 text-sm focus:outline-none"
+                    >
+                      <option value="top_n">Top N players</option>
+                      <option value="top_pct">Top % players</option>
+                    </select>
+                    <div className="flex items-center gap-1 rounded border border-input bg-card px-2">
+                      {r.cutoffType === "top_n" ? <Users className="h-3 w-3 text-primary" /> : <Percent className="h-3 w-3 text-primary" />}
+                      <input
+                        type="number"
+                        value={r.cutoffValue}
+                        onChange={(e) => updateRound(r.roundNumber, { cutoffValue: parseInt(e.target.value) || 1 })}
+                        className="w-full bg-transparent py-1 text-sm focus:outline-none"
+                        min={1}
+                        max={r.cutoffType === "top_pct" ? 100 : 1000}
+                      />
+                      <span className="text-xs text-muted-foreground">{r.cutoffType === "top_pct" ? "%" : ""}</span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {questionsByRound(r.roundNumber).length} question(s) · {r.cutoffType === "top_n" ? `Top ${r.cutoffValue} advance` : `Top ${r.cutoffValue}% advance`}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </GlowCard>
+        )}
 
         <div className="mb-4 flex items-center gap-2">
           <Button variant="neon-outline" size="sm" onClick={() => setShowBulkImport(!showBulkImport)}>
@@ -207,90 +360,64 @@ function QuizCreator() {
             <textarea
               value={bulkData}
               onChange={(e) => setBulkData(e.target.value)}
-              placeholder={`[{"type":"mcq","content":"What layer is HTTP?","points":10,"options":["Layer 1","Layer 4","Layer 7","Layer 3"],"correctOption":2}]`}
-              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              placeholder={`[{"type":"mcq","content":"What layer is HTTP?","points":10,"roundNumber":1,"options":["L1","L4","L7","L3"],"correctOption":2}]`}
+              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               rows={5}
             />
             <Button variant="neon" size="sm" className="mt-2" onClick={importBulk}>Import Questions</Button>
           </GlowCard>
         )}
 
-        <div className="space-y-4">
-          {questions.map((q, index) => (
-            <GlowCard key={q.id}>
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <GripVertical className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-muted-foreground">Q{index + 1}</span>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${q.type === "mcq" ? "bg-primary/20 text-primary" : "bg-accent/20 text-accent"}`}>
-                    {q.type === "mcq" ? <span className="flex items-center gap-1"><ListChecks className="h-3 w-3" /> MCQ</span> : <span className="flex items-center gap-1"><Code className="h-3 w-3" /> Code</span>}
-                  </span>
+        {/* Questions — grouped by round in tournament mode, flat otherwise */}
+        {tournamentMode ? (
+          <div className="space-y-6">
+            {rounds.map((r) => (
+              <div key={r.roundNumber}>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-primary">
+                    <Trophy className="h-4 w-4" /> {r.name} — {questionsByRound(r.roundNumber).length} question(s)
+                  </h3>
+                  <div className="flex gap-1">
+                    <Button variant="neon-outline" size="sm" onClick={() => addQuestion("mcq", r.roundNumber)}>
+                      <Plus className="h-3 w-3" /> MCQ
+                    </Button>
+                    <Button variant="neon-outline" size="sm" onClick={() => addQuestion("code", r.roundNumber)}>
+                      <Plus className="h-3 w-3" /> Code
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
-                    <Zap className="h-3 w-3 text-primary" />
-                    <input type="number" value={q.points} onChange={(e) => updateQuestion(q.id, { points: parseInt(e.target.value) || 0 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={1} />
-                    <span className="text-xs text-muted-foreground">pts</span>
-                  </div>
-                  <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
-                    <Clock className="h-3 w-3 text-primary" />
-                    <input type="number" value={q.timeLimit} onChange={(e) => updateQuestion(q.id, { timeLimit: parseInt(e.target.value) || 30 })} className="w-12 bg-transparent py-1 text-center text-sm text-foreground focus:outline-none" min={5} max={300} />
-                    <span className="text-xs text-muted-foreground">sec</span>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => removeQuestion(q.id)} className="text-destructive hover:text-destructive">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                <div className="space-y-3">
+                  {questionsByRound(r.roundNumber).map((q, idx) => (
+                    <QuestionEditor key={q.id} q={q} index={idx} onUpdate={updateQuestion} onRemove={removeQuestion} rounds={rounds} showRoundPicker />
+                  ))}
+                  {questionsByRound(r.roundNumber).length === 0 && (
+                    <p className="rounded-lg border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+                      No questions in this round yet
+                    </p>
+                  )}
                 </div>
               </div>
-
-              <Input value={q.content} onChange={(e) => updateQuestion(q.id, { content: e.target.value })} placeholder="Question text..." className="mb-3 bg-background" />
-
-              {q.type === "mcq" && q.options && (
-                <div className="grid grid-cols-2 gap-2">
-                  {q.options.map((opt, oi) => (
-                    <div key={oi} className="flex items-center gap-2">
-                      <button
-                        onClick={() => updateQuestion(q.id, { correctOption: oi })}
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-all ${
-                          q.correctOption === oi ? "border-primary bg-primary text-primary-foreground glow-btn" : "border-input bg-background text-muted-foreground hover:border-primary/50"
-                        }`}
-                      >
-                        {String.fromCharCode(65 + oi)}
-                      </button>
-                      <Input
-                        value={opt}
-                        onChange={(e) => {
-                          const newOpts = [...(q.options || [])];
-                          newOpts[oi] = e.target.value;
-                          updateQuestion(q.id, { options: newOpts });
-                        }}
-                        placeholder={`Option ${String.fromCharCode(65 + oi)}`}
-                        className="bg-background"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {q.type === "code" && (
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-muted-foreground">Starter Code</label>
-                  <textarea value={q.starterCode} onChange={(e) => updateQuestion(q.id, { starterCode: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
-                  <label className="text-xs font-medium text-muted-foreground">Solution</label>
-                  <textarea value={q.solution} onChange={(e) => updateQuestion(q.id, { solution: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
-                </div>
-              )}
-            </GlowCard>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {ungroupedQuestions.map((q, index) => (
+              <QuestionEditor key={q.id} q={q} index={index} onUpdate={updateQuestion} onRemove={removeQuestion} rounds={rounds} showRoundPicker={false} />
+            ))}
+          </div>
+        )}
 
         <div className="mt-6 flex items-center gap-3">
-          <Button variant="neon-outline" onClick={() => addQuestion("mcq")}>
-            <Plus className="h-4 w-4" /><ListChecks className="h-4 w-4" /> Add MCQ
-          </Button>
-          <Button variant="neon-outline" onClick={() => addQuestion("code")}>
-            <Plus className="h-4 w-4" /><Code className="h-4 w-4" /> Add Code
-          </Button>
+          {!tournamentMode && (
+            <>
+              <Button variant="neon-outline" onClick={() => addQuestion("mcq")}>
+                <Plus className="h-4 w-4" /><ListChecks className="h-4 w-4" /> Add MCQ
+              </Button>
+              <Button variant="neon-outline" onClick={() => addQuestion("code")}>
+                <Plus className="h-4 w-4" /><Code className="h-4 w-4" /> Add Code
+              </Button>
+            </>
+          )}
           <div className="flex-1" />
           <Button variant="neon" size="lg" onClick={saveQuiz} disabled={saving || !title.trim()}>
             {saving ? "Saving..." : "Save Quiz"}
@@ -298,5 +425,101 @@ function QuizCreator() {
         </div>
       </main>
     </HoneycombLayout>
+  );
+}
+
+function QuestionEditor({
+  q,
+  index,
+  onUpdate,
+  onRemove,
+  rounds,
+  showRoundPicker,
+}: {
+  q: Question;
+  index: number;
+  onUpdate: (id: string, updates: Partial<Question>) => void;
+  onRemove: (id: string) => void;
+  rounds: RoundConfig[];
+  showRoundPicker: boolean;
+}) {
+  return (
+    <GlowCard>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <GripVertical className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-muted-foreground">Q{index + 1}</span>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${q.type === "mcq" ? "bg-primary/20 text-primary" : "bg-accent/20 text-accent"}`}>
+            {q.type === "mcq" ? <span className="flex items-center gap-1"><ListChecks className="h-3 w-3" /> MCQ</span> : <span className="flex items-center gap-1"><Code className="h-3 w-3" /> Code</span>}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {showRoundPicker && (
+            <select
+              value={q.roundNumber}
+              onChange={(e) => onUpdate(q.id, { roundNumber: parseInt(e.target.value) })}
+              className="rounded-lg border border-input bg-background px-2 py-1 text-xs text-foreground focus:outline-none"
+            >
+              {rounds.map((r) => (
+                <option key={r.roundNumber} value={r.roundNumber}>
+                  R{r.roundNumber}: {r.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
+            <Zap className="h-3 w-3 text-primary" />
+            <input type="number" value={q.points} onChange={(e) => onUpdate(q.id, { points: parseInt(e.target.value) || 0 })} className="w-12 bg-transparent py-1 text-center text-sm focus:outline-none" min={1} />
+            <span className="text-xs text-muted-foreground">pts</span>
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-input bg-background px-2">
+            <Clock className="h-3 w-3 text-primary" />
+            <input type="number" value={q.timeLimit} onChange={(e) => onUpdate(q.id, { timeLimit: parseInt(e.target.value) || 30 })} className="w-12 bg-transparent py-1 text-center text-sm focus:outline-none" min={5} max={300} />
+            <span className="text-xs text-muted-foreground">sec</span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={() => onRemove(q.id)} className="text-destructive hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <Input value={q.content} onChange={(e) => onUpdate(q.id, { content: e.target.value })} placeholder="Question text..." className="mb-3 bg-background" />
+
+      {q.type === "mcq" && q.options && (
+        <div className="grid grid-cols-2 gap-2">
+          {q.options.map((opt, oi) => (
+            <div key={oi} className="flex items-center gap-2">
+              <button
+                onClick={() => onUpdate(q.id, { correctOption: oi })}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold transition-all ${
+                  q.correctOption === oi ? "border-primary bg-primary text-primary-foreground glow-btn" : "border-input bg-background text-muted-foreground hover:border-primary/50"
+                }`}
+              >
+                {String.fromCharCode(65 + oi)}
+              </button>
+              <Input
+                value={opt}
+                onChange={(e) => {
+                  const newOpts = [...(q.options || [])];
+                  newOpts[oi] = e.target.value;
+                  onUpdate(q.id, { options: newOpts });
+                }}
+                placeholder={`Option ${String.fromCharCode(65 + oi)}`}
+                className="bg-background"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {q.type === "code" && (
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-muted-foreground">Starter Code</label>
+          <textarea value={q.starterCode} onChange={(e) => onUpdate(q.id, { starterCode: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
+          <label className="text-xs font-medium text-muted-foreground">Solution</label>
+          <textarea value={q.solution} onChange={(e) => onUpdate(q.id, { solution: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
+        </div>
+      )}
+    </GlowCard>
   );
 }

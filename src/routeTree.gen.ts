@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as ManualRouteImport } from './routes/manual'
@@ -20,6 +21,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 
+const StandingsRoute = StandingsRouteImport.update({
+  id: '/standings',
+  path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/quiz/create': typeof QuizCreateRoute
 }
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/standings'
     | '/folder/$folderId'
     | '/quiz/create'
   fileRoutesByTo: FileRoutesByTo
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/standings'
     | '/folder/$folderId'
     | '/quiz/create'
   id:
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/standings'
     | '/folder/$folderId'
     | '/quiz/create'
   fileRoutesById: FileRoutesById
@@ -156,12 +168,20 @@ export interface RootRouteChildren {
   ManualRoute: typeof ManualRoute
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
+  StandingsRoute: typeof StandingsRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
   QuizCreateRoute: typeof QuizCreateRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/standings': {
+      id: '/standings'
+      path: '/standings'
+      fullPath: '/standings'
+      preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManualRoute: ManualRoute,
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
+  StandingsRoute: StandingsRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
   QuizCreateRoute: QuizCreateRoute,
 }

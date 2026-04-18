@@ -43,7 +43,19 @@ const TOOLS = [
     type: "function",
     function: {
       name: "get_quiz_questions",
-      description: "Get all questions for a quiz to analyze them",
+      description: "Get all questions for a quiz to analyze them. Includes round_number for tournament quizzes.",
+      parameters: {
+        type: "object",
+        properties: { quiz_id: { type: "string" } },
+        required: ["quiz_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_quiz_rounds",
+      description: "Get the round configuration (timer, cutoff) for a tournament-style quiz.",
       parameters: {
         type: "object",
         properties: { quiz_id: { type: "string" } },
@@ -55,7 +67,7 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_quiz",
-      description: "Create a new quiz with questions in a folder",
+      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode.",
       parameters: {
         type: "object",
         properties: {
@@ -70,13 +82,29 @@ const TOOLS = [
                 type: { type: "string", enum: ["mcq", "code"] },
                 content: { type: "string" },
                 points: { type: "number" },
-                time_limit: { type: "number" },
+                time_limit: { type: "number", description: "Per-question time in seconds (default 30)" },
+                round_number: { type: "number", description: "Round this question belongs to (default 1)" },
                 options: { type: "array", items: { type: "string" } },
                 correct_option: { type: "number" },
                 starter_code: { type: "string" },
                 solution: { type: "string" },
               },
               required: ["type", "content"],
+            },
+          },
+          rounds: {
+            type: "array",
+            description: "Optional. If provided, the quiz becomes a tournament. Each round defines a timer and cutoff.",
+            items: {
+              type: "object",
+              properties: {
+                round_number: { type: "number" },
+                name: { type: "string" },
+                duration_seconds: { type: "number", description: "Total round time (default 300)" },
+                cutoff_type: { type: "string", enum: ["top_n", "top_pct"] },
+                cutoff_value: { type: "number", description: "Number of players or percentage advancing" },
+              },
+              required: ["round_number"],
             },
           },
         },
@@ -109,6 +137,11 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       if (error) return { error: error.message };
       return { quiz, questions };
     }
+    case "get_quiz_rounds": {
+      const { data, error } = await supabase.from("quiz_rounds").select("*").eq("quiz_id", args.quiz_id).order("round_number");
+      if (error) return { error: error.message };
+      return { rounds: data, is_tournament: (data || []).length > 0 };
+    }
     case "create_quiz": {
       const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
@@ -118,12 +151,14 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         total_points: totalPoints,
       }).select("id").single();
       if (qe) return { error: qe.message };
+
       const questions = (args.questions || []).map((q: any, i: number) => ({
         quiz_id: quiz.id,
         type: q.type || "mcq",
         content: q.content,
         points: q.points || 10,
         time_limit: q.time_limit || 30,
+        round_number: q.round_number || 1,
         options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
         correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
         starter_code: q.type === "code" ? (q.starter_code || "") : "",
@@ -134,7 +169,29 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         const { error: ie } = await supabase.from("questions").insert(questions);
         if (ie) return { error: ie.message };
       }
-      return { created_quiz: { id: quiz.id, title: args.title, question_count: questions.length } };
+
+      // Create rounds if provided
+      if (Array.isArray(args.rounds) && args.rounds.length > 0) {
+        const rounds = args.rounds.map((r: any) => ({
+          quiz_id: quiz.id,
+          round_number: r.round_number,
+          name: r.name || `Round ${r.round_number}`,
+          duration_seconds: r.duration_seconds || 300,
+          cutoff_type: r.cutoff_type || "top_n",
+          cutoff_value: r.cutoff_value || 10,
+        }));
+        const { error: re } = await supabase.from("quiz_rounds").insert(rounds);
+        if (re) return { error: re.message };
+      }
+
+      return {
+        created_quiz: {
+          id: quiz.id,
+          title: args.title,
+          question_count: questions.length,
+          rounds: args.rounds?.length || 0,
+        },
+      };
     }
     default:
       return { error: "Unknown tool" };
@@ -164,31 +221,33 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const systemPrompt = `You are CodeRace AI Assistant — a smart helper for quiz setters on the CodeRace platform.
+    const systemPrompt = `You are CodeRace AI Assistant — a smart helper for quiz setters on the CodeRace tournament platform.
 
 You can:
 - List folders and quizzes
 - Analyze quiz questions for quality, difficulty balance, clarity, and coverage
-- Create new folders and quizzes with questions
-- Give insights on how to improve questions
+- Inspect tournament rounds (timer, cutoff thresholds) via get_quiz_rounds
+- Create new folders and quizzes — including TOURNAMENT-style quizzes with rounds
+- Give insights on how to improve questions and round structure
 
-When analyzing questions, consider:
-- Clarity and unambiguity of the question text
-- Quality of distractors (wrong options) — they should be plausible
-- Difficulty distribution across the quiz
-- Time limits relative to question complexity
-- Point allocation fairness
-- Topic coverage
+CodeRace supports two game modes:
+1. **Standard Mode** — all players answer all questions, ranked by score
+2. **Tournament Mode** — questions grouped into rounds; after each round, only top N or top % players advance. Host gates progression between rounds.
 
-When creating quizzes, always ask for the folder to put it in (list folders first if needed).
-Be concise, friendly, and use markdown formatting. Use emoji sparingly for personality.`;
+When analyzing tournament quizzes, also evaluate:
+- Round difficulty progression (easier early rounds, harder finals)
+- Cutoff fairness given the participant pool
+- Round timer vs question count balance
+- Whether final round has fewer/harder questions for tension
 
-    let apiMessages: any[] = [
+When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1).
+Be concise, friendly, and use markdown. Use emoji sparingly.`;
+
+    const apiMessages: any[] = [
       { role: "system", content: systemPrompt },
       ...messages,
     ];
 
-    // Loop for tool calling
     for (let i = 0; i < 5; i++) {
       const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
