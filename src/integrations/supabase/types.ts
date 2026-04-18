@@ -42,34 +42,46 @@ export type Database = {
         Row: {
           created_at: string
           current_question_index: number
+          current_round: number
           duration_minutes: number
           host_id: string
           id: string
           pin_code: string
           quiz_id: string
+          round_paused: boolean
+          round_started_at: string | null
           status: string
+          tournament_mode: boolean
           updated_at: string
         }
         Insert: {
           created_at?: string
           current_question_index?: number
+          current_round?: number
           duration_minutes?: number
           host_id: string
           id?: string
           pin_code: string
           quiz_id: string
+          round_paused?: boolean
+          round_started_at?: string | null
           status?: string
+          tournament_mode?: boolean
           updated_at?: string
         }
         Update: {
           created_at?: string
           current_question_index?: number
+          current_round?: number
           duration_minutes?: number
           host_id?: string
           id?: string
           pin_code?: string
           quiz_id?: string
+          round_paused?: boolean
+          round_started_at?: string | null
           status?: string
+          tournament_mode?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -134,27 +146,42 @@ export type Database = {
         Row: {
           created_at: string
           current_score: number
+          dq_reason: string | null
+          eliminated_round: number | null
           id: string
+          is_disqualified: boolean
           is_flagged: boolean
+          round_reached: number
           session_id: string
+          strike_count: number
           student_name: string
           tab_switch_count: number
         }
         Insert: {
           created_at?: string
           current_score?: number
+          dq_reason?: string | null
+          eliminated_round?: number | null
           id?: string
+          is_disqualified?: boolean
           is_flagged?: boolean
+          round_reached?: number
           session_id: string
+          strike_count?: number
           student_name: string
           tab_switch_count?: number
         }
         Update: {
           created_at?: string
           current_score?: number
+          dq_reason?: string | null
+          eliminated_round?: number | null
           id?: string
+          is_disqualified?: boolean
           is_flagged?: boolean
+          round_reached?: number
           session_id?: string
+          strike_count?: number
           student_name?: string
           tab_switch_count?: number
         }
@@ -205,6 +232,7 @@ export type Database = {
           order_index: number
           points: number
           quiz_id: string
+          round_number: number
           solution: string | null
           starter_code: string | null
           time_limit: number
@@ -219,6 +247,7 @@ export type Database = {
           order_index?: number
           points?: number
           quiz_id: string
+          round_number?: number
           solution?: string | null
           starter_code?: string | null
           time_limit?: number
@@ -233,6 +262,7 @@ export type Database = {
           order_index?: number
           points?: number
           quiz_id?: string
+          round_number?: number
           solution?: string | null
           starter_code?: string | null
           time_limit?: number
@@ -247,6 +277,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      quiz_rounds: {
+        Row: {
+          created_at: string
+          cutoff_type: string
+          cutoff_value: number
+          duration_seconds: number
+          id: string
+          name: string
+          quiz_id: string
+          round_number: number
+        }
+        Insert: {
+          created_at?: string
+          cutoff_type?: string
+          cutoff_value?: number
+          duration_seconds?: number
+          id?: string
+          name?: string
+          quiz_id: string
+          round_number: number
+        }
+        Update: {
+          created_at?: string
+          cutoff_type?: string
+          cutoff_value?: number
+          duration_seconds?: number
+          id?: string
+          name?: string
+          quiz_id?: string
+          round_number?: number
+        }
+        Relationships: []
       }
       quizzes: {
         Row: {
