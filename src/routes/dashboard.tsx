@@ -4,9 +4,10 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle } from "lucide-react";
+import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { AiAssistant } from "@/components/AiAssistant";
 
@@ -22,7 +23,8 @@ interface Folder {
 }
 
 function Dashboard() {
-  const { user, loading: authLoading, signOut, isAdmin } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
+  const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,13 +38,14 @@ function Dashboard() {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!user) return;
-    if (!isAdmin) {
-      navigate({ to: "/" });
+    if (!user || roleLoading) return;
+    if (!isSetter) {
+      navigate({ to: "/learn" });
       return;
     }
     loadFolders();
-  }, [user, isAdmin]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, roleLoading, isSetter]);
 
   const loadFolders = async () => {
     setLoading(true);
@@ -85,7 +88,7 @@ function Dashboard() {
     loadFolders();
   };
 
-  if (authLoading || loading) {
+  if (authLoading || roleLoading || loading) {
     return (
       <HoneycombLayout>
         <Navbar />
@@ -96,7 +99,7 @@ function Dashboard() {
     );
   }
 
-  if (!isAdmin) return null;
+  if (!isSetter) return null;
 
   return (
     <HoneycombLayout>
@@ -112,6 +115,12 @@ function Dashboard() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Link to="/settings">
+              <Button variant="neon-outline" size="sm">
+                <SettingsIcon className="h-4 w-4" />
+                Settings
+              </Button>
+            </Link>
             <Link to="/manual">
               <Button variant="neon-outline" size="sm">
                 <HelpCircle className="h-4 w-4" />

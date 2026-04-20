@@ -74,6 +74,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { ThemeProvider } from "@/hooks/useTheme";
+
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <ThemeProvider>
+      <Outlet />
+    </ThemeProvider>
+  );
 }
