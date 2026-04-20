@@ -72,6 +72,8 @@ function RaceView() {
   const [strikeWarning, setStrikeWarning] = useState(false);
   const [strikeCountdown, setStrikeCountdown] = useState(STRIKE_GRACE_SECONDS);
   const strikeTimerRef = useRef<number | null>(null);
+  const strikeActiveRef = useRef(false);
+  const enteredFullscreenOnceRef = useRef(false);
   const isMobileDevice = useRef(false);
 
   // Round transition animation
@@ -182,21 +184,25 @@ function RaceView() {
     if (!hasEnteredFullscreen || sessionStatus !== "active" || isMobileDevice.current) return;
     if (participant?.is_disqualified) return;
 
-    if (!isFullscreen) {
-      // Trigger strike
-      handleFullscreenExit();
-    } else {
-      // Cancel any pending DQ
+    if (isFullscreen) {
+      enteredFullscreenOnceRef.current = true;
       if (strikeTimerRef.current) {
         clearInterval(strikeTimerRef.current);
         strikeTimerRef.current = null;
       }
+      strikeActiveRef.current = false;
       setStrikeWarning(false);
+      setStrikeCountdown(STRIKE_GRACE_SECONDS);
+      return;
     }
+
+    if (!enteredFullscreenOnceRef.current || strikeActiveRef.current) return;
+    handleFullscreenExit();
   }, [isFullscreen, hasEnteredFullscreen, sessionStatus, participant?.is_disqualified]);
 
   const handleFullscreenExit = async () => {
-    if (!participant) return;
+    if (!participant || strikeActiveRef.current) return;
+    strikeActiveRef.current = true;
     const newStrikes = (participant.strike_count || 0) + 1;
 
     if (newStrikes >= 2) {
@@ -230,6 +236,8 @@ function RaceView() {
     } as any).eq("id", participantId);
     setStrikeWarning(false);
     if (strikeTimerRef.current) clearInterval(strikeTimerRef.current);
+    strikeTimerRef.current = null;
+    strikeActiveRef.current = false;
     loadParticipant();
   };
 
@@ -237,6 +245,7 @@ function RaceView() {
     if (isMobileDevice.current) return;
     await enterFullscreen();
     setHasEnteredFullscreen(true);
+    enteredFullscreenOnceRef.current = true;
     if (tournamentMode) {
       setShowRoundIntro(true);
       setTimeout(() => setShowRoundIntro(false), 2500);
