@@ -203,8 +203,22 @@ serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!;
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing Supabase environment variables", {
+        hasUrl: Boolean(supabaseUrl),
+        hasAnonKey: Boolean(Deno.env.get("SUPABASE_ANON_KEY")),
+        hasPublishableKey: Boolean(Deno.env.get("SUPABASE_PUBLISHABLE_KEY")),
+      });
+
+      return new Response(JSON.stringify({ error: "Server configuration error: Missing Supabase credentials" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader || "" } },
     });
