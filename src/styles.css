@@ -108,9 +108,11 @@
   }
 }
 
-/* Honeycomb hex pattern background */
+/* Honeycomb hex pattern background (theme-aware via --primary) */
 .honeycomb-bg {
   position: relative;
+  --mx: 50%;
+  --my: 50%;
 }
 
 .honeycomb-bg::before {
@@ -122,25 +124,43 @@
       0deg,
       transparent,
       transparent 28px,
-      oklch(0.78 0.15 200 / 0.04) 28px,
-      oklch(0.78 0.15 200 / 0.04) 30px
+      var(--primary) 28px,
+      var(--primary) 30px
     ),
     repeating-linear-gradient(
       60deg,
       transparent,
       transparent 28px,
-      oklch(0.78 0.15 200 / 0.04) 28px,
-      oklch(0.78 0.15 200 / 0.04) 30px
+      var(--primary) 28px,
+      var(--primary) 30px
     ),
     repeating-linear-gradient(
       120deg,
       transparent,
       transparent 28px,
-      oklch(0.78 0.15 200 / 0.04) 28px,
-      oklch(0.78 0.15 200 / 0.04) 30px
+      var(--primary) 28px,
+      var(--primary) 30px
     );
+  opacity: 0.05;
   pointer-events: none;
   z-index: 0;
+}
+
+/* Mouse-trail glow: highlights honeycomb cells around cursor in theme color */
+.honeycomb-trail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      circle 240px at var(--mx) var(--my),
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 70%
+    );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.05s linear;
 }
 
 .honeycomb-bg > * {
