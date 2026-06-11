@@ -1,15 +1,35 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Copy } from "lucide-react";
+import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Maximize, Palette, Bot, Layers } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/manual")({
   component: ManualPage,
 });
 
 function ManualPage() {
+  const { isSetter, loading } = useUserRole();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !isSetter) navigate({ to: "/learn" });
+  }, [loading, isSetter, navigate]);
+
+  if (loading || !isSetter) {
+    return (
+      <HoneycombLayout>
+        <Navbar />
+        <div className="flex min-h-[80vh] items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        </div>
+      </HoneycombLayout>
+    );
+  }
+
   return (
     <HoneycombLayout>
       <Navbar />
