@@ -55,6 +55,11 @@ function ManualPage() {
             <li><a href="#launching" className="text-primary hover:underline">Launching a Race</a></li>
             <li><a href="#hosting" className="text-primary hover:underline">Hosting a Live Race</a></li>
             <li><a href="#anticheat" className="text-primary hover:underline">Anti-Cheat System</a></li>
+            <li><a href="#tournament" className="text-primary hover:underline">Tournament Mode (Rounds)</a></li>
+            <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
+            <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
+            <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
+            <li><a href="#ai" className="text-primary hover:underline">AI Assistant</a></li>
             <li><a href="#leaderboard" className="text-primary hover:underline">Leaderboard & Scoring</a></li>
             <li><a href="#tips" className="text-primary hover:underline">Tips & Best Practices</a></li>
           </ol>
@@ -235,8 +240,86 @@ function ManualPage() {
 
           {/* 9. Leaderboard */}
           <GlowCard id="leaderboard">
+            {/* Placeholder anchor for legacy ToC position */}
+          </GlowCard>
+
+          {/* Tournament Mode */}
+          <GlowCard id="tournament">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
-              <Trophy className="h-5 w-5 text-primary" /> 9. Leaderboard & Scoring
+              <Trophy className="h-5 w-5 text-primary" /> Tournament Mode (Rounds)
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>In the quiz editor, toggle <strong>Tournament Rounds</strong> to group questions into elimination rounds.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Assign each question a <code>round_number</code> (Round 1, 2, 3…).</li>
+                <li>Per-round timer (e.g. 5 min) and qualification cutoff (top N or score threshold) advance only qualifiers.</li>
+                <li>Eliminated participants enter <strong>Spectator Mode</strong> at <code>/standings</code> — they can still watch the live leaderboard.</li>
+                <li>Animated round transitions play between rounds; auto-advance moves players to the next question once feedback is shown.</li>
+                <li>The host can set a single global quiz duration in launch settings.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Fullscreen Security */}
+          <GlowCard id="fullscreen">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Maximize className="h-5 w-5 text-primary" /> Fullscreen Security
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Live races require participants to be in fullscreen on a desktop browser:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li><strong>Mobile is blocked entirely</strong> — participants must use a laptop/desktop.</li>
+                <li>Exiting fullscreen issues a <strong>strike</strong>. After 3 strikes the participant is <strong>disqualified</strong>.</li>
+                <li>Tab switches still auto-submit the current answer and flag the participant.</li>
+                <li>Disqualified players are moved to the spectator standings view.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Flashcards */}
+          <GlowCard id="flashcards">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Layers className="h-5 w-5 text-primary" /> Flashcards for Learners
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Setters can publish flashcard sets that learners study from their dashboard at <code>/learn</code>.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Go to <strong>Settings → Flashcard Sets → New Set</strong>.</li>
+                <li>Bulk import: paste one card per line as <code>front, back</code>, <code>front | back</code>, or tab-separated.</li>
+                <li>Public sets appear in every learner's library and can be bookmarked.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Themes */}
+          <GlowCard id="themes">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Palette className="h-5 w-5 text-primary" /> Theme Picker
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Open <strong>Settings → Theme Color</strong> and pick Cyan, Blue, Red, Purple, or Yellow. Your choice is saved to your profile and follows you across devices. The honeycomb background glows in the active theme color around your mouse cursor.</p>
+            </div>
+          </GlowCard>
+
+          {/* AI Assistant */}
+          <GlowCard id="ai">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Bot className="h-5 w-5 text-primary" /> AI Assistant
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Click the floating <strong>bot icon</strong> (bottom-right) to open the AI assistant. It can help you draft questions, design rounds, analyze quizzes, and explain concepts.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li><strong>Memory:</strong> the last 30 messages persist locally so the assistant remembers your conversation.</li>
+                <li><strong>Resize/Expand:</strong> use the maximize button for a full-screen workspace.</li>
+                <li><strong>Clear history:</strong> the trash icon resets memory.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Leaderboard (real section) */}
+          <GlowCard>
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Trophy className="h-5 w-5 text-primary" /> Leaderboard & Scoring
             </h2>
             <div className="space-y-3 text-sm text-muted-foreground">
               <ul className="list-disc list-inside space-y-1">
