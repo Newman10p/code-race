@@ -238,11 +238,6 @@ function ManualPage() {
             </div>
           </GlowCard>
 
-          {/* 9. Leaderboard */}
-          <GlowCard id="leaderboard">
-            {/* Placeholder anchor for legacy ToC position */}
-          </GlowCard>
-
           {/* Tournament Mode */}
           <GlowCard id="tournament">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
@@ -317,7 +312,7 @@ function ManualPage() {
           </GlowCard>
 
           {/* Leaderboard (real section) */}
-          <GlowCard>
+          <GlowCard id="leaderboard">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
               <Trophy className="h-5 w-5 text-primary" /> Leaderboard & Scoring
             </h2>
