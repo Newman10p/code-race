@@ -1,21 +1,29 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Play, HelpCircle } from "lucide-react";
+import { FolderOpen, Play, HelpCircle, Settings, BookOpen } from "lucide-react";
 import { Logo } from "@/components/Logo";
-
-const navItems = [
-  { label: "Dashboard", to: "/dashboard", icon: FolderOpen },
-  { label: "Launch", to: "/launch", icon: Play },
-  { label: "Manual", to: "/manual", icon: HelpCircle },
-];
+import { useUserRole } from "@/hooks/useUserRole";
 
 export function Navbar() {
   const location = useLocation();
+  const { isSetter } = useUserRole();
+
+  const navItems = isSetter
+    ? [
+        { label: "Dashboard", to: "/dashboard", icon: FolderOpen },
+        { label: "Launch", to: "/launch", icon: Play },
+        { label: "Manual", to: "/manual", icon: HelpCircle },
+        { label: "Settings", to: "/settings", icon: Settings },
+      ]
+    : [
+        { label: "Learn", to: "/learn", icon: BookOpen },
+        { label: "Settings", to: "/settings", icon: Settings },
+      ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
-        <Link to="/dashboard" className="flex items-center gap-2 group">
+        <Link to={isSetter ? "/dashboard" : "/learn"} className="flex items-center gap-2 group">
           <Logo className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight text-foreground">
             Code<span className="text-primary">Race</span>

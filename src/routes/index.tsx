@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import { Zap, Users, Shield, ArrowRight, Trophy, BookOpen } from "lucide-react";
+import { Zap, Users, Shield, ArrowRight, Trophy, BookOpen, Maximize, Palette, Bot, Layers } from "lucide-react";
 import { GlowCard } from "@/components/GlowCard";
 
 export const Route = createFileRoute("/")({
@@ -73,32 +73,59 @@ function LandingPage() {
 
         {/* Features */}
         <section className="mx-auto max-w-5xl px-4 pb-20">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <GlowCard>
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
-                <BookOpen className="h-6 w-6 text-primary" />
+                <Trophy className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">MCQ & Code Questions</h3>
+              <h3 className="font-semibold text-lg mb-2">Tournament Mode</h3>
               <p className="text-sm text-muted-foreground">
-                Create multiple-choice and code completion questions with custom point values.
+                Group questions into elimination rounds with per-round timers, qualification cutoffs, and spectator mode for eliminated players.
               </p>
             </GlowCard>
             <GlowCard>
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
                 <Zap className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Real-Time Racing</h3>
+              <h3 className="font-semibold text-lg mb-2">Auto-Advance Racing</h3>
               <p className="text-sm text-muted-foreground">
-                Students compete live with instant leaderboard updates via WebSockets.
+                Questions auto-advance after feedback. Hosts set one global quiz duration — no manual clicking required.
               </p>
             </GlowCard>
             <GlowCard>
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
-                <Shield className="h-6 w-6 text-primary" />
+                <Maximize className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Anti-Cheat Protocol</h3>
+              <h3 className="font-semibold text-lg mb-2">Fullscreen Security</h3>
               <p className="text-sm text-muted-foreground">
-                Tab-switch detection auto-submits answers and flags suspicious behavior.
+                Desktop-only races, fullscreen enforcement, 3-strike disqualification, plus tab-switch detection.
+              </p>
+            </GlowCard>
+            <GlowCard>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                <Layers className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Flashcards for Learners</h3>
+              <p className="text-sm text-muted-foreground">
+                Setters publish flashcard sets with bulk import. Learners study, bookmark, and flip cards from their own dashboard.
+              </p>
+            </GlowCard>
+            <GlowCard>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                <Palette className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Themed Honeycomb</h3>
+              <p className="text-sm text-muted-foreground">
+                Choose Cyan, Blue, Red, Purple, or Yellow. The hex grid glows in your theme color around your cursor.
+              </p>
+            </GlowCard>
+            <GlowCard>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                <Bot className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">AI Assistant with Memory</h3>
+              <p className="text-sm text-muted-foreground">
+                A built-in AI assistant helps you draft questions, design rounds, and analyze quizzes — and remembers your conversation.
               </p>
             </GlowCard>
           </div>
