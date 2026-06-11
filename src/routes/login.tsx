@@ -45,7 +45,10 @@ function LoginPage() {
         </div>
 
         <GlowCard className="w-full max-w-sm">
-          <h2 className="mb-6 text-center text-xl font-bold">Setter Login</h2>
+          <h2 className="mb-2 text-center text-xl font-bold">Sign In</h2>
+          <p className="mb-6 text-center text-xs text-muted-foreground">
+            Setters land on the dashboard, learners on the study hub — we route you automatically.
+          </p>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
