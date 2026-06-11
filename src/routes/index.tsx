@@ -35,7 +35,7 @@ function LandingPage() {
             </Link>
             <Link to="/login">
               <Button variant="neon" size="sm">
-                Setter Login
+                Sign In
               </Button>
             </Link>
           </div>
@@ -64,7 +64,7 @@ function LandingPage() {
             </Link>
             <Link to="/login">
               <Button variant="neon-outline" size="xl">
-                I'm a Setter
+                Sign In
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
