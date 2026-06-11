@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTheme, THEME_OPTIONS } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette, ShieldCheck } from "lucide-react";
+import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -26,7 +26,7 @@ interface FlashSet {
 
 function SettingsPage() {
   const { user, loading: authLoading } = useAuth();
-  const { isSetter, roles, loading: roleLoading } = useUserRole();
+  const { isSetter, loading: roleLoading } = useUserRole();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -67,12 +67,6 @@ function SettingsPage() {
     );
     setSets(enriched);
     setLoading(false);
-  };
-
-  const becomeSetter = async () => {
-    if (!user) return;
-    await supabase.from("user_roles").insert({ user_id: user.id, role: "setter" });
-    window.location.reload();
   };
 
   const parseBulk = (text: string) => {
@@ -193,22 +187,6 @@ function SettingsPage() {
             ))}
           </div>
         </GlowCard>
-
-        {/* Setter promotion */}
-        {!isSetter && (
-          <GlowCard className="mb-8">
-            <div className="mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold">Become a Setter</h2>
-            </div>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Setters can create quizzes, run live tournaments, and post flashcards for learners.
-            </p>
-            <Button variant="neon" onClick={becomeSetter}>
-              Enable Setter Mode
-            </Button>
-          </GlowCard>
-        )}
 
         {/* Flashcard manager (setters only) */}
         {isSetter && (
