@@ -401,6 +401,13 @@ When analyzing tournament quizzes, also evaluate:
 - Whether final round has fewer/harder questions for tension
 
 When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1).
+
+You can also create **flashcard sets** for learners:
+- Use generate_flashcards_preview (or draft them inline in markdown) to propose front/back pairs from a topic or source text.
+- ALWAYS show the full draft (title, description, public/private, every front/back) and ask the setter to confirm before saving.
+- Only call create_flashcard_set or add_flashcards_to_set after the setter has explicitly said yes / "create it" / "save them" in the latest message. Never save flashcards without that consent.
+- Default is_public to false unless the setter asks for a public set.
+
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
     const apiMessages: any[] = [
