@@ -112,6 +112,82 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_flashcard_sets",
+      description: "List flashcard sets owned by the current setter.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_flashcard_set",
+      description: "Create a new flashcard set with cards. ALWAYS confirm with the setter (title, description, visibility, and the list of cards) BEFORE calling this. Do not call without explicit consent in the latest user message.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          subject: { type: "string", description: "Optional subject/topic tag" },
+          is_public: { type: "boolean", description: "If true, learners can discover and bookmark this set. Default false." },
+          cards: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string" },
+                back: { type: "string" },
+              },
+              required: ["front", "back"],
+            },
+          },
+        },
+        required: ["title", "cards"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_flashcards_to_set",
+      description: "Append additional cards to an existing flashcard set the setter owns. Confirm with the setter first.",
+      parameters: {
+        type: "object",
+        properties: {
+          set_id: { type: "string" },
+          cards: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string" },
+                back: { type: "string" },
+              },
+              required: ["front", "back"],
+            },
+          },
+        },
+        required: ["set_id", "cards"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_flashcards_preview",
+      description: "Generate a draft list of flashcards from a topic or source text WITHOUT saving anything. Use this to show the setter what would be created so they can review and consent before calling create_flashcard_set.",
+      parameters: {
+        type: "object",
+        properties: {
+          topic: { type: "string", description: "Topic or source material to derive flashcards from" },
+          count: { type: "number", description: "How many cards to draft (default 10)" },
+        },
+        required: ["topic"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
