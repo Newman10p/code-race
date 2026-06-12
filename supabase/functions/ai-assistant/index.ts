@@ -112,6 +112,82 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_flashcard_sets",
+      description: "List flashcard sets owned by the current setter.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_flashcard_set",
+      description: "Create a new flashcard set with cards. ALWAYS confirm with the setter (title, description, visibility, and the list of cards) BEFORE calling this. Do not call without explicit consent in the latest user message.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          subject: { type: "string", description: "Optional subject/topic tag" },
+          is_public: { type: "boolean", description: "If true, learners can discover and bookmark this set. Default false." },
+          cards: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string" },
+                back: { type: "string" },
+              },
+              required: ["front", "back"],
+            },
+          },
+        },
+        required: ["title", "cards"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_flashcards_to_set",
+      description: "Append additional cards to an existing flashcard set the setter owns. Confirm with the setter first.",
+      parameters: {
+        type: "object",
+        properties: {
+          set_id: { type: "string" },
+          cards: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                front: { type: "string" },
+                back: { type: "string" },
+              },
+              required: ["front", "back"],
+            },
+          },
+        },
+        required: ["set_id", "cards"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_flashcards_preview",
+      description: "Generate a draft list of flashcards from a topic or source text WITHOUT saving anything. Use this to show the setter what would be created so they can review and consent before calling create_flashcard_set.",
+      parameters: {
+        type: "object",
+        properties: {
+          topic: { type: "string", description: "Topic or source material to derive flashcards from" },
+          count: { type: "number", description: "How many cards to draft (default 10)" },
+        },
+        required: ["topic"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
@@ -193,6 +269,76 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         },
       };
     }
+    case "list_flashcard_sets": {
+      const { data, error } = await supabase
+        .from("flashcard_sets")
+        .select("id, title, description, subject, is_public, created_at")
+        .eq("setter_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) return { error: error.message };
+      return { sets: data };
+    }
+    case "create_flashcard_set": {
+      const cards = Array.isArray(args.cards) ? args.cards : [];
+      if (cards.length === 0) return { error: "At least one card is required." };
+      const { data: set, error: se } = await supabase
+        .from("flashcard_sets")
+        .insert({
+          setter_id: userId,
+          title: args.title,
+          description: args.description || null,
+          subject: args.subject || null,
+          is_public: !!args.is_public,
+        })
+        .select("id, title")
+        .single();
+      if (se) return { error: se.message };
+      const rows = cards.map((c: any, i: number) => ({
+        set_id: set.id,
+        front: String(c.front || "").trim(),
+        back: String(c.back || "").trim(),
+        order_index: i,
+      })).filter((r: any) => r.front && r.back);
+      const { error: ce } = await supabase.from("flashcards").insert(rows);
+      if (ce) return { error: ce.message };
+      return { created_set: { id: set.id, title: set.title, card_count: rows.length } };
+    }
+    case "add_flashcards_to_set": {
+      const cards = Array.isArray(args.cards) ? args.cards : [];
+      if (cards.length === 0) return { error: "No cards provided." };
+      // Verify ownership
+      const { data: owned } = await supabase
+        .from("flashcard_sets")
+        .select("id")
+        .eq("id", args.set_id)
+        .eq("setter_id", userId)
+        .maybeSingle();
+      if (!owned) return { error: "Set not found or you don't own it." };
+      const { data: existing } = await supabase
+        .from("flashcards")
+        .select("order_index")
+        .eq("set_id", args.set_id)
+        .order("order_index", { ascending: false })
+        .limit(1);
+      const startIdx = (existing && existing[0]?.order_index != null) ? existing[0].order_index + 1 : 0;
+      const rows = cards.map((c: any, i: number) => ({
+        set_id: args.set_id,
+        front: String(c.front || "").trim(),
+        back: String(c.back || "").trim(),
+        order_index: startIdx + i,
+      })).filter((r: any) => r.front && r.back);
+      const { error: ie } = await supabase.from("flashcards").insert(rows);
+      if (ie) return { error: ie.message };
+      return { added: rows.length, set_id: args.set_id };
+    }
+    case "generate_flashcards_preview": {
+      // Pure draft — no DB writes. Returned to the model so it can show the setter for review.
+      return {
+        note: "Draft only — present these to the setter and ask for explicit confirmation before calling create_flashcard_set.",
+        topic: args.topic,
+        suggested_count: args.count || 10,
+      };
+    }
     default:
       return { error: "Unknown tool" };
   }
@@ -255,6 +401,13 @@ When analyzing tournament quizzes, also evaluate:
 - Whether final round has fewer/harder questions for tension
 
 When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1).
+
+You can also create **flashcard sets** for learners:
+- Use generate_flashcards_preview (or draft them inline in markdown) to propose front/back pairs from a topic or source text.
+- ALWAYS show the full draft (title, description, public/private, every front/back) and ask the setter to confirm before saving.
+- Only call create_flashcard_set or add_flashcards_to_set after the setter has explicitly said yes / "create it" / "save them" in the latest message. Never save flashcards without that consent.
+- Default is_public to false unless the setter asks for a public set.
+
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
     const apiMessages: any[] = [
