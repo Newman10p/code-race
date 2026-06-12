@@ -269,6 +269,76 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         },
       };
     }
+    case "list_flashcard_sets": {
+      const { data, error } = await supabase
+        .from("flashcard_sets")
+        .select("id, title, description, subject, is_public, created_at")
+        .eq("setter_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) return { error: error.message };
+      return { sets: data };
+    }
+    case "create_flashcard_set": {
+      const cards = Array.isArray(args.cards) ? args.cards : [];
+      if (cards.length === 0) return { error: "At least one card is required." };
+      const { data: set, error: se } = await supabase
+        .from("flashcard_sets")
+        .insert({
+          setter_id: userId,
+          title: args.title,
+          description: args.description || null,
+          subject: args.subject || null,
+          is_public: !!args.is_public,
+        })
+        .select("id, title")
+        .single();
+      if (se) return { error: se.message };
+      const rows = cards.map((c: any, i: number) => ({
+        set_id: set.id,
+        front: String(c.front || "").trim(),
+        back: String(c.back || "").trim(),
+        order_index: i,
+      })).filter((r: any) => r.front && r.back);
+      const { error: ce } = await supabase.from("flashcards").insert(rows);
+      if (ce) return { error: ce.message };
+      return { created_set: { id: set.id, title: set.title, card_count: rows.length } };
+    }
+    case "add_flashcards_to_set": {
+      const cards = Array.isArray(args.cards) ? args.cards : [];
+      if (cards.length === 0) return { error: "No cards provided." };
+      // Verify ownership
+      const { data: owned } = await supabase
+        .from("flashcard_sets")
+        .select("id")
+        .eq("id", args.set_id)
+        .eq("setter_id", userId)
+        .maybeSingle();
+      if (!owned) return { error: "Set not found or you don't own it." };
+      const { data: existing } = await supabase
+        .from("flashcards")
+        .select("order_index")
+        .eq("set_id", args.set_id)
+        .order("order_index", { ascending: false })
+        .limit(1);
+      const startIdx = (existing && existing[0]?.order_index != null) ? existing[0].order_index + 1 : 0;
+      const rows = cards.map((c: any, i: number) => ({
+        set_id: args.set_id,
+        front: String(c.front || "").trim(),
+        back: String(c.back || "").trim(),
+        order_index: startIdx + i,
+      })).filter((r: any) => r.front && r.back);
+      const { error: ie } = await supabase.from("flashcards").insert(rows);
+      if (ie) return { error: ie.message };
+      return { added: rows.length, set_id: args.set_id };
+    }
+    case "generate_flashcards_preview": {
+      // Pure draft — no DB writes. Returned to the model so it can show the setter for review.
+      return {
+        note: "Draft only — present these to the setter and ask for explicit confirmation before calling create_flashcard_set.",
+        topic: args.topic,
+        suggested_count: args.count || 10,
+      };
+    }
     default:
       return { error: "Unknown tool" };
   }
