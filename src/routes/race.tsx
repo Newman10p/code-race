@@ -197,7 +197,18 @@ function RaceView() {
     }
 
     if (!enteredFullscreenOnceRef.current || strikeActiveRef.current) return;
-    handleFullscreenExit();
+    // Debounce: the browser can momentarily report not-in-fullscreen during
+    // transitions / re-renders. Only count it as an exit if we're still out
+    // of fullscreen after a short delay.
+    const t = window.setTimeout(() => {
+      if (!document.fullscreenElement &&
+          !(document as any).webkitFullscreenElement &&
+          !(document as any).mozFullScreenElement &&
+          !(document as any).msFullscreenElement) {
+        handleFullscreenExit();
+      }
+    }, 600);
+    return () => clearTimeout(t);
   }, [isFullscreen, hasEnteredFullscreen, sessionStatus, participant?.is_disqualified]);
 
   const handleFullscreenExit = async () => {
