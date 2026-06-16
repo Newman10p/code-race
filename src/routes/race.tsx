@@ -245,7 +245,6 @@ function RaceView() {
     if (isMobileDevice.current) return;
     await enterFullscreen();
     setHasEnteredFullscreen(true);
-    enteredFullscreenOnceRef.current = true;
     if (tournamentMode) {
       setShowRoundIntro(true);
       setTimeout(() => setShowRoundIntro(false), 2500);
