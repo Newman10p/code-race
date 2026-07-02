@@ -277,6 +277,9 @@ function RaceView() {
     previousRoundRef.current = s.current_round ?? 1;
     setRoundPaused(s.round_paused ?? true);
 
+    const { data: quiz } = await supabase.from("quizzes").select("is_evaluation").eq("id", session.quiz_id).single();
+    setIsEvaluation(((quiz as any)?.is_evaluation) ?? false);
+
     const { data: qs } = await supabase
       .from("questions")
       .select("id, type, content, points, options, correct_option, starter_code, time_limit, round_number")
