@@ -417,6 +417,7 @@ export type Database = {
           description: string | null
           folder_id: string
           id: string
+          is_evaluation: boolean
           title: string
           total_points: number
           updated_at: string
@@ -426,6 +427,7 @@ export type Database = {
           description?: string | null
           folder_id: string
           id?: string
+          is_evaluation?: boolean
           title: string
           total_points?: number
           updated_at?: string
@@ -435,6 +437,7 @@ export type Database = {
           description?: string | null
           folder_id?: string
           id?: string
+          is_evaluation?: boolean
           title?: string
           total_points?: number
           updated_at?: string
