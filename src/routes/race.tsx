@@ -420,17 +420,68 @@ function RaceView() {
 
   // Finished
   if (sessionStatus === "finished") {
+    // Load my answers once when we enter finished state
+    if (isEvaluation && myAnswers.length === 0 && participantId) {
+      supabase
+        .from("participant_answers")
+        .select("question_id, is_correct, points_awarded")
+        .eq("participant_id", participantId)
+        .then(({ data }) => setMyAnswers((data as any) || []));
+    }
+    const answered = new Set(myAnswers.map((a) => a.question_id));
+    const correctCount = myAnswers.filter((a) => a.is_correct).length;
+    const totalQuestions = questions.length;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     return (
       <HoneycombLayout>
         <main className="mx-auto max-w-2xl px-4 py-12">
           <div className="mb-8 text-center">
             <Trophy className="mx-auto mb-4 h-16 w-16 text-primary" />
-            <h1 className="mb-2 text-3xl font-bold">Race Complete!</h1>
+            <h1 className="mb-2 text-3xl font-bold">
+              {isEvaluation ? "Evaluation Complete!" : "Race Complete!"}
+            </h1>
             <p className="text-muted-foreground">Your rank: #{myRank} · Score: {myScore} pts</p>
+            {isEvaluation && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Accuracy: <span className="font-semibold text-primary">{accuracy}%</span> ({correctCount}/{totalQuestions} correct)
+              </p>
+            )}
           </div>
+          {isEvaluation && (
+            <GlowCard className="mb-6">
+              <h3 className="mb-3 flex items-center gap-2 font-semibold">
+                <Eye className="h-4 w-4 text-primary" /> Your Answer Breakdown
+              </h3>
+              <div className="space-y-2">
+                {questions.map((q, i) => {
+                  const a = myAnswers.find((ans) => ans.question_id === q.id);
+                  const status = !a ? "skipped" : a.is_correct ? "correct" : "wrong";
+                  return (
+                    <div key={q.id} className={`flex items-start justify-between rounded-lg border p-3 text-sm ${
+                      status === "correct" ? "border-green-500/40 bg-green-500/5"
+                      : status === "wrong" ? "border-destructive/40 bg-destructive/5"
+                      : "border-border bg-card"
+                    }`}>
+                      <div className="min-w-0 flex-1 pr-3">
+                        <p className="text-xs font-medium text-muted-foreground">Q{i + 1}</p>
+                        <p className="truncate">{q.content}</p>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        status === "correct" ? "bg-green-500/20 text-green-500"
+                        : status === "wrong" ? "bg-destructive/20 text-destructive"
+                        : "bg-muted text-muted-foreground"
+                      }`}>
+                        {status === "correct" ? `+${a?.points_awarded ?? 0}` : status === "wrong" ? "0" : "—"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </GlowCard>
+          )}
           <GlowCard>
             <h3 className="mb-3 flex items-center gap-2 font-semibold">
-              <Trophy className="h-4 w-4 text-primary" /> Final Leaderboard
+              <Trophy className="h-4 w-4 text-primary" /> {isEvaluation ? "Class Results" : "Final Leaderboard"}
             </h3>
             <AnimatedLeaderboard entries={leaderboard} highlightId={participantId} />
           </GlowCard>
