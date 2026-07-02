@@ -269,11 +269,13 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
     }
     case "create_quiz": {
       const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const isEval = !!args.is_evaluation;
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
         title: args.title,
         description: args.description || "",
         total_points: totalPoints,
+        is_evaluation: isEval,
       }).select("id").single();
       if (qe) return { error: qe.message };
 
@@ -315,8 +317,52 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
           title: args.title,
           question_count: questions.length,
           rounds: args.rounds?.length || 0,
+          is_evaluation: isEval,
         },
       };
+    }
+    case "create_evaluation": {
+      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
+        folder_id: args.folder_id,
+        title: args.title,
+        description: args.description || "",
+        total_points: totalPoints,
+        is_evaluation: true,
+      }).select("id").single();
+      if (qe) return { error: qe.message };
+      const questions = (args.questions || []).map((q: any, i: number) => ({
+        quiz_id: quiz.id,
+        type: q.type || "mcq",
+        content: q.content,
+        points: q.points || 10,
+        time_limit: q.time_limit || 45,
+        round_number: 1,
+        options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
+        correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
+        starter_code: q.type === "code" ? (q.starter_code || "") : "",
+        solution: q.type === "code" ? (q.solution || "") : "",
+        order_index: i,
+      }));
+      if (questions.length > 0) {
+        const { error: ie } = await supabase.from("questions").insert(questions);
+        if (ie) return { error: ie.message };
+      }
+      return {
+        created_evaluation: {
+          id: quiz.id,
+          title: args.title,
+          question_count: questions.length,
+        },
+      };
+    }
+    case "publish_flashcard_set": {
+      // Verify ownership
+      const { data: owned } = await supabase.from("flashcard_sets").select("id").eq("id", args.set_id).eq("setter_id", userId).maybeSingle();
+      if (!owned) return { error: "Set not found or you don't own it." };
+      const { error } = await supabase.from("flashcard_sets").update({ is_public: !!args.publish }).eq("id", args.set_id);
+      if (error) return { error: error.message };
+      return { set_id: args.set_id, is_public: !!args.publish };
     }
     case "list_flashcard_sets": {
       const { data, error } = await supabase
