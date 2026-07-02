@@ -124,6 +124,54 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "create_evaluation",
+      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Use when the setter asks for a test, assessment, evaluation, performance check, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
+      parameters: {
+        type: "object",
+        properties: {
+          folder_id: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          questions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["mcq", "code"] },
+                content: { type: "string" },
+                points: { type: "number" },
+                time_limit: { type: "number", description: "Per-question time in seconds (default 45 for evaluations)" },
+                options: { type: "array", items: { type: "string" } },
+                correct_option: { type: "number" },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+              },
+              required: ["type", "content"],
+            },
+          },
+        },
+        required: ["folder_id", "title", "questions"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "publish_flashcard_set",
+      description: "Publish (is_public=true) or unpublish (is_public=false) an existing flashcard set the setter owns. Publishing lets learners discover and bookmark it.",
+      parameters: {
+        type: "object",
+        properties: {
+          set_id: { type: "string" },
+          publish: { type: "boolean", description: "true to publish, false to unpublish" },
+        },
+        required: ["set_id", "publish"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "create_flashcard_set",
       description: "Create a new flashcard set with cards. ALWAYS confirm with the setter (title, description, visibility, and the list of cards) BEFORE calling this. Do not call without explicit consent in the latest user message.",
       parameters: {
