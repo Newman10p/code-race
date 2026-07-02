@@ -56,6 +56,7 @@ function ManualPage() {
             <li><a href="#hosting" className="text-primary hover:underline">Hosting a Live Race</a></li>
             <li><a href="#anticheat" className="text-primary hover:underline">Anti-Cheat System</a></li>
             <li><a href="#tournament" className="text-primary hover:underline">Tournament Mode (Rounds)</a></li>
+            <li><a href="#evaluation" className="text-primary hover:underline">Evaluation / Assessment Mode</a></li>
             <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
             <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
             <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
@@ -264,9 +265,28 @@ function ManualPage() {
               <p>Live races require participants to be in fullscreen on a desktop browser:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li><strong>Mobile is blocked entirely</strong> — participants must use a laptop/desktop.</li>
-                <li>Exiting fullscreen issues a <strong>strike</strong>. After 3 strikes the participant is <strong>disqualified</strong>.</li>
+                <li>Exiting fullscreen issues a <strong>strike</strong> after a short debounce (so brief transitions or reloads don't count). A second exit triggers <strong>disqualification</strong>.</li>
+                <li>On the first strike, a full-screen warning appears with a <strong>10-second countdown</strong> and a "Return to Fullscreen" button. Return in time to stay in the race.</li>
                 <li>Tab switches still auto-submit the current answer and flag the participant.</li>
                 <li>Disqualified players are moved to the spectator standings view.</li>
+                <li>Page reloads and navigation away are detected and do <strong>not</strong> count as strikes.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Evaluation Mode */}
+          <GlowCard id="evaluation">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Trophy className="h-5 w-5 text-primary" /> Evaluation / Assessment Mode
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Evaluation mode turns a quiz into a live <strong>assessment</strong> for performance checking and grading.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Toggle <strong>Evaluation / Assessment Mode</strong> in the quiz editor (mutually exclusive with Tournament).</li>
+                <li>Plays live like a standard race with the same fullscreen & anti-cheat rules.</li>
+                <li>At the end, every learner sees a <strong>per-question breakdown</strong>: correct, wrong, or skipped, plus points and accuracy percentage.</li>
+                <li>The AI Assistant can create evaluations for you — just ask for a "test", "assessment", or "evaluation".</li>
+                <li>Quizzes flagged as evaluations show an <span className="text-primary font-semibold">EVALUATION</span> badge in the folder view.</li>
               </ul>
             </div>
           </GlowCard>
@@ -281,7 +301,9 @@ function ManualPage() {
               <ul className="list-disc list-inside space-y-1">
                 <li>Go to <strong>Settings → Flashcard Sets → New Set</strong>.</li>
                 <li>Bulk import: paste one card per line as <code>front, back</code>, <code>front | back</code>, or tab-separated.</li>
-                <li>Public sets appear in every learner's library and can be bookmarked.</li>
+                <li>New sets start as <strong>drafts</strong> (private). Click <strong>Publish</strong> on the set to make it visible to learners.</li>
+                <li>Public sets appear in every learner's library and can be bookmarked. <strong>Unpublish</strong> anytime to pull it back.</li>
+                <li>Ask the AI Assistant to draft flashcards from a topic and publish them for you.</li>
               </ul>
             </div>
           </GlowCard>
@@ -302,11 +324,13 @@ function ManualPage() {
               <Bot className="h-5 w-5 text-primary" /> AI Assistant
             </h2>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>Click the floating <strong>bot icon</strong> (bottom-right) to open the AI assistant. It can help you draft questions, design rounds, analyze quizzes, and explain concepts.</p>
+              <p>Click the floating <strong>bot icon</strong> (bottom-right) to open the AI assistant. It can help you draft questions, design rounds, build evaluations, manage flashcards, and explain concepts.</p>
               <ul className="list-disc list-inside space-y-1">
                 <li><strong>Memory:</strong> the last 30 messages persist locally so the assistant remembers your conversation.</li>
                 <li><strong>Resize/Expand:</strong> use the maximize button for a full-screen workspace.</li>
                 <li><strong>Clear history:</strong> the trash icon resets memory.</li>
+                <li><strong>Can create for you:</strong> standard quizzes, tournaments, <strong>evaluation tests</strong>, and flashcard sets (always with your explicit confirmation).</li>
+                <li><strong>Publishing:</strong> ask the assistant to publish or unpublish any of your flashcard sets.</li>
               </ul>
             </div>
           </GlowCard>

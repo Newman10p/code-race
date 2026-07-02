@@ -67,13 +67,14 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_quiz",
-      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode.",
+      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, or set is_evaluation=true for a live evaluation/assessment quiz.",
       parameters: {
         type: "object",
         properties: {
           folder_id: { type: "string" },
           title: { type: "string" },
           description: { type: "string" },
+          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Mutually exclusive with rounds. Learners see a per-question breakdown at the end." },
           questions: {
             type: "array",
             items: {
@@ -118,6 +119,54 @@ const TOOLS = [
       name: "list_flashcard_sets",
       description: "List flashcard sets owned by the current setter.",
       parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_evaluation",
+      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Use when the setter asks for a test, assessment, evaluation, performance check, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
+      parameters: {
+        type: "object",
+        properties: {
+          folder_id: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          questions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["mcq", "code"] },
+                content: { type: "string" },
+                points: { type: "number" },
+                time_limit: { type: "number", description: "Per-question time in seconds (default 45 for evaluations)" },
+                options: { type: "array", items: { type: "string" } },
+                correct_option: { type: "number" },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+              },
+              required: ["type", "content"],
+            },
+          },
+        },
+        required: ["folder_id", "title", "questions"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "publish_flashcard_set",
+      description: "Publish (is_public=true) or unpublish (is_public=false) an existing flashcard set the setter owns. Publishing lets learners discover and bookmark it.",
+      parameters: {
+        type: "object",
+        properties: {
+          set_id: { type: "string" },
+          publish: { type: "boolean", description: "true to publish, false to unpublish" },
+        },
+        required: ["set_id", "publish"],
+      },
     },
   },
   {
@@ -220,11 +269,13 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
     }
     case "create_quiz": {
       const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const isEval = !!args.is_evaluation;
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
         title: args.title,
         description: args.description || "",
         total_points: totalPoints,
+        is_evaluation: isEval,
       }).select("id").single();
       if (qe) return { error: qe.message };
 
@@ -266,8 +317,52 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
           title: args.title,
           question_count: questions.length,
           rounds: args.rounds?.length || 0,
+          is_evaluation: isEval,
         },
       };
+    }
+    case "create_evaluation": {
+      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
+        folder_id: args.folder_id,
+        title: args.title,
+        description: args.description || "",
+        total_points: totalPoints,
+        is_evaluation: true,
+      }).select("id").single();
+      if (qe) return { error: qe.message };
+      const questions = (args.questions || []).map((q: any, i: number) => ({
+        quiz_id: quiz.id,
+        type: q.type || "mcq",
+        content: q.content,
+        points: q.points || 10,
+        time_limit: q.time_limit || 45,
+        round_number: 1,
+        options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
+        correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
+        starter_code: q.type === "code" ? (q.starter_code || "") : "",
+        solution: q.type === "code" ? (q.solution || "") : "",
+        order_index: i,
+      }));
+      if (questions.length > 0) {
+        const { error: ie } = await supabase.from("questions").insert(questions);
+        if (ie) return { error: ie.message };
+      }
+      return {
+        created_evaluation: {
+          id: quiz.id,
+          title: args.title,
+          question_count: questions.length,
+        },
+      };
+    }
+    case "publish_flashcard_set": {
+      // Verify ownership
+      const { data: owned } = await supabase.from("flashcard_sets").select("id").eq("id", args.set_id).eq("setter_id", userId).maybeSingle();
+      if (!owned) return { error: "Set not found or you don't own it." };
+      const { error } = await supabase.from("flashcard_sets").update({ is_public: !!args.publish }).eq("id", args.set_id);
+      if (error) return { error: error.message };
+      return { set_id: args.set_id, is_public: !!args.publish };
     }
     case "list_flashcard_sets": {
       const { data, error } = await supabase
@@ -390,9 +485,10 @@ You can:
 - Create new folders and quizzes — including TOURNAMENT-style quizzes with rounds
 - Give insights on how to improve questions and round structure
 
-CodeRace supports two game modes:
+CodeRace supports three game modes:
 1. **Standard Mode** — all players answer all questions, ranked by score
 2. **Tournament Mode** — questions grouped into rounds; after each round, only top N or top % players advance. Host gates progression between rounds.
+3. **Evaluation / Assessment Mode** — runs live like a standard quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end (correct / wrong / skipped + points). Use this for tests, graded assessments, and performance checks. Evaluation quizzes cannot use tournament rounds.
 
 When analyzing tournament quizzes, also evaluate:
 - Round difficulty progression (easier early rounds, harder finals)
@@ -400,13 +496,14 @@ When analyzing tournament quizzes, also evaluate:
 - Round timer vs question count balance
 - Whether final round has fewer/harder questions for tension
 
-When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1).
+When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1). For evaluations, use the dedicated create_evaluation tool (or create_quiz with is_evaluation=true) — recommend slightly longer per-question timers (45–60s) since accuracy matters more than speed.
 
-You can also create **flashcard sets** for learners:
+You can also create and manage **flashcard sets** for learners:
 - Use generate_flashcards_preview (or draft them inline in markdown) to propose front/back pairs from a topic or source text.
 - ALWAYS show the full draft (title, description, public/private, every front/back) and ask the setter to confirm before saving.
 - Only call create_flashcard_set or add_flashcards_to_set after the setter has explicitly said yes / "create it" / "save them" in the latest message. Never save flashcards without that consent.
-- Default is_public to false unless the setter asks for a public set.
+- Default is_public to false unless the setter asks for a public set. New sets start as drafts.
+- Use publish_flashcard_set with publish=true to publish a draft set, or publish=false to unpublish.
 
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 

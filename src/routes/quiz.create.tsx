@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock, Trophy, Users, Percent } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock, Trophy, Users, Percent, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -51,6 +51,7 @@ function QuizCreator() {
     { roundNumber: 1, name: "Round 1", durationSeconds: 300, cutoffType: "top_n", cutoffValue: 10 },
   ]);
   const [tournamentMode, setTournamentMode] = useState(false);
+  const [isEvaluation, setIsEvaluation] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkData, setBulkData] = useState("");
@@ -69,6 +70,7 @@ function QuizCreator() {
     if (quiz) {
       setTitle(quiz.title);
       setDescription(quiz.description || "");
+      setIsEvaluation(((quiz as any).is_evaluation) ?? false);
     }
     const { data: qs } = await supabase
       .from("questions")
@@ -176,13 +178,13 @@ function QuizCreator() {
       const totalPoints = questions.reduce((a, q) => a + q.points, 0);
 
       if (isEditing) {
-        await supabase.from("quizzes").update({ title, description, total_points: totalPoints }).eq("id", quizId);
+        await supabase.from("quizzes").update({ title, description, total_points: totalPoints, is_evaluation: isEvaluation } as any).eq("id", quizId);
         await supabase.from("questions").delete().eq("quiz_id", quizId);
         await (supabase as any).from("quiz_rounds").delete().eq("quiz_id", quizId);
       } else {
         const { data } = await supabase
           .from("quizzes")
-          .insert({ folder_id: folderId, title, description, total_points: totalPoints })
+          .insert({ folder_id: folderId, title, description, total_points: totalPoints, is_evaluation: isEvaluation } as any)
           .select("id")
           .single();
         if (!data) throw new Error("Failed to create quiz");
@@ -270,7 +272,23 @@ function QuizCreator() {
                   </p>
                 </div>
               </div>
-              <Switch checked={tournamentMode} onCheckedChange={setTournamentMode} />
+              <Switch checked={tournamentMode} onCheckedChange={(v) => { setTournamentMode(v); if (v) setIsEvaluation(false); }} disabled={isEvaluation} />
+            </div>
+
+            {/* Evaluation mode toggle (mutually exclusive with tournament) */}
+            <div className="flex items-center justify-between rounded-lg border border-border bg-background p-3">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Evaluation / Assessment Mode</p>
+                  <p className="text-xs text-muted-foreground">
+                    {isEvaluation
+                      ? "Runs live like a quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end."
+                      : "Standard race — ranks by speed and score"}
+                  </p>
+                </div>
+              </div>
+              <Switch checked={isEvaluation} onCheckedChange={(v) => { setIsEvaluation(v); if (v) setTournamentMode(false); }} disabled={tournamentMode} />
             </div>
           </div>
         </GlowCard>

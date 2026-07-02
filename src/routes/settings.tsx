@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTheme, THEME_OPTIONS } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette } from "lucide-react";
+import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette, Globe, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -97,7 +97,7 @@ function SettingsPage() {
         title: newTitle.trim(),
         description: newDescription.trim(),
         subject: newSubject.trim(),
-        is_public: true,
+        is_public: false,
       })
       .select("id")
       .single();
@@ -124,6 +124,11 @@ function SettingsPage() {
   const deleteSet = async (id: string) => {
     if (!confirm("Delete this flashcard set?")) return;
     await supabase.from("flashcard_sets").delete().eq("id", id);
+    loadSets();
+  };
+
+  const togglePublish = async (id: string, currentlyPublic: boolean) => {
+    await supabase.from("flashcard_sets").update({ is_public: !currentlyPublic }).eq("id", id);
     loadSets();
   };
 
@@ -263,12 +268,21 @@ function SettingsPage() {
                         {s.is_public ? "• Public" : "• Private"}
                       </p>
                     </div>
-                    <button
-                      onClick={() => deleteSet(s.id)}
-                      className="rounded p-1.5 text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={s.is_public ? "neon-outline" : "neon"}
+                        size="sm"
+                        onClick={() => togglePublish(s.id, s.is_public)}
+                      >
+                        {s.is_public ? (<><Lock className="h-3 w-3" /> Unpublish</>) : (<><Globe className="h-3 w-3" /> Publish</>)}
+                      </Button>
+                      <button
+                        onClick={() => deleteSet(s.id)}
+                        className="rounded p-1.5 text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

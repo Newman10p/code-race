@@ -3,7 +3,7 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, BookOpen, Zap, Play, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, BookOpen, Zap, Play, Trash2, ClipboardCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ interface Quiz {
   description: string | null;
   total_points: number;
   questionCount: number;
+  is_evaluation?: boolean;
 }
 
 function FolderView() {
@@ -51,7 +52,7 @@ function FolderView() {
 
     const { data: quizzesData } = await supabase
       .from("quizzes")
-      .select("id, title, description, total_points")
+      .select("id, title, description, total_points, is_evaluation")
       .eq("folder_id", folderId)
       .order("created_at", { ascending: false });
 
@@ -139,8 +140,15 @@ function FolderView() {
                   <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10">
                     <BookOpen className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold">{quiz.title}</h3>
+                <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold">{quiz.title}</h3>
+                      {quiz.is_evaluation && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                          <ClipboardCheck className="h-3 w-3" /> EVALUATION
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground">{quiz.description}</p>
                     <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
                       <span>{quiz.questionCount} questions</span>

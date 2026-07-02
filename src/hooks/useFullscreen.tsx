@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 export function isMobile() {
   if (typeof navigator === "undefined") return false;
@@ -17,6 +17,17 @@ function getFullscreenElement(): Element | null {
     d.msFullscreenElement ||
     null
   );
+}
+
+// Module-level flag so any exit-detection code can skip strikes when the
+// page is unloading, navigating away, or HMR-reloading in dev.
+let isUnloadingFlag = false;
+export function isPageUnloading() {
+  return isUnloadingFlag;
+}
+if (typeof window !== "undefined") {
+  window.addEventListener("pagehide", () => { isUnloadingFlag = true; });
+  window.addEventListener("beforeunload", () => { isUnloadingFlag = true; });
 }
 
 export function useFullscreen() {
