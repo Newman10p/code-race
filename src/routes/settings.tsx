@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTheme, THEME_OPTIONS } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette } from "lucide-react";
+import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette, Globe, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -97,7 +97,7 @@ function SettingsPage() {
         title: newTitle.trim(),
         description: newDescription.trim(),
         subject: newSubject.trim(),
-        is_public: true,
+        is_public: false,
       })
       .select("id")
       .single();
@@ -124,6 +124,11 @@ function SettingsPage() {
   const deleteSet = async (id: string) => {
     if (!confirm("Delete this flashcard set?")) return;
     await supabase.from("flashcard_sets").delete().eq("id", id);
+    loadSets();
+  };
+
+  const togglePublish = async (id: string, currentlyPublic: boolean) => {
+    await supabase.from("flashcard_sets").update({ is_public: !currentlyPublic }).eq("id", id);
     loadSets();
   };
 
