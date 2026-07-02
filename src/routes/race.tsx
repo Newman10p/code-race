@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Clock, ChevronRight, Trophy, AlertTriangle, Maximize, Ban, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { isMobile, useFullscreen } from "@/hooks/useFullscreen";
+import { isMobile, useFullscreen, isPageUnloading } from "@/hooks/useFullscreen";
 
 export const Route = createFileRoute("/race")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -45,7 +45,7 @@ interface RoundCfg {
   duration_seconds: number;
 }
 
-const STRIKE_GRACE_SECONDS = 5;
+const STRIKE_GRACE_SECONDS = 10;
 
 function RaceView() {
   const { sessionId, participantId } = Route.useSearch();
@@ -55,6 +55,7 @@ function RaceView() {
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [sessionStatus, setSessionStatus] = useState("lobby");
   const [tournamentMode, setTournamentMode] = useState(false);
+  const [isEvaluation, setIsEvaluation] = useState(false);
   const [currentRound, setCurrentRound] = useState(1);
   const [roundPaused, setRoundPaused] = useState(true);
   const [rounds, setRounds] = useState<RoundCfg[]>([]);
@@ -66,6 +67,7 @@ function RaceView() {
   const [timer, setTimer] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [showResult, setShowResult] = useState(false);
+  const [myAnswers, setMyAnswers] = useState<any[]>([]);
 
   // Strike system
   const [hasEnteredFullscreen, setHasEnteredFullscreen] = useState(false);
@@ -198,16 +200,18 @@ function RaceView() {
 
     if (!enteredFullscreenOnceRef.current || strikeActiveRef.current) return;
     // Debounce: the browser can momentarily report not-in-fullscreen during
-    // transitions / re-renders. Only count it as an exit if we're still out
-    // of fullscreen after a short delay.
+    // transitions, HMR reloads, or re-renders. Only count it as a real exit
+    // if we're still out of fullscreen after a delay AND the page isn't
+    // unloading/navigating away.
     const t = window.setTimeout(() => {
-      if (!document.fullscreenElement &&
-          !(document as any).webkitFullscreenElement &&
-          !(document as any).mozFullScreenElement &&
-          !(document as any).msFullscreenElement) {
-        handleFullscreenExit();
-      }
-    }, 600);
+      if (isPageUnloading()) return;
+      const stillOut =
+        !document.fullscreenElement &&
+        !(document as any).webkitFullscreenElement &&
+        !(document as any).mozFullScreenElement &&
+        !(document as any).msFullscreenElement;
+      if (stillOut) handleFullscreenExit();
+    }, 1500);
     return () => clearTimeout(t);
   }, [isFullscreen, hasEnteredFullscreen, sessionStatus, participant?.is_disqualified]);
 
