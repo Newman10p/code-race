@@ -268,12 +268,21 @@ function SettingsPage() {
                         {s.is_public ? "• Public" : "• Private"}
                       </p>
                     </div>
-                    <button
-                      onClick={() => deleteSet(s.id)}
-                      className="rounded p-1.5 text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant={s.is_public ? "neon-outline" : "neon"}
+                        size="sm"
+                        onClick={() => togglePublish(s.id, s.is_public)}
+                      >
+                        {s.is_public ? (<><Lock className="h-3 w-3" /> Unpublish</>) : (<><Globe className="h-3 w-3" /> Publish</>)}
+                      </Button>
+                      <button
+                        onClick={() => deleteSet(s.id)}
+                        className="rounded p-1.5 text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
