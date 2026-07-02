@@ -67,13 +67,14 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_quiz",
-      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode.",
+      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, or set is_evaluation=true for a live evaluation/assessment quiz.",
       parameters: {
         type: "object",
         properties: {
           folder_id: { type: "string" },
           title: { type: "string" },
           description: { type: "string" },
+          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Mutually exclusive with rounds. Learners see a per-question breakdown at the end." },
           questions: {
             type: "array",
             items: {
