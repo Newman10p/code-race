@@ -3,7 +3,7 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Maximize, Palette, Bot, Layers } from "lucide-react";
+import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Maximize, Palette, Bot, Layers, Megaphone, GraduationCap, Lock, FileBarChart } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect } from "react";
 
@@ -57,6 +57,10 @@ function ManualPage() {
             <li><a href="#anticheat" className="text-primary hover:underline">Anti-Cheat System</a></li>
             <li><a href="#tournament" className="text-primary hover:underline">Tournament Mode (Rounds)</a></li>
             <li><a href="#evaluation" className="text-primary hover:underline">Evaluation / Assessment Mode</a></li>
+            <li><a href="#reports" className="text-primary hover:underline">Performance Reports</a></li>
+            <li><a href="#authjoin" className="text-primary hover:underline">Sign-in Required to Join</a></li>
+            <li><a href="#announcements" className="text-primary hover:underline">Announcements</a></li>
+            <li><a href="#tutorial" className="text-primary hover:underline">Learner Tutorial</a></li>
             <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
             <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
             <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
@@ -288,6 +292,83 @@ function ManualPage() {
                 <li>The AI Assistant can create evaluations for you — just ask for a "test", "assessment", or "evaluation".</li>
                 <li>Quizzes flagged as evaluations show an <span className="text-primary font-semibold">EVALUATION</span> badge in the folder view.</li>
               </ul>
+            </div>
+          </GlowCard>
+
+          {/* Performance Reports */}
+          <GlowCard id="reports">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <FileBarChart className="h-5 w-5 text-primary" /> Performance Reports
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Every live session — race, tournament, or evaluation — now has a
+                <strong> full report</strong> at{" "}
+                <code>/report?sessionId=…</code>. Open it from the Launch page via the{" "}
+                <span className="text-primary font-medium">Report</span> button.
+              </p>
+              <ul className="list-disc list-inside space-y-1">
+                <li><strong>Ranking by performance</strong> — sorted by accuracy, with score as tie-breaker.</li>
+                <li><strong>Per-question difficulty</strong> — see which questions the class struggled with (colour-coded pass rate).</li>
+                <li><strong>Answer grid</strong> — for each learner, a check / cross / dash per question so you can spot patterns fast.</li>
+                <li><strong>CSV export</strong> — one-click download for your gradebook.</li>
+                <li>Updates in real time as answers come in — leave it open during the race.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Sign-in Required */}
+          <GlowCard id="authjoin">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Lock className="h-5 w-5 text-primary" /> Sign-in Required to Join
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                To keep races fair, every participant must be signed in. The <code>/join</code> page now
+                shows a sign-in gate for anonymous visitors and pre-fills the participant name from their
+                profile.
+              </p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Each user can join a given race <strong>only once</strong> — a database-level unique constraint blocks duplicate entries.</li>
+                <li>If a signed-in learner rejoins by accident (e.g. after a refresh), they land back on their existing participant instead of a new one.</li>
+                <li>Anonymous joins are no longer possible — the "Sign in to Join" panel replaces the PIN form until they authenticate.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Announcements */}
+          <GlowCard id="announcements">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Megaphone className="h-5 w-5 text-primary" /> Announcements
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Post product updates that pop up as a modal on every signed-in user's screen. Perfect for
+                announcing "new evaluation mode", schedule changes, or reminders.
+              </p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Open <strong>Announcements</strong> in the top navigation.</li>
+                <li>Click <strong>New Announcement</strong>, add a title + body, and Publish.</li>
+                <li>The popup appears once per user with an <strong>OK</strong> button; dismissals are stored so no one sees the same message twice.</li>
+                <li>Toggle an announcement <em>Off</em> to stop delivery; toggle it back <em>On</em> to resurface it to anyone who hasn't already dismissed it.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Learner Tutorial */}
+          <GlowCard id="tutorial">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <GraduationCap className="h-5 w-5 text-primary" /> Learner Tutorial
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                First-time learners now see a short 5-step interactive walkthrough covering flashcards,
+                joining races, tournaments, evaluations, and fair-play rules. It auto-appears once, and
+                the completion timestamp is stored on their profile so it never bothers them again.
+              </p>
+              <p>
+                Learners can also skip any step; skipping still marks the tutorial as complete.
+              </p>
             </div>
           </GlowCard>
 

@@ -146,7 +146,18 @@ function LearnerDashboard() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((s) => (
               <div key={s.id} className="group relative">
-                <Link to="/learn/$setId" params={{ setId: s.id }}>
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate({ to: "/learn/$setId", params: { setId: s.id } })}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      navigate({ to: "/learn/$setId", params: { setId: s.id } });
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
                   <GlowCard className="h-full transition-transform hover:scale-[1.02]">
                     <div className="mb-3 flex items-start justify-between gap-3">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -168,9 +179,10 @@ function LearnerDashboard() {
                       {s.card_count} card{s.card_count === 1 ? "" : "s"}
                     </div>
                   </GlowCard>
-                </Link>
+                </div>
                 <button
                   onClick={(e) => {
+                    e.stopPropagation();
                     e.preventDefault();
                     toggleSave(s.id, s.saved);
                   }}
