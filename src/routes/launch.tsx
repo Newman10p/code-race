@@ -5,7 +5,7 @@ import { GlowCard } from "@/components/GlowCard";
 import { AnimatedLeaderboard } from "@/components/AnimatedLeaderboard";
 import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
-import { Copy, Users, Zap, Trophy, Clock, Play, BarChart3 } from "lucide-react";
+import { Copy, Users, Zap, Trophy, Clock, Play, BarChart3, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
@@ -284,6 +284,9 @@ function LaunchRoom() {
               <div className="flex flex-wrap gap-2">
                 <Link to="/standings" search={{ sessionId }}>
                   <Button variant="neon-outline" size="sm"><BarChart3 className="h-3 w-3" /> Standings</Button>
+                </Link>
+                <Link to="/report" search={{ sessionId }}>
+                  <Button variant="neon-outline" size="sm"><FileBarChart className="h-3 w-3" /> Report</Button>
                 </Link>
                 <span className="flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-primary">
                   <Users className="h-3 w-3" /> {activeParticipants.length} active

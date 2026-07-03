@@ -3,7 +3,7 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Maximize, Palette, Bot, Layers } from "lucide-react";
+import { ArrowLeft, FolderOpen, BookOpen, Plus, Play, Users, Shield, Code, ListChecks, Zap, AlertTriangle, Trophy, Maximize, Palette, Bot, Layers, Megaphone, GraduationCap, Lock, FileBarChart } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect } from "react";
 
@@ -57,6 +57,10 @@ function ManualPage() {
             <li><a href="#anticheat" className="text-primary hover:underline">Anti-Cheat System</a></li>
             <li><a href="#tournament" className="text-primary hover:underline">Tournament Mode (Rounds)</a></li>
             <li><a href="#evaluation" className="text-primary hover:underline">Evaluation / Assessment Mode</a></li>
+            <li><a href="#reports" className="text-primary hover:underline">Performance Reports</a></li>
+            <li><a href="#authjoin" className="text-primary hover:underline">Sign-in Required to Join</a></li>
+            <li><a href="#announcements" className="text-primary hover:underline">Announcements</a></li>
+            <li><a href="#tutorial" className="text-primary hover:underline">Learner Tutorial</a></li>
             <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
             <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
             <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>

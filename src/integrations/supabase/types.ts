@@ -14,6 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcement_dismissals: {
+        Row: {
+          announcement_id: string
+          dismissed_at: string
+          user_id: string
+        }
+        Insert: {
+          announcement_id: string
+          dismissed_at?: string
+          user_id: string
+        }
+        Update: {
+          announcement_id?: string
+          dismissed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_dismissals_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          id: string
+          is_active: boolean
+          setter_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          setter_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          setter_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       flashcard_sets: {
         Row: {
           created_at: string
@@ -253,6 +312,7 @@ export type Database = {
           strike_count: number
           student_name: string
           tab_switch_count: number
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -267,6 +327,7 @@ export type Database = {
           strike_count?: number
           student_name: string
           tab_switch_count?: number
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -281,6 +342,7 @@ export type Database = {
           strike_count?: number
           student_name?: string
           tab_switch_count?: number
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -299,6 +361,7 @@ export type Database = {
           email: string
           id: string
           theme_color: string
+          tutorial_completed_at: string | null
           updated_at: string
           user_id: string
         }
@@ -308,6 +371,7 @@ export type Database = {
           email: string
           id?: string
           theme_color?: string
+          tutorial_completed_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -317,6 +381,7 @@ export type Database = {
           email?: string
           id?: string
           theme_color?: string
+          tutorial_completed_at?: string | null
           updated_at?: string
           user_id?: string
         }

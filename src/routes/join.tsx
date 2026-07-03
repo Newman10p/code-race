@@ -4,24 +4,45 @@ import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/Logo";
-import { useState } from "react";
-import { ArrowRight, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, ArrowLeft, Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/join")({
   component: JoinPage,
 });
 
 function JoinPage() {
+  const { user, loading: authLoading } = useAuth();
   const [pin, setPin] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Prefill name from profile once user is loaded
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name, email")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const preferred = (data?.display_name || data?.email || user.email || "").trim();
+      if (preferred && !name) setName(preferred);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
   const handleJoin = async () => {
     if (pin.length !== 6 || !name.trim()) return;
+    if (!user) {
+      setError("You must sign in to join a race.");
+      return;
+    }
     setError("");
     setLoading(true);
     try {
@@ -42,13 +63,41 @@ function JoinPage() {
         return;
       }
 
-      const { data: participant, error: insertError } = await supabase
+      // If this user already joined this session, reuse the same participant row
+      const { data: existing } = await supabase
         .from("participants")
-        .insert({ session_id: session.id, student_name: name.trim() })
         .select("id")
-        .single();
+        .eq("session_id", session.id)
+        .eq("user_id", user.id)
+        .maybeSingle();
 
-      if (insertError || !participant) {
+      let participantId = existing?.id as string | undefined;
+
+      if (!participantId) {
+        const { data: participant, error: insertError } = await supabase
+          .from("participants")
+          .insert({
+            session_id: session.id,
+            student_name: name.trim(),
+            user_id: user.id,
+          } as any)
+          .select("id")
+          .single();
+
+        if (insertError) {
+          // 23505 = unique violation (duplicate join)
+          if ((insertError as any).code === "23505") {
+            setError("You have already joined this race from this account.");
+          } else {
+            setError("Failed to join. Try again.");
+          }
+          setLoading(false);
+          return;
+        }
+        participantId = participant?.id;
+      }
+
+      if (!participantId) {
         setError("Failed to join. Try again.");
         setLoading(false);
         return;
@@ -56,7 +105,7 @@ function JoinPage() {
 
       navigate({
         to: "/race",
-        search: { sessionId: session.id, participantId: participant.id },
+        search: { sessionId: session.id, participantId },
       });
     } catch {
       setError("Something went wrong.");
@@ -64,6 +113,40 @@ function JoinPage() {
       setLoading(false);
     }
   };
+
+  // Not signed in — force login first
+  if (!authLoading && !user) {
+    return (
+      <HoneycombLayout>
+        <main className="flex min-h-screen flex-col items-center justify-center px-4">
+          <div className="mb-8 flex items-center gap-2">
+            <Logo className="h-12 w-12" />
+            <span className="text-3xl font-bold tracking-tight">
+              Code<span className="text-primary">Race</span>
+            </span>
+          </div>
+          <GlowCard className="w-full max-w-sm text-center">
+            <Lock className="mx-auto mb-3 h-10 w-10 text-primary" />
+            <h2 className="mb-2 text-xl font-bold">Sign in to Join</h2>
+            <p className="mb-5 text-sm text-muted-foreground">
+              To keep races fair, each participant must sign in. This prevents duplicate joins and cheating.
+            </p>
+            <div className="flex flex-col gap-2">
+              <Link to="/login">
+                <Button variant="neon" size="lg" className="w-full">Sign In</Button>
+              </Link>
+              <Link to="/register">
+                <Button variant="ghost" size="sm" className="w-full">Create an account</Button>
+              </Link>
+            </div>
+          </GlowCard>
+          <Link to="/" className="mt-6 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to home
+          </Link>
+        </main>
+      </HoneycombLayout>
+    );
+  }
 
   return (
     <HoneycombLayout>

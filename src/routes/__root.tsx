@@ -75,11 +75,15 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 import { ThemeProvider } from "@/hooks/useTheme";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
+import { UserTutorial } from "@/components/UserTutorial";
 
 function RootComponent() {
   return (
     <ThemeProvider>
       <Outlet />
+      <AnnouncementBanner />
+      <UserTutorial />
     </ThemeProvider>
   );
 }

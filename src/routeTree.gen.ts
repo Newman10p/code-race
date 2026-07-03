@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as ManualRouteImport } from './routes/manual'
@@ -19,6 +20,7 @@ import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
@@ -32,6 +34,11 @@ const StandingsRoute = StandingsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -74,6 +81,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AnnouncementsRoute = AnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -97,6 +109,7 @@ const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
@@ -105,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -113,6 +127,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
@@ -121,6 +136,7 @@ export interface FileRoutesByTo {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -130,6 +146,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/announcements': typeof AnnouncementsRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
@@ -138,6 +155,7 @@ export interface FileRoutesById {
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
+  '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -148,6 +166,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/announcements'
     | '/dashboard'
     | '/join'
     | '/launch'
@@ -156,6 +175,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/report'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -164,6 +184,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/announcements'
     | '/dashboard'
     | '/join'
     | '/launch'
@@ -172,6 +193,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/report'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -180,6 +202,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/announcements'
     | '/dashboard'
     | '/join'
     | '/launch'
@@ -188,6 +211,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/race'
     | '/register'
+    | '/report'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -197,6 +221,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AnnouncementsRoute: typeof AnnouncementsRoute
   DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
   LaunchRoute: typeof LaunchRoute
@@ -205,6 +230,7 @@ export interface RootRouteChildren {
   ManualRoute: typeof ManualRoute
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
+  ReportRoute: typeof ReportRoute
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
@@ -225,6 +251,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -283,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/announcements': {
+      id: '/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AnnouncementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -326,6 +366,7 @@ const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AnnouncementsRoute: AnnouncementsRoute,
   DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
   LaunchRoute: LaunchRoute,
@@ -334,6 +375,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManualRoute: ManualRoute,
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
+  ReportRoute: ReportRoute,
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
