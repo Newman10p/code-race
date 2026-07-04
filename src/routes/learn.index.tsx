@@ -10,7 +10,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 
-export const Route = createFileRoute("/learn")({
+export const Route = createFileRoute("/learn/")({
   component: LearnerDashboard,
 });
 
