@@ -16,12 +16,12 @@ import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as LearnRouteImport } from './routes/learn'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
@@ -61,11 +61,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnRoute = LearnRouteImport.update({
-  id: '/learn',
-  path: '/learn',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LaunchRoute = LaunchRouteImport.update({
   id: '/launch',
   path: '/launch',
@@ -91,15 +86,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuizCreateRoute = QuizCreateRouteImport.update({
   id: '/quiz/create',
   path: '/quiz/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnSetIdRoute = LearnSetIdRouteImport.update({
-  id: '/$setId',
-  path: '/$setId',
-  getParentRoute: () => LearnRoute,
+  id: '/learn/$setId',
+  path: '/learn/$setId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
   id: '/folder/$folderId',
@@ -113,7 +113,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -124,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/learn/': typeof LearnIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -131,7 +131,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -142,6 +141,7 @@ export interface FileRoutesByTo {
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/learn': typeof LearnIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -150,7 +150,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
-  '/learn': typeof LearnRouteWithChildren
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
   '/race': typeof RaceRoute
@@ -161,6 +160,7 @@ export interface FileRoutesById {
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/learn/': typeof LearnIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -170,7 +170,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/learn'
     | '/login'
     | '/manual'
     | '/race'
@@ -181,6 +180,7 @@ export interface FileRouteTypes {
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/quiz/create'
+    | '/learn/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,7 +188,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/learn'
     | '/login'
     | '/manual'
     | '/race'
@@ -199,6 +198,7 @@ export interface FileRouteTypes {
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/quiz/create'
+    | '/learn'
   id:
     | '__root__'
     | '/'
@@ -206,7 +206,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/join'
     | '/launch'
-    | '/learn'
     | '/login'
     | '/manual'
     | '/race'
@@ -217,6 +216,7 @@ export interface FileRouteTypes {
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/quiz/create'
+    | '/learn/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -225,7 +225,6 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
   LaunchRoute: typeof LaunchRoute
-  LearnRoute: typeof LearnRouteWithChildren
   LoginRoute: typeof LoginRoute
   ManualRoute: typeof ManualRoute
   RaceRoute: typeof RaceRoute
@@ -234,7 +233,9 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
+  LearnSetIdRoute: typeof LearnSetIdRoute
   QuizCreateRoute: typeof QuizCreateRoute
+  LearnIndexRoute: typeof LearnIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -288,13 +289,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn': {
-      id: '/learn'
-      path: '/learn'
-      fullPath: '/learn'
-      preLoaderRoute: typeof LearnRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/launch': {
       id: '/launch'
       path: '/launch'
@@ -330,6 +324,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/quiz/create': {
       id: '/quiz/create'
       path: '/quiz/create'
@@ -339,10 +340,10 @@ declare module '@tanstack/react-router' {
     }
     '/learn/$setId': {
       id: '/learn/$setId'
-      path: '/$setId'
+      path: '/learn/$setId'
       fullPath: '/learn/$setId'
       preLoaderRoute: typeof LearnSetIdRouteImport
-      parentRoute: typeof LearnRoute
+      parentRoute: typeof rootRouteImport
     }
     '/folder/$folderId': {
       id: '/folder/$folderId'
@@ -354,23 +355,12 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface LearnRouteChildren {
-  LearnSetIdRoute: typeof LearnSetIdRoute
-}
-
-const LearnRouteChildren: LearnRouteChildren = {
-  LearnSetIdRoute: LearnSetIdRoute,
-}
-
-const LearnRouteWithChildren = LearnRoute._addFileChildren(LearnRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnnouncementsRoute: AnnouncementsRoute,
   DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
   LaunchRoute: LaunchRoute,
-  LearnRoute: LearnRouteWithChildren,
   LoginRoute: LoginRoute,
   ManualRoute: ManualRoute,
   RaceRoute: RaceRoute,
@@ -379,17 +369,10 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
+  LearnSetIdRoute: LearnSetIdRoute,
   QuizCreateRoute: QuizCreateRoute,
+  LearnIndexRoute: LearnIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
