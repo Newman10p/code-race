@@ -13,6 +13,7 @@ import {
   Trash2,
   Eye,
   EyeOff,
+  Sparkles,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,6 +43,8 @@ function AnnouncementsPage() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [saving, setSaving] = useState(false);
+  const [enhancing, setEnhancing] = useState(false);
+  const [enhanceError, setEnhanceError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -83,6 +86,28 @@ function AnnouncementsPage() {
       setBody("");
       setShowNew(false);
       load();
+    }
+  };
+
+  const enhance = async () => {
+    if (!title.trim() && !body.trim()) {
+      setEnhanceError("Add a title or body first, then let AI polish it.");
+      return;
+    }
+    setEnhancing(true);
+    setEnhanceError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("enhance-announcement", {
+        body: { title, body },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if ((data as any)?.title) setTitle((data as any).title);
+      if ((data as any)?.body) setBody((data as any).body);
+    } catch (e) {
+      setEnhanceError((e as Error).message || "Failed to enhance.");
+    } finally {
+      setEnhancing(false);
     }
   };
 
@@ -154,6 +179,9 @@ function AnnouncementsPage() {
                 onChange={(e) => setBody(e.target.value)}
                 className="min-h-32 bg-background"
               />
+              {enhanceError && (
+                <p className="text-xs text-destructive">{enhanceError}</p>
+              )}
               <div className="flex gap-2">
                 <Button
                   variant="neon"
@@ -163,11 +191,21 @@ function AnnouncementsPage() {
                   {saving ? "Publishing..." : "Publish"}
                 </Button>
                 <Button
+                  variant="neon-outline"
+                  onClick={enhance}
+                  disabled={enhancing || (!title.trim() && !body.trim())}
+                  title="Let AI polish your title and body"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  {enhancing ? "Enhancing..." : "Enhance with AI"}
+                </Button>
+                <Button
                   variant="ghost"
                   onClick={() => {
                     setShowNew(false);
                     setTitle("");
                     setBody("");
+                    setEnhanceError(null);
                   }}
                 >
                   Cancel
