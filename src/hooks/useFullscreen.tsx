@@ -34,7 +34,24 @@ export function useFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    const update = () => setIsFullscreen(!!getFullscreenElement());
+    // Track browser fullscreen. Use a small delay so brief browser-triggered
+    // transitions (permission prompts, focus swaps, Monaco's own fullscreen
+    // widget) don't flip our state to false and back.
+    let pendingFalse: number | null = null;
+    const update = () => {
+      const nowFs = !!getFullscreenElement();
+      if (nowFs) {
+        if (pendingFalse) { clearTimeout(pendingFalse); pendingFalse = null; }
+        setIsFullscreen(true);
+      } else {
+        // Confirm the exit persists briefly before flipping state to false.
+        if (pendingFalse) clearTimeout(pendingFalse);
+        pendingFalse = window.setTimeout(() => {
+          if (!getFullscreenElement()) setIsFullscreen(false);
+          pendingFalse = null;
+        }, 250);
+      }
+    };
     const events = [
       "fullscreenchange",
       "webkitfullscreenchange",
@@ -42,8 +59,10 @@ export function useFullscreen() {
       "MSFullscreenChange",
     ];
     events.forEach((e) => document.addEventListener(e, update));
-    update();
+    // Sync immediately without the debounce
+    setIsFullscreen(!!getFullscreenElement());
     return () => {
+      if (pendingFalse) clearTimeout(pendingFalse);
       events.forEach((e) => document.removeEventListener(e, update));
     };
   }, []);
