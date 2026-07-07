@@ -23,6 +23,7 @@ import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
+import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 
@@ -96,6 +97,11 @@ const QuizCreateRoute = QuizCreateRouteImport.update({
   path: '/quiz/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LessonsCreateRoute = LessonsCreateRouteImport.update({
+  id: '/lessons/create',
+  path: '/lessons/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LearnSetIdRoute = LearnSetIdRouteImport.update({
   id: '/learn/$setId',
   path: '/learn/$setId',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
+  '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/learn/': typeof LearnIndexRoute
 }
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
+  '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/learn': typeof LearnIndexRoute
 }
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
+  '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/learn/': typeof LearnIndexRoute
 }
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/standings'
     | '/folder/$folderId'
     | '/learn/$setId'
+    | '/lessons/create'
     | '/quiz/create'
     | '/learn/'
   fileRoutesByTo: FileRoutesByTo
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/standings'
     | '/folder/$folderId'
     | '/learn/$setId'
+    | '/lessons/create'
     | '/quiz/create'
     | '/learn'
   id:
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/standings'
     | '/folder/$folderId'
     | '/learn/$setId'
+    | '/lessons/create'
     | '/quiz/create'
     | '/learn/'
   fileRoutesById: FileRoutesById
@@ -234,6 +246,7 @@ export interface RootRouteChildren {
   StandingsRoute: typeof StandingsRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
   LearnSetIdRoute: typeof LearnSetIdRoute
+  LessonsCreateRoute: typeof LessonsCreateRoute
   QuizCreateRoute: typeof QuizCreateRoute
   LearnIndexRoute: typeof LearnIndexRoute
 }
@@ -338,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuizCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lessons/create': {
+      id: '/lessons/create'
+      path: '/lessons/create'
+      fullPath: '/lessons/create'
+      preLoaderRoute: typeof LessonsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/learn/$setId': {
       id: '/learn/$setId'
       path: '/learn/$setId'
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   StandingsRoute: StandingsRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
   LearnSetIdRoute: LearnSetIdRoute,
+  LessonsCreateRoute: LessonsCreateRoute,
   QuizCreateRoute: QuizCreateRoute,
   LearnIndexRoute: LearnIndexRoute,
 }
