@@ -9,6 +9,9 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Code, ListChecks, Zap, GripVertical, Clock, Trophy, Users, Percent, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { MonacoCodeEditor } from "@/components/code/MonacoCodeEditor";
+import { CodeTestEditor } from "@/components/code/CodeTestEditor";
+import type { TestCase } from "@/lib/code-runners";
 
 export const Route = createFileRoute("/quiz/create")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -29,6 +32,9 @@ interface Question {
   correctOption?: number;
   starterCode?: string;
   solution?: string;
+  language?: string;
+  testMode?: "io" | "assert";
+  testCases?: TestCase[];
   dbId?: string;
 }
 
@@ -91,6 +97,9 @@ function QuizCreator() {
           correctOption: q.correct_option || 0,
           starterCode: q.starter_code || "",
           solution: q.solution || "",
+          language: (q as any).language || "javascript",
+          testMode: ((q as any).test_mode as "io" | "assert") || "io",
+          testCases: ((q as any).test_cases as TestCase[]) || [],
         }))
       );
     }
@@ -123,7 +132,7 @@ function QuizCreator() {
       roundNumber,
       ...(type === "mcq"
         ? { options: ["", "", "", ""], correctOption: 0 }
-        : { starterCode: "// Write your code here\n", solution: "" }),
+        : { starterCode: "// Write your code here\n", solution: "", language: "javascript", testMode: "io" as const, testCases: [] }),
     };
     setQuestions([...questions, q]);
   };
@@ -204,6 +213,9 @@ function QuizCreator() {
             correct_option: q.type === "mcq" ? q.correctOption : 0,
             starter_code: q.type === "code" ? q.starterCode : "",
             solution: q.type === "code" ? q.solution : "",
+            language: q.type === "code" ? (q.language || "javascript") : "javascript",
+            test_mode: q.type === "code" ? (q.testMode || "io") : "io",
+            test_cases: q.type === "code" ? (q.testCases || []) : [],
             order_index: i,
           })) as any
         );
@@ -533,9 +545,27 @@ function QuestionEditor({
       {q.type === "code" && (
         <div className="space-y-2">
           <label className="text-xs font-medium text-muted-foreground">Starter Code</label>
-          <textarea value={q.starterCode} onChange={(e) => onUpdate(q.id, { starterCode: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
-          <label className="text-xs font-medium text-muted-foreground">Solution</label>
-          <textarea value={q.solution} onChange={(e) => onUpdate(q.id, { solution: e.target.value })} className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring" rows={4} />
+          <MonacoCodeEditor
+            value={q.starterCode || ""}
+            onChange={(v) => onUpdate(q.id, { starterCode: v })}
+            language={q.language || "javascript"}
+            height="180px"
+          />
+          <label className="text-xs font-medium text-muted-foreground">Solution (reference)</label>
+          <MonacoCodeEditor
+            value={q.solution || ""}
+            onChange={(v) => onUpdate(q.id, { solution: v })}
+            language={q.language || "javascript"}
+            height="140px"
+          />
+          <CodeTestEditor
+            language={q.language || "javascript"}
+            mode={q.testMode || "io"}
+            tests={q.testCases || []}
+            onLanguageChange={(l) => onUpdate(q.id, { language: l })}
+            onModeChange={(m) => onUpdate(q.id, { testMode: m })}
+            onChange={(t) => onUpdate(q.id, { testCases: t })}
+          />
         </div>
       )}
     </GlowCard>
