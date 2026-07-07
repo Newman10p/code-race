@@ -3,7 +3,7 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Bookmark, LogOut, Search, Sparkles } from "lucide-react";
+import { BookOpen, Bookmark, LogOut, Search, Sparkles, Book, GraduationCap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/learn/")({
+  validateSearch: (s: Record<string, unknown>) => ({ tab: ((s.tab as string) || "flashcards") as "flashcards" | "lessons" }),
   component: LearnerDashboard,
 });
 
@@ -27,7 +28,9 @@ function LearnerDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
+  const { tab } = Route.useSearch();
   const [sets, setSets] = useState<FlashSet[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +45,7 @@ function LearnerDashboard() {
       return;
     }
     loadSets();
+    loadCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, roleLoading, isSetter]);
 
@@ -72,6 +76,11 @@ function LearnerDashboard() {
     setLoading(false);
   };
 
+  const loadCourses = async () => {
+    const { data } = await supabase.from("lesson_courses" as any).select("id, title, description, subject, cover_image_url").eq("is_public", true).order("created_at", { ascending: false });
+    setCourses((data as any) || []);
+  };
+
   const toggleSave = async (setId: string, currentlySaved: boolean) => {
     if (currentlySaved) {
       await supabase.from("learner_saved_sets").delete().eq("user_id", user!.id).eq("set_id", setId);
@@ -85,6 +94,11 @@ function LearnerDashboard() {
     (s) =>
       s.title.toLowerCase().includes(search.toLowerCase()) ||
       (s.subject || "").toLowerCase().includes(search.toLowerCase())
+  );
+  const filteredCourses = courses.filter(
+    (c) =>
+      c.title.toLowerCase().includes(search.toLowerCase()) ||
+      (c.subject || "").toLowerCase().includes(search.toLowerCase())
   );
 
   if (authLoading || roleLoading || loading) {
@@ -130,12 +144,60 @@ function LearnerDashboard() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search flashcard sets by title or subject..."
+            placeholder={`Search ${tab === "lessons" ? "lesson courses" : "flashcard sets"} by title or subject...`}
             className="bg-card pl-10"
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {/* Tabs */}
+        <div className="mb-4 flex gap-2 border-b border-border">
+          <Link to="/learn" search={{ tab: "flashcards" }}>
+            <button className={`flex items-center gap-2 border-b-2 px-3 py-2 text-sm transition ${tab === "flashcards" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+              <BookOpen className="h-4 w-4" /> Flashcards
+            </button>
+          </Link>
+          <Link to="/learn" search={{ tab: "lessons" }}>
+            <button className={`flex items-center gap-2 border-b-2 px-3 py-2 text-sm transition ${tab === "lessons" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+              <GraduationCap className="h-4 w-4" /> Lessons
+            </button>
+          </Link>
+        </div>
+
+        {tab === "lessons" ? (
+          filteredCourses.length === 0 ? (
+            <GlowCard className="py-12 text-center">
+              <Book className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="text-muted-foreground">No lesson courses available yet. Check back soon!</p>
+            </GlowCard>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredCourses.map((c) => (
+                <div
+                  key={c.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate({ to: "/learn/course/$courseId", params: { courseId: c.id } })}
+                  className="cursor-pointer"
+                >
+                  <GlowCard className="h-full transition-transform hover:scale-[1.02]">
+                    {c.cover_image_url ? (
+                      <img src={c.cover_image_url} alt="" className="mb-3 h-32 w-full rounded-lg object-cover" />
+                    ) : (
+                      <div className="mb-3 flex h-32 w-full items-center justify-center rounded-lg bg-primary/10">
+                        <Book className="h-10 w-10 text-primary" />
+                      </div>
+                    )}
+                    <div className="mb-1 flex items-center gap-2">
+                      <h3 className="font-semibold">{c.title}</h3>
+                      {c.subject && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">{c.subject}</span>}
+                    </div>
+                    {c.description && <p className="line-clamp-2 text-xs text-muted-foreground">{c.description}</p>}
+                  </GlowCard>
+                </div>
+              ))}
+            </div>
+          )
+        ) : filtered.length === 0 ? (
           <GlowCard className="py-12 text-center">
             <BookOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
             <p className="text-muted-foreground">
