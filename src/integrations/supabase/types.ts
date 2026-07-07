@@ -221,6 +221,35 @@ export type Database = {
           },
         ]
       }
+      learner_saved_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_saved_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learner_saved_sets: {
         Row: {
           id: string
@@ -250,6 +279,142 @@ export type Database = {
           },
         ]
       }
+      lesson_courses: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          setter_id: string
+          subject: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setter_id: string
+          subject?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          setter_id?: string
+          subject?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          attempts: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          lesson_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          attempts?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          concept_markdown: string
+          course_id: string
+          created_at: string
+          hint: string | null
+          id: string
+          image_url: string | null
+          language: string
+          objective: string
+          order_index: number
+          solution: string
+          starter_code: string
+          test_cases: Json
+          test_mode: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          concept_markdown?: string
+          course_id: string
+          created_at?: string
+          hint?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string
+          objective?: string
+          order_index?: number
+          solution?: string
+          starter_code?: string
+          test_cases?: Json
+          test_mode?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          concept_markdown?: string
+          course_id?: string
+          created_at?: string
+          hint?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string
+          objective?: string
+          order_index?: number
+          solution?: string
+          starter_code?: string
+          test_cases?: Json
+          test_mode?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       participant_answers: {
         Row: {
           answer: Json | null
@@ -260,6 +425,7 @@ export type Database = {
           points_awarded: number
           question_id: string
           submitted_at: string
+          test_results: Json | null
         }
         Insert: {
           answer?: Json | null
@@ -270,6 +436,7 @@ export type Database = {
           points_awarded?: number
           question_id: string
           submitted_at?: string
+          test_results?: Json | null
         }
         Update: {
           answer?: Json | null
@@ -280,6 +447,7 @@ export type Database = {
           points_awarded?: number
           question_id?: string
           submitted_at?: string
+          test_results?: Json | null
         }
         Relationships: [
           {
@@ -393,6 +561,7 @@ export type Database = {
           correct_option: number | null
           created_at: string
           id: string
+          language: string
           options: Json | null
           order_index: number
           points: number
@@ -400,14 +569,18 @@ export type Database = {
           round_number: number
           solution: string | null
           starter_code: string | null
+          test_cases: Json
+          test_mode: string
           time_limit: number
           type: string
+          visible_test_count: number
         }
         Insert: {
           content: string
           correct_option?: number | null
           created_at?: string
           id?: string
+          language?: string
           options?: Json | null
           order_index?: number
           points?: number
@@ -415,14 +588,18 @@ export type Database = {
           round_number?: number
           solution?: string | null
           starter_code?: string | null
+          test_cases?: Json
+          test_mode?: string
           time_limit?: number
           type?: string
+          visible_test_count?: number
         }
         Update: {
           content?: string
           correct_option?: number | null
           created_at?: string
           id?: string
+          language?: string
           options?: Json | null
           order_index?: number
           points?: number
@@ -430,8 +607,11 @@ export type Database = {
           round_number?: number
           solution?: string | null
           starter_code?: string | null
+          test_cases?: Json
+          test_mode?: string
           time_limit?: number
           type?: string
+          visible_test_count?: number
         }
         Relationships: [
           {

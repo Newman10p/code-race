@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Zap, Clock, ChevronRight, Trophy, AlertTriangle, Maximize, Ban, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { isMobile, useFullscreen, isPageUnloading } from "@/hooks/useFullscreen";
+import { CodeRunner } from "@/components/code/CodeRunner";
+import type { TestResult, TestCase } from "@/lib/code-runners";
 
 export const Route = createFileRoute("/race")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -28,6 +30,10 @@ interface QuestionData {
   starter_code: string;
   time_limit: number;
   round_number: number;
+  language?: string;
+  test_mode?: "io" | "assert";
+  test_cases?: TestCase[];
+  visible_test_count?: number;
 }
 
 interface LeaderboardEntry {
@@ -64,6 +70,7 @@ function RaceView() {
   const [selected, setSelected] = useState<number | null>(null);
   const [code, setCode] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [codeTestResults, setCodeTestResults] = useState<{ passed: number; total: number; results: TestResult[] } | null>(null);
   const [timer, setTimer] = useState(0);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [showResult, setShowResult] = useState(false);
@@ -130,6 +137,7 @@ function RaceView() {
     setSelected(null);
     setSubmitted(false);
     setShowResult(false);
+    setCodeTestResults(null);
   }, [currentQIndex, questions, sessionStatus]);
 
   // Per-question countdown
@@ -282,7 +290,7 @@ function RaceView() {
 
     const { data: qs } = await supabase
       .from("questions")
-      .select("id, type, content, points, options, correct_option, starter_code, time_limit, round_number")
+      .select("id, type, content, points, options, correct_option, starter_code, time_limit, round_number, language, test_mode, test_cases, visible_test_count")
       .eq("quiz_id", session.quiz_id)
       .order("order_index");
     if (qs) {
@@ -293,6 +301,10 @@ function RaceView() {
         starter_code: q.starter_code || "",
         time_limit: q.time_limit ?? 30,
         round_number: q.round_number ?? 1,
+        language: q.language || "javascript",
+        test_mode: (q.test_mode as "io" | "assert") || "io",
+        test_cases: (q.test_cases as TestCase[]) || [],
+        visible_test_count: q.visible_test_count ?? 1,
       }));
       setQuestions(mapped);
       // Jump to first question of current round
@@ -325,8 +337,27 @@ function RaceView() {
     if (submitted || !questions[currentQIndex]) return;
     setSubmitted(true);
     const q = questions[currentQIndex];
-    const isCorrect = q.type === "mcq" ? selected === q.correct_option : false;
-    const pointsAwarded = isCorrect ? q.points : 0;
+    let isCorrect = false;
+    let pointsAwarded = 0;
+    let testResultsPayload: any = null;
+    if (q.type === "mcq") {
+      isCorrect = selected === q.correct_option;
+      pointsAwarded = isCorrect ? q.points : 0;
+    } else {
+      // Code: use last test-run results if available, else run once now.
+      let res = codeTestResults;
+      if (!res && (q.test_cases?.length ?? 0) > 0) {
+        const { runCode } = await import("@/lib/code-runners");
+        const r = await runCode(q.language || "javascript", code, q.test_cases || [], q.test_mode || "io");
+        res = { passed: r.testResults.filter((t) => t.passed).length, total: r.testResults.length, results: r.testResults };
+      }
+      if (res && res.total > 0) {
+        const ratio = res.passed / res.total;
+        pointsAwarded = Math.round(q.points * ratio);
+        isCorrect = res.passed === res.total;
+        testResultsPayload = res.results;
+      }
+    }
 
     await supabase.from("participant_answers").insert({
       participant_id: participantId,
@@ -335,6 +366,7 @@ function RaceView() {
       is_correct: isCorrect,
       points_awarded: pointsAwarded,
       flagged_tab_switch: isTabSwitch,
+      test_results: testResultsPayload,
     });
 
     if (pointsAwarded > 0) {
@@ -628,14 +660,16 @@ function RaceView() {
                 </div>
               ) : (
                 <GlowCard>
-                  <label className="mb-2 block text-sm font-medium text-muted-foreground">Your Code</label>
-                  <textarea
-                    value={code}
-                    onChange={(e) => !submitted && setCode(e.target.value)}
-                    className="w-full rounded-lg border border-input bg-background p-4 font-mono text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                    rows={8}
-                    spellCheck={false}
+                  <CodeRunner
+                    language={currentQ.language || "javascript"}
+                    code={code}
+                    onCodeChange={(v) => !submitted && setCode(v)}
+                    tests={currentQ.test_cases || []}
+                    testMode={currentQ.test_mode || "io"}
+                    height="280px"
+                    showPreview={currentQ.language === "html"}
                     disabled={submitted}
+                    onResult={setCodeTestResults}
                   />
                 </GlowCard>
               )}
