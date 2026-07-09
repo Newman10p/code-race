@@ -255,6 +255,111 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_lesson_courses",
+      description: "List lesson courses owned by the current setter.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_lesson_outline_preview",
+      description: "Draft a course outline (course title + list of lesson titles+objectives) from a topic WITHOUT saving. Use to show the setter for approval before calling create_lesson_course.",
+      parameters: {
+        type: "object",
+        properties: {
+          topic: { type: "string" },
+          language: { type: "string", enum: ["javascript", "python", "html"] },
+          lesson_count: { type: "number" },
+        },
+        required: ["topic"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_lesson_course",
+      description: "Create a full lesson course with interactive coding lessons. Each lesson has a concept, an objective, starter_code in Monaco editor, and test_cases that verify the learner's solution. ALWAYS confirm the outline (title, subject, list of lessons with objectives) with the setter BEFORE calling. Default is_public=false.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          subject: { type: "string" },
+          is_public: { type: "boolean" },
+          cover_image_url: { type: "string" },
+          lessons: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                concept_markdown: { type: "string", description: "Concept explanation (markdown)" },
+                objective: { type: "string", description: "Single-sentence goal" },
+                hint: { type: "string" },
+                image_url: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      stdin: { type: "string" },
+                      expected: { type: "string" },
+                      code: { type: "string" },
+                      is_hidden: { type: "boolean" },
+                    },
+                  },
+                },
+              },
+              required: ["title", "objective", "language", "starter_code"],
+            },
+          },
+        },
+        required: ["title", "lessons"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_lessons_to_course",
+      description: "Append lessons to an existing course the setter owns. Confirm first.",
+      parameters: {
+        type: "object",
+        properties: {
+          course_id: { type: "string" },
+          lessons: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                concept_markdown: { type: "string" },
+                objective: { type: "string" },
+                hint: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: { type: "array", items: { type: "object" } },
+              },
+              required: ["title", "objective", "language", "starter_code"],
+            },
+          },
+        },
+        required: ["course_id", "lessons"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
