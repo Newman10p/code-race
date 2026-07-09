@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap } from "lucide-react";
+import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Edit, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -27,6 +27,7 @@ function Dashboard() {
   const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newFolderName, setNewFolderName] = useState("");
   const [showNewFolder, setShowNewFolder] = useState(false);
@@ -44,6 +45,7 @@ function Dashboard() {
       return;
     }
     loadFolders();
+    loadCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, roleLoading, isSetter]);
 
@@ -72,6 +74,36 @@ function Dashboard() {
       setFolders(foldersWithStats);
     }
     setLoading(false);
+  };
+
+  const loadCourses = async () => {
+    const { data } = await supabase
+      .from("lesson_courses" as any)
+      .select("id, title, description, subject, is_public, cover_image_url, created_at")
+      .eq("setter_id", user!.id)
+      .order("created_at", { ascending: false });
+    const list = (data as any[]) || [];
+    const enriched = await Promise.all(
+      list.map(async (c) => {
+        const { count } = await supabase
+          .from("lessons" as any)
+          .select("*", { count: "exact", head: true })
+          .eq("course_id", c.id);
+        return { ...c, lesson_count: count || 0 };
+      })
+    );
+    setCourses(enriched);
+  };
+
+  const deleteCourse = async (id: string) => {
+    if (!confirm("Delete this course and all its lessons?")) return;
+    await supabase.from("lesson_courses" as any).delete().eq("id", id);
+    loadCourses();
+  };
+
+  const toggleCoursePublish = async (id: string, isPublic: boolean) => {
+    await supabase.from("lesson_courses" as any).update({ is_public: !isPublic }).eq("id", id);
+    loadCourses();
   };
 
   const createFolder = async () => {
@@ -236,6 +268,70 @@ function Dashboard() {
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-10 mb-4 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-xl font-semibold">
+            <GraduationCap className="h-5 w-5 text-primary" /> Lesson Courses
+          </h2>
+          <Link to="/lessons/create" search={{ courseId: "" }}>
+            <Button variant="neon-outline" size="sm">
+              <Plus className="h-4 w-4" /> New Course
+            </Button>
+          </Link>
+        </div>
+
+        {courses.length === 0 ? (
+          <GlowCard className="text-center py-8">
+            <GraduationCap className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
+            <p className="text-sm text-muted-foreground">No lesson courses yet. Create one or ask the AI Assistant to draft one.</p>
+          </GlowCard>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((c) => (
+              <div key={c.id} className="group relative">
+                <GlowCard className="transition-transform hover:scale-[1.02]">
+                  {c.cover_image_url ? (
+                    <img src={c.cover_image_url} alt="" className="mb-3 h-24 w-full rounded-lg object-cover" />
+                  ) : (
+                    <div className="mb-3 flex h-24 w-full items-center justify-center rounded-lg bg-primary/10">
+                      <GraduationCap className="h-8 w-8 text-primary" />
+                    </div>
+                  )}
+                  <div className="mb-1 flex items-center gap-2">
+                    <h3 className="flex-1 truncate font-semibold">{c.title}</h3>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${c.is_public ? "bg-green-500/20 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                      {c.is_public ? "Public" : "Draft"}
+                    </span>
+                  </div>
+                  {c.subject && <p className="mb-1 text-[11px] text-primary">{c.subject}</p>}
+                  <p className="text-xs text-muted-foreground">{c.lesson_count} lesson{c.lesson_count === 1 ? "" : "s"}</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-1">
+                    <Link to="/lessons/create" search={{ courseId: c.id }}>
+                      <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                        <Edit className="h-3 w-3" /> Edit
+                      </Button>
+                    </Link>
+                    {c.lesson_count > 0 && (
+                      <Link to="/learn/course/$courseId" params={{ courseId: c.id }}>
+                        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                          <BookOpen className="h-3 w-3" /> Preview
+                        </Button>
+                      </Link>
+                    )}
+                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={() => toggleCoursePublish(c.id, c.is_public)}>
+                      {c.is_public ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      {c.is_public ? "Unpublish" : "Publish"}
+                    </Button>
+                    <div className="flex-1" />
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteCourse(c.id)}>
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </GlowCard>
               </div>
             ))}
           </div>

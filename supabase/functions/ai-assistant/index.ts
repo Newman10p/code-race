@@ -89,6 +89,21 @@ const TOOLS = [
                 correct_option: { type: "number" },
                 starter_code: { type: "string" },
                 solution: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"], description: "For code questions" },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      stdin: { type: "string" },
+                      expected: { type: "string" },
+                      code: { type: "string" },
+                      is_hidden: { type: "boolean" },
+                    },
+                  },
+                },
               },
               required: ["type", "content"],
             },
@@ -145,6 +160,9 @@ const TOOLS = [
                 correct_option: { type: "number" },
                 starter_code: { type: "string" },
                 solution: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: { type: "array", items: { type: "object" } },
               },
               required: ["type", "content"],
             },
@@ -237,6 +255,111 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "list_lesson_courses",
+      description: "List lesson courses owned by the current setter.",
+      parameters: { type: "object", properties: {}, required: [] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_lesson_outline_preview",
+      description: "Draft a course outline (course title + list of lesson titles+objectives) from a topic WITHOUT saving. Use to show the setter for approval before calling create_lesson_course.",
+      parameters: {
+        type: "object",
+        properties: {
+          topic: { type: "string" },
+          language: { type: "string", enum: ["javascript", "python", "html"] },
+          lesson_count: { type: "number" },
+        },
+        required: ["topic"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_lesson_course",
+      description: "Create a full lesson course with interactive coding lessons. Each lesson has a concept, an objective, starter_code in Monaco editor, and test_cases that verify the learner's solution. ALWAYS confirm the outline (title, subject, list of lessons with objectives) with the setter BEFORE calling. Default is_public=false.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string" },
+          description: { type: "string" },
+          subject: { type: "string" },
+          is_public: { type: "boolean" },
+          cover_image_url: { type: "string" },
+          lessons: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                concept_markdown: { type: "string", description: "Concept explanation (markdown)" },
+                objective: { type: "string", description: "Single-sentence goal" },
+                hint: { type: "string" },
+                image_url: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string" },
+                      stdin: { type: "string" },
+                      expected: { type: "string" },
+                      code: { type: "string" },
+                      is_hidden: { type: "boolean" },
+                    },
+                  },
+                },
+              },
+              required: ["title", "objective", "language", "starter_code"],
+            },
+          },
+        },
+        required: ["title", "lessons"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "add_lessons_to_course",
+      description: "Append lessons to an existing course the setter owns. Confirm first.",
+      parameters: {
+        type: "object",
+        properties: {
+          course_id: { type: "string" },
+          lessons: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                concept_markdown: { type: "string" },
+                objective: { type: "string" },
+                hint: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: { type: "array", items: { type: "object" } },
+              },
+              required: ["title", "objective", "language", "starter_code"],
+            },
+          },
+        },
+        required: ["course_id", "lessons"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
@@ -290,6 +413,9 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
         starter_code: q.type === "code" ? (q.starter_code || "") : "",
         solution: q.type === "code" ? (q.solution || "") : "",
+        language: q.type === "code" ? (q.language || "javascript") : null,
+        test_mode: q.type === "code" ? (q.test_mode || "io") : null,
+        test_cases: q.type === "code" ? (q.test_cases || []) : [],
         order_index: i,
       }));
       if (questions.length > 0) {
@@ -342,6 +468,9 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
         starter_code: q.type === "code" ? (q.starter_code || "") : "",
         solution: q.type === "code" ? (q.solution || "") : "",
+        language: q.type === "code" ? (q.language || "javascript") : null,
+        test_mode: q.type === "code" ? (q.test_mode || "io") : null,
+        test_cases: q.type === "code" ? (q.test_cases || []) : [],
         order_index: i,
       }));
       if (questions.length > 0) {
@@ -434,6 +563,92 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         suggested_count: args.count || 10,
       };
     }
+    case "list_lesson_courses": {
+      const { data, error } = await supabase
+        .from("lesson_courses")
+        .select("id, title, description, subject, is_public, created_at")
+        .eq("setter_id", userId)
+        .order("created_at", { ascending: false });
+      if (error) return { error: error.message };
+      return { courses: data };
+    }
+    case "generate_lesson_outline_preview": {
+      return {
+        note: "Draft only — present the outline to the setter and get explicit consent before calling create_lesson_course.",
+        topic: args.topic,
+        language: args.language || "javascript",
+        lesson_count: args.lesson_count || 6,
+      };
+    }
+    case "create_lesson_course": {
+      const lessons = Array.isArray(args.lessons) ? args.lessons : [];
+      if (lessons.length === 0) return { error: "At least one lesson is required." };
+      const { data: course, error: ce } = await supabase
+        .from("lesson_courses")
+        .insert({
+          setter_id: userId,
+          title: args.title,
+          description: args.description || null,
+          subject: args.subject || null,
+          is_public: !!args.is_public,
+          cover_image_url: args.cover_image_url || null,
+        })
+        .select("id, title")
+        .single();
+      if (ce) return { error: ce.message };
+      const rows = lessons.map((l: any, i: number) => ({
+        course_id: course.id,
+        order_index: i,
+        title: String(l.title || `Lesson ${i + 1}`),
+        concept_markdown: l.concept_markdown || "",
+        image_url: l.image_url || null,
+        objective: l.objective || "",
+        hint: l.hint || null,
+        language: l.language || "javascript",
+        starter_code: l.starter_code || "",
+        solution: l.solution || "",
+        test_mode: l.test_mode || "io",
+        test_cases: l.test_cases || [],
+      }));
+      const { error: le } = await supabase.from("lessons").insert(rows);
+      if (le) return { error: le.message };
+      return { created_course: { id: course.id, title: course.title, lesson_count: rows.length } };
+    }
+    case "add_lessons_to_course": {
+      const lessons = Array.isArray(args.lessons) ? args.lessons : [];
+      if (lessons.length === 0) return { error: "No lessons provided." };
+      const { data: owned } = await supabase
+        .from("lesson_courses")
+        .select("id")
+        .eq("id", args.course_id)
+        .eq("setter_id", userId)
+        .maybeSingle();
+      if (!owned) return { error: "Course not found or you don't own it." };
+      const { data: existing } = await supabase
+        .from("lessons")
+        .select("order_index")
+        .eq("course_id", args.course_id)
+        .order("order_index", { ascending: false })
+        .limit(1);
+      const startIdx = (existing && existing[0]?.order_index != null) ? existing[0].order_index + 1 : 0;
+      const rows = lessons.map((l: any, i: number) => ({
+        course_id: args.course_id,
+        order_index: startIdx + i,
+        title: String(l.title || `Lesson ${startIdx + i + 1}`),
+        concept_markdown: l.concept_markdown || "",
+        image_url: l.image_url || null,
+        objective: l.objective || "",
+        hint: l.hint || null,
+        language: l.language || "javascript",
+        starter_code: l.starter_code || "",
+        solution: l.solution || "",
+        test_mode: l.test_mode || "io",
+        test_cases: l.test_cases || [],
+      }));
+      const { error: le } = await supabase.from("lessons").insert(rows);
+      if (le) return { error: le.message };
+      return { added: rows.length, course_id: args.course_id };
+    }
     default:
       return { error: "Unknown tool" };
   }
@@ -504,6 +719,15 @@ You can also create and manage **flashcard sets** for learners:
 - Only call create_flashcard_set or add_flashcards_to_set after the setter has explicitly said yes / "create it" / "save them" in the latest message. Never save flashcards without that consent.
 - Default is_public to false unless the setter asks for a public set. New sets start as drafts.
 - Use publish_flashcard_set with publish=true to publish a draft set, or publish=false to unpublish.
+
+You can also create **lesson courses** (interactive coding lessons with test cases):
+- Use generate_lesson_outline_preview to draft an outline. Present the outline (course title, subject, list of lessons with title+objective+language) and ask the setter to confirm.
+- Only call create_lesson_course or add_lessons_to_course after explicit "yes / save it / create it".
+- Each lesson needs: title, concept_markdown, objective, language (javascript|python|html), starter_code, test_cases. Prefer test_mode="io" for stdin/stdout comparisons; use "assert" when a check like \`if (add(2,3) !== 5) throw new Error()\` fits better.
+- For HTML lessons, test_cases can be CSS selectors that must exist (in "io" mode, put the selector in \`expected\`).
+- Default is_public=false.
+
+For code QUESTIONS inside quizzes/evaluations, use the same code-editor fields: language, test_mode, test_cases. Learners write code in a Monaco editor and their score is (passed/total)*points.
 
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 

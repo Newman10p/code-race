@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { useState, useEffect } from "react";
 import { ArrowLeft, Plus, Trash2, Sparkles, Book } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { MonacoCodeEditor } from "@/components/code/MonacoCodeEditor";
 import { CodeTestEditor } from "@/components/code/CodeTestEditor";
@@ -51,7 +52,8 @@ function newDraft(): LessonDraft {
 
 function LessonCourseCreator() {
   const { courseId } = Route.useSearch();
-  const { user, loading, isAdmin } = useAuth();
+  const { user, loading } = useAuth();
+  const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const isEditing = !!courseId;
 
@@ -65,8 +67,8 @@ function LessonCourseCreator() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) navigate({ to: "/login" });
-  }, [user, loading, isAdmin]);
+    if (!loading && !roleLoading && (!user || !isSetter)) navigate({ to: "/login" });
+  }, [user, loading, roleLoading, isSetter]);
 
   useEffect(() => {
     if (courseId && user) load();

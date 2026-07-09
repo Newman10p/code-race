@@ -61,13 +61,18 @@ export function MonacoCodeEditor({
   }, []);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-primary/20 bg-[#000814]">
+    <div
+      className="overflow-hidden rounded-lg border border-primary/20 bg-[#000814]"
+      style={{ height, minHeight: typeof height === "string" && height.endsWith("%") ? 240 : undefined, width: "100%" }}
+    >
       <Editor
-        height={height}
+        height="100%"
+        width="100%"
         language={languageMap[language] || "javascript"}
         theme="cyber-dark"
         value={value}
         onChange={(v) => onChange(v || "")}
+        loading={<div className="flex h-full items-center justify-center text-xs text-muted-foreground">Loading editor…</div>}
         options={{
           readOnly,
           minimap: { enabled: false },
