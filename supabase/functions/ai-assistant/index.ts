@@ -720,6 +720,15 @@ You can also create and manage **flashcard sets** for learners:
 - Default is_public to false unless the setter asks for a public set. New sets start as drafts.
 - Use publish_flashcard_set with publish=true to publish a draft set, or publish=false to unpublish.
 
+You can also create **lesson courses** (interactive coding lessons with test cases):
+- Use generate_lesson_outline_preview to draft an outline. Present the outline (course title, subject, list of lessons with title+objective+language) and ask the setter to confirm.
+- Only call create_lesson_course or add_lessons_to_course after explicit "yes / save it / create it".
+- Each lesson needs: title, concept_markdown, objective, language (javascript|python|html), starter_code, test_cases. Prefer test_mode="io" for stdin/stdout comparisons; use "assert" when a check like \`if (add(2,3) !== 5) throw new Error()\` fits better.
+- For HTML lessons, test_cases can be CSS selectors that must exist (in "io" mode, put the selector in \`expected\`).
+- Default is_public=false.
+
+For code QUESTIONS inside quizzes/evaluations, use the same code-editor fields: language, test_mode, test_cases. Learners write code in a Monaco editor and their score is (passed/total)*points.
+
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
     const apiMessages: any[] = [
