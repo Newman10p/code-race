@@ -63,6 +63,8 @@ function ManualPage() {
             <li><a href="#tutorial" className="text-primary hover:underline">Learner Tutorial</a></li>
             <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
             <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
+            <li><a href="#lessons" className="text-primary hover:underline">Interactive Lesson Courses</a></li>
+            <li><a href="#code-questions" className="text-primary hover:underline">Code Questions & Test Cases</a></li>
             <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
             <li><a href="#ai" className="text-primary hover:underline">AI Assistant</a></li>
             <li><a href="#leaderboard" className="text-primary hover:underline">Leaderboard & Scoring</a></li>
@@ -389,6 +391,41 @@ function ManualPage() {
             </div>
           </GlowCard>
 
+          {/* Lessons */}
+          <GlowCard id="lessons">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <GraduationCap className="h-5 w-5 text-primary" /> Interactive Lesson Courses
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Build guided, hands-on coding lessons. Learners see a three-column workbench: <strong>concept + objective</strong> on the left, a full <strong>Monaco (VS Code) editor</strong> in the middle, and <strong>live output / preview</strong> on the right.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Click <strong>New Lesson Course</strong> on the dashboard (or ask the AI Assistant to draft an outline).</li>
+                <li>Each lesson has: concept (markdown), objective, optional hint (unlocked after a failed run), starter code, and test cases.</li>
+                <li>Languages: <strong>JavaScript</strong>, <strong>Python</strong> (Pyodide), <strong>HTML/CSS</strong> (live preview).</li>
+                <li>Test modes: <strong>I/O</strong> (compare stdout to expected) or <strong>Assertion</strong> (write test code that throws on failure).</li>
+                <li>Progress is saved per learner; the next lesson unlocks after the current one passes all tests.</li>
+                <li>Manage your courses on the dashboard: edit, publish/unpublish, preview, or delete.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
+          {/* Code questions */}
+          <GlowCard id="code-questions">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Code className="h-5 w-5 text-primary" /> Code Questions & Test Cases
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Code questions in quizzes, tournaments, and evaluations now use the same Monaco editor. Setters pick a language and add test cases; learners get partial credit based on how many tests pass.</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Add a code question in the quiz creator, choose a language, then add tests (I/O pairs or assertions).</li>
+                <li>Mark tests as <strong>hidden</strong> to prevent learners from seeing the expected output.</li>
+                <li>Score = <code>(passed / total) × points</code> — partial credit is automatic.</li>
+                <li>The evaluation report shows per-test pass/fail per learner.</li>
+                <li>The AI Assistant can generate code questions with language + test cases on request.</li>
+              </ul>
+            </div>
+          </GlowCard>
+
           {/* Themes */}
           <GlowCard id="themes">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
@@ -412,6 +449,8 @@ function ManualPage() {
                 <li><strong>Clear history:</strong> the trash icon resets memory.</li>
                 <li><strong>Can create for you:</strong> standard quizzes, tournaments, <strong>evaluation tests</strong>, and flashcard sets (always with your explicit confirmation).</li>
                 <li><strong>Publishing:</strong> ask the assistant to publish or unpublish any of your flashcard sets.</li>
+                <li><strong>Lesson courses:</strong> the assistant can draft an outline, then create the full interactive course (with starter code + tests) once you approve.</li>
+                <li><strong>Code questions:</strong> the assistant can add code questions with language + test cases directly into a quiz or evaluation.</li>
               </ul>
             </div>
           </GlowCard>
