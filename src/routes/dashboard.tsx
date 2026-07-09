@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap } from "lucide-react";
+import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Edit, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -27,6 +27,7 @@ function Dashboard() {
   const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newFolderName, setNewFolderName] = useState("");
   const [showNewFolder, setShowNewFolder] = useState(false);
@@ -44,6 +45,7 @@ function Dashboard() {
       return;
     }
     loadFolders();
+    loadCourses();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, roleLoading, isSetter]);
 
@@ -72,6 +74,36 @@ function Dashboard() {
       setFolders(foldersWithStats);
     }
     setLoading(false);
+  };
+
+  const loadCourses = async () => {
+    const { data } = await supabase
+      .from("lesson_courses" as any)
+      .select("id, title, description, subject, is_public, cover_image_url, created_at")
+      .eq("setter_id", user!.id)
+      .order("created_at", { ascending: false });
+    const list = (data as any[]) || [];
+    const enriched = await Promise.all(
+      list.map(async (c) => {
+        const { count } = await supabase
+          .from("lessons" as any)
+          .select("*", { count: "exact", head: true })
+          .eq("course_id", c.id);
+        return { ...c, lesson_count: count || 0 };
+      })
+    );
+    setCourses(enriched);
+  };
+
+  const deleteCourse = async (id: string) => {
+    if (!confirm("Delete this course and all its lessons?")) return;
+    await supabase.from("lesson_courses" as any).delete().eq("id", id);
+    loadCourses();
+  };
+
+  const toggleCoursePublish = async (id: string, isPublic: boolean) => {
+    await supabase.from("lesson_courses" as any).update({ is_public: !isPublic }).eq("id", id);
+    loadCourses();
   };
 
   const createFolder = async () => {
