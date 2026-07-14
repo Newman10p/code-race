@@ -376,6 +376,123 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "add_questions_to_quiz",
+      description: "Append questions (mcq or code) to an existing quiz the setter owns. Use to grow a quiz that was already created. Order_index is auto-computed after the current last question.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          questions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["mcq", "code"] },
+                content: { type: "string" },
+                points: { type: "number" },
+                time_limit: { type: "number" },
+                round_number: { type: "number" },
+                options: { type: "array", items: { type: "string" } },
+                correct_option: { type: "number" },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: { type: "array", items: { type: "object" } },
+              },
+              required: ["type", "content"],
+            },
+          },
+        },
+        required: ["quiz_id", "questions"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_question",
+      description: "Update fields on an existing question. Only the provided fields are changed. Setter must own the parent quiz's folder.",
+      parameters: {
+        type: "object",
+        properties: {
+          question_id: { type: "string" },
+          content: { type: "string" },
+          points: { type: "number" },
+          time_limit: { type: "number" },
+          round_number: { type: "number" },
+          options: { type: "array", items: { type: "string" } },
+          correct_option: { type: "number" },
+          starter_code: { type: "string" },
+          solution: { type: "string" },
+          language: { type: "string", enum: ["javascript", "python", "html"] },
+          test_mode: { type: "string", enum: ["io", "assert"] },
+          test_cases: { type: "array", items: { type: "object" } },
+        },
+        required: ["question_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_question",
+      description: "Delete a single question from a quiz the setter owns.",
+      parameters: {
+        type: "object",
+        properties: { question_id: { type: "string" } },
+        required: ["question_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_quiz",
+      description: "Update quiz-level fields (title, description, is_evaluation). Only provided fields change.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          is_evaluation: { type: "boolean" },
+        },
+        required: ["quiz_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_quiz_rounds",
+      description: "Replace the rounds config for a quiz (deletes existing rounds and inserts the provided list). Pass an empty rounds array to remove tournament mode.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          rounds: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                round_number: { type: "number" },
+                name: { type: "string" },
+                duration_seconds: { type: "number" },
+                cutoff_type: { type: "string", enum: ["top_n", "top_pct"] },
+                cutoff_value: { type: "number" },
+              },
+              required: ["round_number"],
+            },
+          },
+        },
+        required: ["quiz_id", "rounds"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
@@ -678,6 +795,113 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       if (le) return { error: le.message };
       return { added: rows.length, course_id: args.course_id };
     }
+    case "add_questions_to_quiz": {
+      const qs = Array.isArray(args.questions) ? args.questions : [];
+      if (qs.length === 0) return { error: "No questions provided." };
+      const { data: quiz } = await supabase
+        .from("quizzes")
+        .select("id, folder_id, total_points, folders!inner(user_id)")
+        .eq("id", args.quiz_id)
+        .maybeSingle();
+      if (!quiz || (quiz as any).folders?.user_id !== userId) return { error: "Quiz not found or you don't own it." };
+      const { data: existing } = await supabase
+        .from("questions")
+        .select("order_index")
+        .eq("quiz_id", args.quiz_id)
+        .order("order_index", { ascending: false })
+        .limit(1);
+      const startIdx = (existing && existing[0]?.order_index != null) ? existing[0].order_index + 1 : 0;
+      const rows = qs.map((q: any, i: number) => ({
+        quiz_id: args.quiz_id,
+        type: q.type || "mcq",
+        content: q.content,
+        points: q.points || 10,
+        time_limit: q.time_limit || 30,
+        round_number: q.round_number || 1,
+        options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
+        correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
+        starter_code: q.type === "code" ? (q.starter_code || "") : "",
+        solution: q.type === "code" ? (q.solution || "") : "",
+        language: q.type === "code" ? (q.language || "javascript") : null,
+        test_mode: q.type === "code" ? (q.test_mode || "io") : null,
+        test_cases: q.type === "code" ? (q.test_cases || []) : [],
+        order_index: startIdx + i,
+      }));
+      const { error: ie } = await supabase.from("questions").insert(rows);
+      if (ie) return { error: ie.message };
+      const added = rows.reduce((a, r) => a + (r.points || 0), 0);
+      await supabase.from("quizzes").update({ total_points: (quiz as any).total_points + added }).eq("id", args.quiz_id);
+      return { added: rows.length, quiz_id: args.quiz_id };
+    }
+    case "update_question": {
+      const { data: q } = await supabase
+        .from("questions")
+        .select("id, quiz_id, quizzes!inner(folder_id, folders!inner(user_id))")
+        .eq("id", args.question_id)
+        .maybeSingle();
+      if (!q || (q as any).quizzes?.folders?.user_id !== userId) return { error: "Question not found or you don't own it." };
+      const upd: any = {};
+      for (const k of ["content", "points", "time_limit", "round_number", "options", "correct_option", "starter_code", "solution", "language", "test_mode", "test_cases"]) {
+        if (args[k] !== undefined) upd[k] = args[k];
+      }
+      if (Object.keys(upd).length === 0) return { error: "No fields to update." };
+      const { error } = await supabase.from("questions").update(upd).eq("id", args.question_id);
+      if (error) return { error: error.message };
+      return { updated: args.question_id, fields: Object.keys(upd) };
+    }
+    case "delete_question": {
+      const { data: q } = await supabase
+        .from("questions")
+        .select("id, quiz_id, points, quizzes!inner(total_points, folder_id, folders!inner(user_id))")
+        .eq("id", args.question_id)
+        .maybeSingle();
+      if (!q || (q as any).quizzes?.folders?.user_id !== userId) return { error: "Question not found or you don't own it." };
+      const { error } = await supabase.from("questions").delete().eq("id", args.question_id);
+      if (error) return { error: error.message };
+      const newTotal = ((q as any).quizzes.total_points || 0) - ((q as any).points || 0);
+      await supabase.from("quizzes").update({ total_points: Math.max(0, newTotal) }).eq("id", (q as any).quiz_id);
+      return { deleted: args.question_id };
+    }
+    case "update_quiz": {
+      const { data: quiz } = await supabase
+        .from("quizzes")
+        .select("id, folders!inner(user_id)")
+        .eq("id", args.quiz_id)
+        .maybeSingle();
+      if (!quiz || (quiz as any).folders?.user_id !== userId) return { error: "Quiz not found or you don't own it." };
+      const upd: any = {};
+      for (const k of ["title", "description", "is_evaluation"]) {
+        if (args[k] !== undefined) upd[k] = args[k];
+      }
+      if (Object.keys(upd).length === 0) return { error: "No fields to update." };
+      const { error } = await supabase.from("quizzes").update(upd).eq("id", args.quiz_id);
+      if (error) return { error: error.message };
+      return { updated: args.quiz_id, fields: Object.keys(upd) };
+    }
+    case "set_quiz_rounds": {
+      const { data: quiz } = await supabase
+        .from("quizzes")
+        .select("id, folders!inner(user_id)")
+        .eq("id", args.quiz_id)
+        .maybeSingle();
+      if (!quiz || (quiz as any).folders?.user_id !== userId) return { error: "Quiz not found or you don't own it." };
+      const { error: de } = await supabase.from("quiz_rounds").delete().eq("quiz_id", args.quiz_id);
+      if (de) return { error: de.message };
+      const rounds = Array.isArray(args.rounds) ? args.rounds : [];
+      if (rounds.length > 0) {
+        const rows = rounds.map((r: any) => ({
+          quiz_id: args.quiz_id,
+          round_number: r.round_number,
+          name: r.name || `Round ${r.round_number}`,
+          duration_seconds: r.duration_seconds || 300,
+          cutoff_type: r.cutoff_type || "top_n",
+          cutoff_value: r.cutoff_value || 10,
+        }));
+        const { error: ie } = await supabase.from("quiz_rounds").insert(rows);
+        if (ie) return { error: ie.message };
+      }
+      return { quiz_id: args.quiz_id, rounds: rounds.length };
+    }
     default:
       return { error: "Unknown tool" };
   }
@@ -741,6 +965,8 @@ When analyzing tournament quizzes, also evaluate:
 - Whether final round has fewer/harder questions for tension
 
 When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1). For evaluations, use the dedicated create_evaluation tool (or create_quiz with is_evaluation=true) — recommend slightly longer per-question timers (45–60s) since accuracy matters more than speed. For a "tournament evaluation" or "graded tournament", pass both is_evaluation=true AND rounds (with round_number on each question) so learners still get per-question breakdowns after being ranked and eliminated across rounds.
+
+To edit an EXISTING quiz: use get_quiz_questions to inspect, then add_questions_to_quiz to append, update_question to modify one, delete_question to remove one, update_quiz for title/description/is_evaluation, and set_quiz_rounds to replace rounds config. Always confirm destructive changes (delete/replace) with the setter first.
 
 You can also create and manage **flashcard sets** for learners:
 - Use generate_flashcards_preview (or draft them inline in markdown) to propose front/back pairs from a topic or source text.
