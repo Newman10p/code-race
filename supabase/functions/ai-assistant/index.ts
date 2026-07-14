@@ -67,14 +67,14 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_quiz",
-      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, or set is_evaluation=true for a live evaluation/assessment quiz.",
+      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, and/or set is_evaluation=true for a live evaluation/assessment quiz. Tournament + evaluation can be combined for a graded tournament with per-learner breakdowns.",
       parameters: {
         type: "object",
         properties: {
           folder_id: { type: "string" },
           title: { type: "string" },
           description: { type: "string" },
-          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Mutually exclusive with rounds. Learners see a per-question breakdown at the end." },
+          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Can be combined with rounds for a tournament-style evaluation. Learners see a per-question breakdown at the end." },
           questions: {
             type: "array",
             items: {
@@ -140,7 +140,7 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_evaluation",
-      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Use when the setter asks for a test, assessment, evaluation, performance check, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
+      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Optionally pass 'rounds' to make it a tournament-style evaluation (rounds + cutoffs + per-learner breakdown). Use when the setter asks for a test, assessment, evaluation, performance check, graded tournament, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
       parameters: {
         type: "object",
         properties: {
@@ -163,8 +163,24 @@ const TOOLS = [
                 language: { type: "string", enum: ["javascript", "python", "html"] },
                 test_mode: { type: "string", enum: ["io", "assert"] },
                 test_cases: { type: "array", items: { type: "object" } },
+                round_number: { type: "number", description: "Round this question belongs to (default 1). Only meaningful when rounds are provided." },
               },
               required: ["type", "content"],
+            },
+          },
+          rounds: {
+            type: "array",
+            description: "Optional. If provided, the evaluation becomes a tournament-style evaluation. Each round defines a timer and cutoff.",
+            items: {
+              type: "object",
+              properties: {
+                round_number: { type: "number" },
+                name: { type: "string" },
+                duration_seconds: { type: "number", description: "Total round time (default 300)" },
+                cutoff_type: { type: "string", enum: ["top_n", "top_pct"] },
+                cutoff_value: { type: "number" },
+              },
+              required: ["round_number"],
             },
           },
         },
@@ -463,7 +479,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         content: q.content,
         points: q.points || 10,
         time_limit: q.time_limit || 45,
-        round_number: 1,
+        round_number: q.round_number || 1,
         options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
         correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
         starter_code: q.type === "code" ? (q.starter_code || "") : "",
@@ -477,11 +493,24 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         const { error: ie } = await supabase.from("questions").insert(questions);
         if (ie) return { error: ie.message };
       }
+      if (Array.isArray(args.rounds) && args.rounds.length > 0) {
+        const rounds = args.rounds.map((r: any) => ({
+          quiz_id: quiz.id,
+          round_number: r.round_number,
+          name: r.name || `Round ${r.round_number}`,
+          duration_seconds: r.duration_seconds || 300,
+          cutoff_type: r.cutoff_type || "top_n",
+          cutoff_value: r.cutoff_value || 10,
+        }));
+        const { error: re } = await supabase.from("quiz_rounds").insert(rounds);
+        if (re) return { error: re.message };
+      }
       return {
         created_evaluation: {
           id: quiz.id,
           title: args.title,
           question_count: questions.length,
+          rounds: args.rounds?.length || 0,
         },
       };
     }
@@ -703,7 +732,7 @@ You can:
 CodeRace supports three game modes:
 1. **Standard Mode** — all players answer all questions, ranked by score
 2. **Tournament Mode** — questions grouped into rounds; after each round, only top N or top % players advance. Host gates progression between rounds.
-3. **Evaluation / Assessment Mode** — runs live like a standard quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end (correct / wrong / skipped + points). Use this for tests, graded assessments, and performance checks. Evaluation quizzes cannot use tournament rounds.
+3. **Evaluation / Assessment Mode** — runs live like a standard quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end (correct / wrong / skipped + points). Use this for tests, graded assessments, and performance checks. Evaluation can be combined with tournament rounds for a graded tournament that still produces a per-learner breakdown.
 
 When analyzing tournament quizzes, also evaluate:
 - Round difficulty progression (easier early rounds, harder finals)
@@ -711,7 +740,7 @@ When analyzing tournament quizzes, also evaluate:
 - Round timer vs question count balance
 - Whether final round has fewer/harder questions for tension
 
-When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1). For evaluations, use the dedicated create_evaluation tool (or create_quiz with is_evaluation=true) — recommend slightly longer per-question timers (45–60s) since accuracy matters more than speed.
+When creating quizzes, ask which folder. For tournaments, suggest reasonable round structures (e.g., 3 rounds: Top 50% → Top 25% → Top 1). For evaluations, use the dedicated create_evaluation tool (or create_quiz with is_evaluation=true) — recommend slightly longer per-question timers (45–60s) since accuracy matters more than speed. For a "tournament evaluation" or "graded tournament", pass both is_evaluation=true AND rounds (with round_number on each question) so learners still get per-question breakdowns after being ranked and eliminated across rounds.
 
 You can also create and manage **flashcard sets** for learners:
 - Use generate_flashcards_preview (or draft them inline in markdown) to propose front/back pairs from a topic or source text.
