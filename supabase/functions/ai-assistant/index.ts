@@ -376,6 +376,123 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "add_questions_to_quiz",
+      description: "Append questions (mcq or code) to an existing quiz the setter owns. Use to grow a quiz that was already created. Order_index is auto-computed after the current last question.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          questions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["mcq", "code"] },
+                content: { type: "string" },
+                points: { type: "number" },
+                time_limit: { type: "number" },
+                round_number: { type: "number" },
+                options: { type: "array", items: { type: "string" } },
+                correct_option: { type: "number" },
+                starter_code: { type: "string" },
+                solution: { type: "string" },
+                language: { type: "string", enum: ["javascript", "python", "html"] },
+                test_mode: { type: "string", enum: ["io", "assert"] },
+                test_cases: { type: "array", items: { type: "object" } },
+              },
+              required: ["type", "content"],
+            },
+          },
+        },
+        required: ["quiz_id", "questions"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_question",
+      description: "Update fields on an existing question. Only the provided fields are changed. Setter must own the parent quiz's folder.",
+      parameters: {
+        type: "object",
+        properties: {
+          question_id: { type: "string" },
+          content: { type: "string" },
+          points: { type: "number" },
+          time_limit: { type: "number" },
+          round_number: { type: "number" },
+          options: { type: "array", items: { type: "string" } },
+          correct_option: { type: "number" },
+          starter_code: { type: "string" },
+          solution: { type: "string" },
+          language: { type: "string", enum: ["javascript", "python", "html"] },
+          test_mode: { type: "string", enum: ["io", "assert"] },
+          test_cases: { type: "array", items: { type: "object" } },
+        },
+        required: ["question_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "delete_question",
+      description: "Delete a single question from a quiz the setter owns.",
+      parameters: {
+        type: "object",
+        properties: { question_id: { type: "string" } },
+        required: ["question_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "update_quiz",
+      description: "Update quiz-level fields (title, description, is_evaluation). Only provided fields change.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          title: { type: "string" },
+          description: { type: "string" },
+          is_evaluation: { type: "boolean" },
+        },
+        required: ["quiz_id"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "set_quiz_rounds",
+      description: "Replace the rounds config for a quiz (deletes existing rounds and inserts the provided list). Pass an empty rounds array to remove tournament mode.",
+      parameters: {
+        type: "object",
+        properties: {
+          quiz_id: { type: "string" },
+          rounds: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                round_number: { type: "number" },
+                name: { type: "string" },
+                duration_seconds: { type: "number" },
+                cutoff_type: { type: "string", enum: ["top_n", "top_pct"] },
+                cutoff_value: { type: "number" },
+              },
+              required: ["round_number"],
+            },
+          },
+        },
+        required: ["quiz_id", "rounds"],
+      },
+    },
+  },
 ];
 
 async function executeTool(supabase: any, userId: string, name: string, args: any) {
