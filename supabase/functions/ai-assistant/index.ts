@@ -67,14 +67,14 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_quiz",
-      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, or set is_evaluation=true for a live evaluation/assessment quiz.",
+      description: "Create a new quiz with questions in a folder. Optionally configure rounds for tournament mode, and/or set is_evaluation=true for a live evaluation/assessment quiz. Tournament + evaluation can be combined for a graded tournament with per-learner breakdowns.",
       parameters: {
         type: "object",
         properties: {
           folder_id: { type: "string" },
           title: { type: "string" },
           description: { type: "string" },
-          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Mutually exclusive with rounds. Learners see a per-question breakdown at the end." },
+          is_evaluation: { type: "boolean", description: "If true, this is an evaluation/assessment quiz. Can be combined with rounds for a tournament-style evaluation. Learners see a per-question breakdown at the end." },
           questions: {
             type: "array",
             items: {
@@ -140,7 +140,7 @@ const TOOLS = [
     type: "function",
     function: {
       name: "create_evaluation",
-      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Use when the setter asks for a test, assessment, evaluation, performance check, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
+      description: "Create a live EVALUATION/ASSESSMENT quiz in a folder. Same live gameplay as a normal quiz, but focused on measuring performance — every learner gets a per-question breakdown at the end. Optionally pass 'rounds' to make it a tournament-style evaluation (rounds + cutoffs + per-learner breakdown). Use when the setter asks for a test, assessment, evaluation, performance check, graded tournament, or grading quiz. ALWAYS confirm folder, title, and question list with the setter BEFORE calling.",
       parameters: {
         type: "object",
         properties: {
@@ -163,8 +163,24 @@ const TOOLS = [
                 language: { type: "string", enum: ["javascript", "python", "html"] },
                 test_mode: { type: "string", enum: ["io", "assert"] },
                 test_cases: { type: "array", items: { type: "object" } },
+                round_number: { type: "number", description: "Round this question belongs to (default 1). Only meaningful when rounds are provided." },
               },
               required: ["type", "content"],
+            },
+          },
+          rounds: {
+            type: "array",
+            description: "Optional. If provided, the evaluation becomes a tournament-style evaluation. Each round defines a timer and cutoff.",
+            items: {
+              type: "object",
+              properties: {
+                round_number: { type: "number" },
+                name: { type: "string" },
+                duration_seconds: { type: "number", description: "Total round time (default 300)" },
+                cutoff_type: { type: "string", enum: ["top_n", "top_pct"] },
+                cutoff_value: { type: "number" },
+              },
+              required: ["round_number"],
             },
           },
         },
