@@ -479,7 +479,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         content: q.content,
         points: q.points || 10,
         time_limit: q.time_limit || 45,
-        round_number: 1,
+        round_number: q.round_number || 1,
         options: q.type === "mcq" ? (q.options || ["", "", "", ""]) : [],
         correct_option: q.type === "mcq" ? (q.correct_option ?? 0) : 0,
         starter_code: q.type === "code" ? (q.starter_code || "") : "",
@@ -493,11 +493,24 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         const { error: ie } = await supabase.from("questions").insert(questions);
         if (ie) return { error: ie.message };
       }
+      if (Array.isArray(args.rounds) && args.rounds.length > 0) {
+        const rounds = args.rounds.map((r: any) => ({
+          quiz_id: quiz.id,
+          round_number: r.round_number,
+          name: r.name || `Round ${r.round_number}`,
+          duration_seconds: r.duration_seconds || 300,
+          cutoff_type: r.cutoff_type || "top_n",
+          cutoff_value: r.cutoff_value || 10,
+        }));
+        const { error: re } = await supabase.from("quiz_rounds").insert(rounds);
+        if (re) return { error: re.message };
+      }
       return {
         created_evaluation: {
           id: quiz.id,
           title: args.title,
           question_count: questions.length,
+          rounds: args.rounds?.length || 0,
         },
       };
     }
