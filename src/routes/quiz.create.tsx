@@ -284,7 +284,7 @@ function QuizCreator() {
                   </p>
                 </div>
               </div>
-              <Switch checked={tournamentMode} onCheckedChange={(v) => { setTournamentMode(v); if (v) setIsEvaluation(false); }} disabled={isEvaluation} />
+              <Switch checked={tournamentMode} onCheckedChange={setTournamentMode} />
             </div>
 
             {/* Evaluation mode toggle (mutually exclusive with tournament) */}
@@ -295,12 +295,14 @@ function QuizCreator() {
                   <p className="text-sm font-medium">Evaluation / Assessment Mode</p>
                   <p className="text-xs text-muted-foreground">
                     {isEvaluation
-                      ? "Runs live like a quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end."
+                      ? tournamentMode
+                        ? "Tournament evaluation — rounds with cutoffs plus per-learner performance breakdown at the end."
+                        : "Runs live like a quiz, but focused on measuring performance. Every learner sees a per-question breakdown at the end."
                       : "Standard race — ranks by speed and score"}
                   </p>
                 </div>
               </div>
-              <Switch checked={isEvaluation} onCheckedChange={(v) => { setIsEvaluation(v); if (v) setTournamentMode(false); }} disabled={tournamentMode} />
+              <Switch checked={isEvaluation} onCheckedChange={setIsEvaluation} />
             </div>
           </div>
         </GlowCard>
