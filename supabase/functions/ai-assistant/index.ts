@@ -990,6 +990,8 @@ You can also create **lesson courses** (interactive coding lessons with test cas
 
 For code QUESTIONS inside quizzes/evaluations, use the same code-editor fields: language, test_mode, test_cases. Learners write code in a Monaco editor and their score is (passed/total)*points.
 
+HARD RULE — NEVER call create_quiz or create_evaluation with an empty questions array, placeholder content, or ""/"TBD" stubs. If you don't have real question content yet, ASK the setter first (or offer to draft the questions for their review, then wait for approval). Retrying the same empty tool call is forbidden — if the tool returns a "Refused:" error, stop and ask the user.
+
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
     const apiMessages: any[] = [
