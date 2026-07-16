@@ -524,7 +524,10 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       return { rounds: data, is_tournament: (data || []).length > 0 };
     }
     case "create_quiz": {
-      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const rawQs = Array.isArray(args.questions) ? args.questions.filter((q: any) => q && typeof q.content === "string" && q.content.trim().length > 0) : [];
+      if (rawQs.length === 0) return { error: "Refused: quiz must include at least one question with non-empty content. Ask the setter for the questions before calling create_quiz." };
+      if (!args.folder_id || !args.title) return { error: "Refused: folder_id and title are required." };
+      const totalPoints = rawQs.reduce((a: number, q: any) => a + (q.points || 10), 0);
       const isEval = !!args.is_evaluation;
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
@@ -535,7 +538,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       }).select("id").single();
       if (qe) return { error: qe.message };
 
-      const questions = (args.questions || []).map((q: any, i: number) => ({
+      const questions = rawQs.map((q: any, i: number) => ({
         quiz_id: quiz.id,
         type: q.type || "mcq",
         content: q.content,
@@ -581,7 +584,10 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       };
     }
     case "create_evaluation": {
-      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const rawQs = Array.isArray(args.questions) ? args.questions.filter((q: any) => q && typeof q.content === "string" && q.content.trim().length > 0) : [];
+      if (rawQs.length === 0) return { error: "Refused: evaluation must include at least one question with non-empty content. Ask the setter for the questions (or generate them and confirm) BEFORE calling create_evaluation. Do NOT retry with an empty questions array." };
+      if (!args.folder_id || !args.title) return { error: "Refused: folder_id and title are required." };
+      const totalPoints = rawQs.reduce((a: number, q: any) => a + (q.points || 10), 0);
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
         title: args.title,
@@ -590,7 +596,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         is_evaluation: true,
       }).select("id").single();
       if (qe) return { error: qe.message };
-      const questions = (args.questions || []).map((q: any, i: number) => ({
+      const questions = rawQs.map((q: any, i: number) => ({
         quiz_id: quiz.id,
         type: q.type || "mcq",
         content: q.content,
