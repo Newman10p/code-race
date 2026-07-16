@@ -1005,9 +1005,10 @@ Be concise, friendly, and use markdown. Use emoji sparingly.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-flash",
           messages: apiMessages,
           tools: TOOLS,
+          max_tokens: 8192,
         }),
       });
 
@@ -1023,13 +1024,24 @@ Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
       if (choice.finish_reason === "tool_calls" && choice.message.tool_calls) {
         apiMessages.push(choice.message);
+        let sawRefusal = false;
         for (const tc of choice.message.tool_calls) {
-          const args = JSON.parse(tc.function.arguments);
+          let args: any = {};
+          try { args = JSON.parse(tc.function.arguments || "{}"); } catch { args = {}; }
           const toolResult = await executeTool(supabase, user.id, tc.function.name, args);
+          if (toolResult && typeof toolResult === "object" && typeof (toolResult as any).error === "string" && (toolResult as any).error.startsWith("Refused:")) {
+            sawRefusal = true;
+          }
           apiMessages.push({
             role: "tool",
             tool_call_id: tc.id,
             content: JSON.stringify(toolResult),
+          });
+        }
+        // If the model was refused for missing content, stop looping so it must ask the user instead of retrying with more empties.
+        if (sawRefusal && i >= 1) {
+          return new Response(JSON.stringify({ reply: "I need the actual question content before I can build that evaluation. Please share the questions (or ask me to draft them for your review) and I'll create it." }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         continue;
