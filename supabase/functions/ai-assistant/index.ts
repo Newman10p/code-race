@@ -524,7 +524,10 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       return { rounds: data, is_tournament: (data || []).length > 0 };
     }
     case "create_quiz": {
-      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const rawQs = Array.isArray(args.questions) ? args.questions.filter((q: any) => q && typeof q.content === "string" && q.content.trim().length > 0) : [];
+      if (rawQs.length === 0) return { error: "Refused: quiz must include at least one question with non-empty content. Ask the setter for the questions before calling create_quiz." };
+      if (!args.folder_id || !args.title) return { error: "Refused: folder_id and title are required." };
+      const totalPoints = rawQs.reduce((a: number, q: any) => a + (q.points || 10), 0);
       const isEval = !!args.is_evaluation;
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
@@ -535,7 +538,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       }).select("id").single();
       if (qe) return { error: qe.message };
 
-      const questions = (args.questions || []).map((q: any, i: number) => ({
+      const questions = rawQs.map((q: any, i: number) => ({
         quiz_id: quiz.id,
         type: q.type || "mcq",
         content: q.content,
@@ -581,7 +584,10 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
       };
     }
     case "create_evaluation": {
-      const totalPoints = (args.questions || []).reduce((a: number, q: any) => a + (q.points || 10), 0);
+      const rawQs = Array.isArray(args.questions) ? args.questions.filter((q: any) => q && typeof q.content === "string" && q.content.trim().length > 0) : [];
+      if (rawQs.length === 0) return { error: "Refused: evaluation must include at least one question with non-empty content. Ask the setter for the questions (or generate them and confirm) BEFORE calling create_evaluation. Do NOT retry with an empty questions array." };
+      if (!args.folder_id || !args.title) return { error: "Refused: folder_id and title are required." };
+      const totalPoints = rawQs.reduce((a: number, q: any) => a + (q.points || 10), 0);
       const { data: quiz, error: qe } = await supabase.from("quizzes").insert({
         folder_id: args.folder_id,
         title: args.title,
@@ -590,7 +596,7 @@ async function executeTool(supabase: any, userId: string, name: string, args: an
         is_evaluation: true,
       }).select("id").single();
       if (qe) return { error: qe.message };
-      const questions = (args.questions || []).map((q: any, i: number) => ({
+      const questions = rawQs.map((q: any, i: number) => ({
         quiz_id: quiz.id,
         type: q.type || "mcq",
         content: q.content,
@@ -984,6 +990,8 @@ You can also create **lesson courses** (interactive coding lessons with test cas
 
 For code QUESTIONS inside quizzes/evaluations, use the same code-editor fields: language, test_mode, test_cases. Learners write code in a Monaco editor and their score is (passed/total)*points.
 
+HARD RULE — NEVER call create_quiz or create_evaluation with an empty questions array, placeholder content, or ""/"TBD" stubs. If you don't have real question content yet, ASK the setter first (or offer to draft the questions for their review, then wait for approval). Retrying the same empty tool call is forbidden — if the tool returns a "Refused:" error, stop and ask the user.
+
 Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
     const apiMessages: any[] = [
@@ -999,9 +1007,10 @@ Be concise, friendly, and use markdown. Use emoji sparingly.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-flash",
           messages: apiMessages,
           tools: TOOLS,
+          max_tokens: 8192,
         }),
       });
 
@@ -1017,13 +1026,24 @@ Be concise, friendly, and use markdown. Use emoji sparingly.`;
 
       if (choice.finish_reason === "tool_calls" && choice.message.tool_calls) {
         apiMessages.push(choice.message);
+        let sawRefusal = false;
         for (const tc of choice.message.tool_calls) {
-          const args = JSON.parse(tc.function.arguments);
+          let args: any = {};
+          try { args = JSON.parse(tc.function.arguments || "{}"); } catch { args = {}; }
           const toolResult = await executeTool(supabase, user.id, tc.function.name, args);
+          if (toolResult && typeof toolResult === "object" && typeof (toolResult as any).error === "string" && (toolResult as any).error.startsWith("Refused:")) {
+            sawRefusal = true;
+          }
           apiMessages.push({
             role: "tool",
             tool_call_id: tc.id,
             content: JSON.stringify(toolResult),
+          });
+        }
+        // If the model was refused for missing content, stop looping so it must ask the user instead of retrying with more empties.
+        if (sawRefusal && i >= 1) {
+          return new Response(JSON.stringify({ reply: "I need the actual question content before I can build that evaluation. Please share the questions (or ask me to draft them for your review) and I'll create it." }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
         continue;
