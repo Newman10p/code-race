@@ -73,6 +73,95 @@ export type Database = {
         }
         Relationships: []
       }
+      criteria_rubrics: {
+        Row: {
+          created_at: string
+          dimensions: Json
+          id: string
+          is_published: boolean
+          passing_score: number
+          project_description: string
+          setter_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          is_published?: boolean
+          passing_score?: number
+          project_description?: string
+          setter_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          is_published?: boolean
+          passing_score?: number
+          project_description?: string
+          setter_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      criteria_submissions: {
+        Row: {
+          content: string
+          created_at: string
+          dimension_scores: Json
+          feedback: string
+          id: string
+          learner_name: string
+          link_url: string | null
+          rubric_id: string
+          scored_at: string | null
+          total_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          dimension_scores?: Json
+          feedback?: string
+          id?: string
+          learner_name?: string
+          link_url?: string | null
+          rubric_id: string
+          scored_at?: string | null
+          total_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          dimension_scores?: Json
+          feedback?: string
+          id?: string
+          learner_name?: string
+          link_url?: string | null
+          rubric_id?: string
+          scored_at?: string | null
+          total_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "criteria_submissions_rubric_id_fkey"
+            columns: ["rubric_id"]
+            isOneToOne: false
+            referencedRelation: "criteria_rubrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       flashcard_sets: {
         Row: {
           created_at: string
