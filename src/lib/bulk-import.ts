@@ -36,22 +36,20 @@ const tryJson = (text: string): any | null => {
 
 const normalizeTests = (raw: any, warnings: string[], label: string): TestCase[] => {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((t: any, i: number) => {
-      if (typeof t === "string") return { name: `Test ${i + 1}`, assertion: t, hidden: false } as unknown as TestCase;
-      const tc: any = {
-        name: t.name || `Test ${i + 1}`,
-        hidden: !!t.hidden,
-      };
-      if (t.assertion !== undefined) tc.assertion = String(t.assertion);
-      if (t.input !== undefined) tc.input = String(t.input);
-      if (t.expected !== undefined) tc.expected = String(t.expected);
-      if (tc.assertion === undefined && tc.expected === undefined) {
-        warnings.push(`${label}: test "${tc.name}" has no expected output or assertion.`);
-      }
-      return tc as TestCase;
-    })
-    .filter(Boolean);
+  return raw.map((t: any, i: number): TestCase => {
+    if (typeof t === "string") return { name: `Test ${i + 1}`, code: t, is_hidden: false };
+    const tc: TestCase = {
+      name: String(t.name || `Test ${i + 1}`),
+      is_hidden: !!(t.is_hidden ?? t.hidden),
+    };
+    if (t.stdin !== undefined || t.input !== undefined) tc.stdin = String(t.stdin ?? t.input);
+    if (t.expected !== undefined || t.output !== undefined) tc.expected = String(t.expected ?? t.output);
+    if (t.code !== undefined || t.assertion !== undefined) tc.code = String(t.code ?? t.assertion);
+    if (tc.expected === undefined && tc.code === undefined) {
+      warnings.push(`${label}: test "${tc.name}" has no expected output or assertion.`);
+    }
+    return tc;
+  });
 };
 
 /* ------------------------------------------------------------------ */
