@@ -547,6 +547,31 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
             </div>
           </GlowCard>
 
+          {/* Criteria & Rubrics */}
+          <GlowCard id="criteria">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <FileBarChart className="h-5 w-5 text-primary" /> Criteria & Rubrics
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>
+                Open <span className="text-primary font-medium">Criteria</span> from the dashboard to grade open-ended project work
+                on creativity and problem solving instead of right/wrong answers.
+              </p>
+              <ol className="list-decimal list-inside space-y-2">
+                <li><strong>Upload the brief:</strong> paste the project description or upload a <code>.txt</code>/<code>.md</code> file. The brief is what submissions are compared against.</li>
+                <li><strong>Set the algorithm:</strong> each criterion has a label, a weight (%) and optional evidence keywords. Defaults are Creativity &amp; Originality (30%), Problem Solving (30%), Brief Alignment (25%) and Clarity &amp; Communication (15%). Keep the weights totalling 100%.</li>
+                <li><strong>Set the passing score</strong> and publish the rubric when you want learners to see it.</li>
+                <li><strong>Score submissions:</strong> paste or upload a learner's write-up/code, press <em>Run Algorithm</em>, review the per-criterion bars, then <em>Save Result</em>.</li>
+                <li><strong>Ranked results:</strong> every saved submission appears ranked by weighted total, with pass/below-cutoff status and a criterion breakdown.</li>
+              </ol>
+              <p className="text-xs">
+                How the score is derived: each criterion blends keyword evidence, answer depth, vocabulary variety and overlap with your
+                brief into a 0–100 value; the final grade is the weighted average of those values. Adjust weights and keywords to tune it
+                to your subject.
+              </p>
+            </div>
+          </GlowCard>
+
           {/* 10. Tips */}
           <GlowCard id="tips">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
@@ -562,6 +587,7 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
                 <li><strong>Pace your questions:</strong> Don't rush. Give students time to read and answer before advancing.</li>
                 <li><strong>Review flagged students:</strong> After the race, check for flagged students and discuss academic integrity.</li>
                 <li><strong>Organize by topic:</strong> Use folders to group related quizzes (e.g., "Week 1", "Midterm Review").</li>
+                <li><strong>Answers stay hidden:</strong> during a race learners only see whether their own pick was right or wrong — the correct option is never revealed on screen.</li>
               </ul>
             </div>
           </GlowCard>
