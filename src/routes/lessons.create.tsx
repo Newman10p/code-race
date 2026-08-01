@@ -253,6 +253,56 @@ function LessonCourseCreator() {
           </Button>
         </div>
 
+        <div className="mb-3">
+          <Button variant="neon-outline" size="sm" onClick={() => setShowBulk(!showBulk)}>
+            Bulk Import Lessons
+          </Button>
+        </div>
+
+        {showBulk && (
+          <GlowCard className="mb-4">
+            <label className="mb-2 block text-sm text-muted-foreground">
+              Paste a course JSON (lessons with starter code, solution and test cases)
+            </label>
+            <textarea
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-xs focus:outline-none"
+              rows={10}
+              placeholder={`{
+  "course": {"title":"Intro to Python","subject":"Programming","description":"Start coding"},
+  "lessons": [
+    {
+      "title": "Variables",
+      "concept_markdown": "A variable stores a value...",
+      "objective": "Print the value of x",
+      "hint": "Use print()",
+      "language": "python",
+      "starter_code": "x = 5\\n",
+      "solution": "x = 5\\nprint(x)",
+      "test_mode": "io",
+      "test_cases": [{"name":"prints 5","expected":"5"}]
+    }
+  ]
+}`}
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button variant="neon" size="sm" onClick={importBulk}>Import Lessons</Button>
+              <input
+                type="file"
+                accept=".json,.txt"
+                onChange={(e) => onBulkFile(e.target.files?.[0])}
+                className="text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
+              />
+            </div>
+            {bulkWarnings.length > 0 && (
+              <ul className="mt-3 list-inside list-disc rounded-lg border border-yellow-500/40 bg-yellow-500/5 p-3 text-xs text-yellow-500">
+                {bulkWarnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            )}
+          </GlowCard>
+        )}
+
         <div className="space-y-3">
           {lessons.map((l, i) => (
             <GlowCard key={l.id}>
