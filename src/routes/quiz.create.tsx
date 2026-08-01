@@ -457,15 +457,51 @@ function QuizCreator() {
 
         {showBulkImport && (
           <GlowCard className="mb-6">
-            <label className="mb-2 block text-sm font-medium text-muted-foreground">Paste JSON questions</label>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              {([
+                ["standard", "Normal Quiz"],
+                ["tournament", "Tournament"],
+                ["evaluation", "Evaluation"],
+                ["tournament_evaluation", "Tournament Evaluation"],
+              ] as const).map(([k, label]) => (
+                <button
+                  key={k}
+                  onClick={() => setBulkKind(k)}
+                  className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                    bulkKind === k ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              Paste JSON (MCQ + code with test cases) or CSV (MCQ only)
+            </label>
             <textarea
               value={bulkData}
               onChange={(e) => setBulkData(e.target.value)}
-              placeholder={`[{"type":"mcq","content":"What layer is HTTP?","points":10,"roundNumber":1,"options":["L1","L4","L7","L3"],"correctOption":2}]`}
-              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-              rows={5}
+              placeholder={bulkPlaceholder[bulkKind]}
+              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              rows={10}
             />
-            <Button variant="neon" size="sm" className="mt-2" onClick={importBulk}>Import Questions</Button>
+            <p className="mt-2 text-xs text-muted-foreground">
+              CSV columns: <span className="font-mono">type,content,points,timeLimit,round,"optA|optB|optC|optD",correctIndex</span>
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button variant="neon" size="sm" onClick={importBulk}>Import</Button>
+              <input
+                type="file"
+                accept=".json,.csv,.txt"
+                onChange={(e) => onBulkFile(e.target.files?.[0])}
+                className="text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
+              />
+            </div>
+            {bulkWarnings.length > 0 && (
+              <ul className="mt-3 list-inside list-disc rounded-lg border border-yellow-500/40 bg-yellow-500/5 p-3 text-xs text-yellow-500">
+                {bulkWarnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            )}
           </GlowCard>
         )}
 
