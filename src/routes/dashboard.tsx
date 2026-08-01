@@ -159,6 +159,12 @@ function Dashboard() {
                 Manual
               </Button>
             </Link>
+            <Link to="/criteria">
+              <Button variant="neon-outline" size="sm">
+                <Gauge className="h-4 w-4" />
+                Criteria
+              </Button>
+            </Link>
             <Link to="/lessons/create" search={{ courseId: "" }}>
               <Button variant="neon" size="sm">
                 <GraduationCap className="h-4 w-4" />
