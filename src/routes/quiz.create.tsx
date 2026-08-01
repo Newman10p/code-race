@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MonacoCodeEditor } from "@/components/code/MonacoCodeEditor";
 import { CodeTestEditor } from "@/components/code/CodeTestEditor";
 import type { TestCase } from "@/lib/code-runners";
+import { parseQuizBulk } from "@/lib/bulk-import";
 
 export const Route = createFileRoute("/quiz/create")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -61,6 +62,8 @@ function QuizCreator() {
   const [saving, setSaving] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [bulkData, setBulkData] = useState("");
+  const [bulkWarnings, setBulkWarnings] = useState<string[]>([]);
+  const [bulkKind, setBulkKind] = useState<"standard" | "tournament" | "evaluation" | "tournament_evaluation">("standard");
   const isEditing = !!quizId;
 
   useEffect(() => {
@@ -156,27 +159,93 @@ function QuizCreator() {
   };
 
   const importBulk = () => {
-    try {
-      const parsed = JSON.parse(bulkData);
-      if (!Array.isArray(parsed)) throw new Error("Must be an array");
-      const imported: Question[] = parsed.map((item: any, i: number) => ({
-        id: `import-${Date.now()}-${i}`,
-        type: item.type || "mcq",
-        content: item.content || "",
-        points: item.points || 10,
-        timeLimit: item.timeLimit ?? 30,
-        roundNumber: item.roundNumber ?? 1,
-        options: item.options || ["", "", "", ""],
-        correctOption: item.correctOption ?? 0,
-        starterCode: item.starterCode || "",
-        solution: item.solution || "",
-      }));
-      setQuestions([...questions, ...imported]);
-      setBulkData("");
-      setShowBulkImport(false);
-    } catch {
-      alert("Invalid JSON format. Please provide a valid JSON array.");
+    const res = parseQuizBulk(bulkData);
+    setBulkWarnings(res.warnings);
+    if (!res.ok || !res.data) {
+      alert(res.error || "Could not parse the import.");
+      return;
     }
+    const d = res.data;
+    const imported: Question[] = d.questions.map((q, i) => ({
+      id: `import-${Date.now()}-${i}`,
+      type: q.type,
+      content: q.content,
+      points: q.points,
+      timeLimit: q.timeLimit,
+      roundNumber: q.roundNumber,
+      options: q.options ?? ["", "", "", ""],
+      correctOption: q.correctOption ?? 0,
+      starterCode: q.starterCode ?? "",
+      solution: q.solution ?? "",
+      language: q.language ?? "javascript",
+      testMode: q.testMode ?? "io",
+      testCases: q.testCases ?? [],
+    }));
+
+    // Format selector acts as the default; anything declared in the file wins.
+    const wantsTournament = d.tournamentMode ?? bulkKind.includes("tournament");
+    const wantsEvaluation = d.isEvaluation ?? bulkKind.includes("evaluation");
+    if (d.title && !title.trim()) setTitle(d.title);
+    if (d.description && !description.trim()) setDescription(d.description);
+    if (wantsEvaluation) setIsEvaluation(true);
+    if (wantsTournament) {
+      setTournamentMode(true);
+      if (d.rounds && d.rounds.length > 0) {
+        setRounds(d.rounds.map((r, i) => ({ ...r, roundNumber: i + 1 })));
+      } else {
+        const maxRound = Math.max(1, ...imported.map((q) => q.roundNumber));
+        if (maxRound > rounds.length) {
+          setRounds(
+            Array.from({ length: maxRound }, (_, i) =>
+              rounds[i] ?? { roundNumber: i + 1, name: `Round ${i + 1}`, durationSeconds: 300, cutoffType: "top_n" as const, cutoffValue: 5 }
+            )
+          );
+        }
+      }
+    }
+
+    setQuestions([...questions, ...imported]);
+    setBulkData("");
+    if (res.warnings.length === 0) setShowBulkImport(false);
+  };
+
+  const onBulkFile = async (file: File | undefined) => {
+    if (!file) return;
+    setBulkData(await file.text());
+  };
+
+  const bulkPlaceholder: Record<string, string> = {
+    standard: `[
+  {"type":"mcq","content":"What layer is HTTP?","points":10,"timeLimit":30,"options":["L1","L4","L7","L3"],"correctOption":2},
+  {"type":"code","content":"Return the sum of two numbers","language":"javascript","testMode":"io","starterCode":"function sum(a,b){}","solution":"function sum(a,b){return a+b}","testCases":[{"name":"basic","stdin":"1 2","expected":"3"}]}
+]`,
+    tournament: `{
+  "mode": "tournament",
+  "title": "ICT Championship",
+  "rounds": [
+    {"roundNumber":1,"name":"Qualifiers","durationSeconds":300,"cutoffType":"top_n","cutoffValue":10},
+    {"roundNumber":2,"name":"Finals","durationSeconds":420,"cutoffType":"top_pct","cutoffValue":50}
+  ],
+  "questions": [
+    {"type":"mcq","content":"Binary of 10?","roundNumber":1,"options":["1010","1100","1001","1110"],"correctOption":0},
+    {"type":"code","content":"Reverse a string","roundNumber":2,"language":"python","testMode":"assert","testCases":[{"name":"rev","code":"assert rev('ab')=='ba'"}]}
+  ]
+}`,
+    evaluation: `{
+  "mode": "evaluation",
+  "title": "Term 1 Assessment",
+  "questions": [
+    {"type":"mcq","content":"Define an algorithm","points":5,"options":["A recipe","A device","A file","A cable"],"correctOption":0}
+  ]
+}`,
+    tournament_evaluation: `{
+  "mode": "tournament evaluation",
+  "title": "Graded Championship",
+  "rounds": [{"roundNumber":1,"name":"Round 1","durationSeconds":300,"cutoffType":"top_n","cutoffValue":8}],
+  "questions": [
+    {"type":"code","content":"FizzBuzz to n","roundNumber":1,"language":"javascript","testMode":"io","testCases":[{"name":"n=3","stdin":"3","expected":"1\\n2\\nFizz"}]}
+  ]
+}`,
   };
 
   const saveQuiz = async () => {
