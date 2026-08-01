@@ -68,6 +68,7 @@ function ManualPage() {
             <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
             <li><a href="#ai" className="text-primary hover:underline">AI Assistant</a></li>
             <li><a href="#leaderboard" className="text-primary hover:underline">Leaderboard & Scoring</a></li>
+            <li><a href="#criteria" className="text-primary hover:underline">Criteria & Rubrics (Creativity / Problem Solving)</a></li>
             <li><a href="#tips" className="text-primary hover:underline">Tips & Best Practices</a></li>
           </ol>
         </GlowCard>
@@ -155,17 +156,23 @@ function ManualPage() {
           {/* 5. Bulk Import */}
           <GlowCard id="bulk">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
-              <Plus className="h-5 w-5 text-primary" /> 5. Bulk Import (JSON)
+              <Plus className="h-5 w-5 text-primary" /> 5. Bulk Import Formats
             </h2>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <p>Click <span className="text-primary font-medium">"ICT Bulk Upload"</span> in the quiz editor to paste a JSON array of questions.</p>
-              <p><strong>JSON Format:</strong></p>
+              <p>
+                Click <span className="text-primary font-medium">"ICT Bulk Upload"</span> in the quiz editor, then pick the format tab:
+                Normal Quiz, Tournament, Evaluation, or Tournament Evaluation. You can paste text or upload a
+                <code> .json</code> / <code>.csv</code> file. Anything declared inside the file (mode, rounds, evaluation) overrides the tab.
+              </p>
+
+              <p><strong>A. Normal quiz — JSON array (MCQ + code with test cases):</strong></p>
               <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
 {`[
   {
     "type": "mcq",
     "content": "What layer is HTTP?",
     "points": 10,
+    "timeLimit": 30,
     "options": ["Layer 1", "Layer 4", "Layer 7", "Layer 3"],
     "correctOption": 2
   },
@@ -173,12 +180,80 @@ function ManualPage() {
     "type": "code",
     "content": "Complete the function:",
     "points": 20,
+    "language": "python",
+    "testMode": "io",
     "starterCode": "def add(a, b):\\n    pass",
-    "solution": "def add(a, b):\\n    return a + b"
+    "solution": "def add(a, b):\\n    return a + b",
+    "testCases": [
+      { "name": "adds", "stdin": "2 3", "expected": "5" },
+      { "name": "hidden", "stdin": "10 1", "expected": "11", "is_hidden": true }
+    ]
   }
 ]`}
               </pre>
-              <p className="text-xs"><strong>Fields:</strong> <code>type</code> ("mcq" or "code"), <code>content</code> (question text), <code>points</code>, <code>options</code> (array of 4 strings for MCQ), <code>correctOption</code> (0-3 index), <code>starterCode</code>, <code>solution</code>.</p>
+
+              <p><strong>B. Tournament — wrap questions in an object with rounds:</strong></p>
+              <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
+{`{
+  "mode": "tournament",
+  "title": "ICT Championship",
+  "rounds": [
+    { "roundNumber": 1, "name": "Qualifiers", "durationSeconds": 300,
+      "cutoffType": "top_n", "cutoffValue": 10 },
+    { "roundNumber": 2, "name": "Finals", "durationSeconds": 420,
+      "cutoffType": "top_pct", "cutoffValue": 50 }
+  ],
+  "questions": [
+    { "type": "mcq", "content": "Binary of 10?", "roundNumber": 1,
+      "options": ["1010","1100","1001","1110"], "correctOption": 0 }
+  ]
+}`}
+              </pre>
+
+              <p>
+                <strong>C. Evaluation:</strong> same as A or B, but set <code>"mode": "evaluation"</code>.
+                <strong> D. Tournament Evaluation:</strong> set <code>"mode": "tournament evaluation"</code> and include a
+                <code> rounds</code> array — you get round cutoffs plus the full per-learner performance report.
+              </p>
+
+              <p><strong>E. CSV (MCQ only — code questions need JSON for their test cases):</strong></p>
+              <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
+{`type,content,points,timeLimit,round,options,correctIndex
+mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power Unit|Core Print Unit|Central Program Unit",0`}
+              </pre>
+
+              <p><strong>F. Test case fields</strong> — I/O mode: <code>name</code>, <code>stdin</code>, <code>expected</code>, <code>is_hidden</code>.
+                Assertion mode: <code>name</code>, <code>code</code> (the assertion), <code>is_hidden</code>. Set the question's
+                <code> testMode</code> to <code>"io"</code> or <code>"assert"</code>.</p>
+
+              <p><strong>G. Lesson courses</strong> — in the lesson creator click "Bulk Import Lessons":</p>
+              <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
+{`{
+  "course": { "title": "Intro to Python", "subject": "Programming",
+              "description": "Start coding" },
+  "lessons": [
+    { "title": "Variables",
+      "concept_markdown": "A variable stores a value...",
+      "objective": "Print the value of x",
+      "hint": "Use print()",
+      "language": "python",
+      "starter_code": "x = 5\\n",
+      "solution": "x = 5\\nprint(x)",
+      "test_mode": "io",
+      "test_cases": [{ "name": "prints 5", "expected": "5" }] }
+  ]
+}`}
+              </pre>
+
+              <p><strong>H. Flashcards</strong> — Settings → Flashcard Sets → Bulk import. One card per line
+                (<code>front, back</code> / <code>front | back</code> / tab-separated), or JSON:</p>
+              <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
+{`[{ "front": "RAM", "back": "Random Access Memory" }]`}
+              </pre>
+
+              <p className="text-xs">
+                Editing a course now updates lessons in place — learners keep their progress and never have to redo the course.
+              </p>
             </div>
           </GlowCard>
 
