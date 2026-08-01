@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Edit, Eye, EyeOff } from "lucide-react";
+import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Gauge, Edit, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
