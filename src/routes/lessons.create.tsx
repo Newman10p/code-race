@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MonacoCodeEditor } from "@/components/code/MonacoCodeEditor";
 import { CodeTestEditor } from "@/components/code/CodeTestEditor";
 import type { TestCase } from "@/lib/code-runners";
+import { parseCourseBulk } from "@/lib/bulk-import";
 
 export const Route = createFileRoute("/lessons/create")({
   validateSearch: (s: Record<string, unknown>) => ({ courseId: (s.courseId as string) || "" }),
@@ -65,6 +66,9 @@ function LessonCourseCreator() {
   const [lessons, setLessons] = useState<LessonDraft[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
+  const [bulkData, setBulkData] = useState("");
+  const [bulkWarnings, setBulkWarnings] = useState<string[]>([]);
 
   useEffect(() => {
     if (!loading && !roleLoading && (!user || !isSetter)) navigate({ to: "/login" });
@@ -114,6 +118,31 @@ function LessonCourseCreator() {
     setLessons(lessons.map((l) => (l.id === id ? { ...l, ...u } : l)));
   const removeLesson = (id: string) => setLessons(lessons.filter((l) => l.id !== id));
 
+  const importBulk = () => {
+    const res = parseCourseBulk(bulkData);
+    setBulkWarnings(res.warnings);
+    if (!res.ok || !res.data) {
+      alert(res.error || "Could not parse the import.");
+      return;
+    }
+    const d = res.data;
+    if (d.title && !title.trim()) setTitle(d.title);
+    if (d.description && !description.trim()) setDescription(d.description);
+    if (d.subject && !subject.trim()) setSubject(d.subject);
+    if (d.cover_image_url && !coverUrl.trim()) setCoverUrl(d.cover_image_url);
+    setLessons([
+      ...lessons,
+      ...d.lessons.map((l, i) => ({ ...l, id: `import-${Date.now()}-${i}` })),
+    ]);
+    setBulkData("");
+    if (res.warnings.length === 0) setShowBulk(false);
+  };
+
+  const onBulkFile = async (file: File | undefined) => {
+    if (!file) return;
+    setBulkData(await file.text());
+  };
+
   const save = async () => {
     if (!user || !title.trim()) return;
     setSaving(true);
@@ -123,7 +152,6 @@ function LessonCourseCreator() {
         await supabase.from("lesson_courses" as any).update({
           title, description, subject, cover_image_url: coverUrl, is_public: isPublic,
         }).eq("id", courseId);
-        await supabase.from("lessons" as any).delete().eq("course_id", courseId);
       } else {
         const { data, error } = await supabase.from("lesson_courses" as any).insert({
           setter_id: user.id, title, description, subject, cover_image_url: coverUrl, is_public: isPublic,
@@ -131,23 +159,39 @@ function LessonCourseCreator() {
         if (error) throw error;
         cid = (data as any).id;
       }
-      if (lessons.length > 0) {
-        await supabase.from("lessons" as any).insert(
-          lessons.map((l, i) => ({
-            course_id: cid,
-            order_index: i,
-            title: l.title,
-            concept_markdown: l.concept_markdown,
-            image_url: l.image_url || null,
-            objective: l.objective,
-            hint: l.hint || null,
-            language: l.language,
-            starter_code: l.starter_code,
-            solution: l.solution,
-            test_mode: l.test_mode,
-            test_cases: l.test_cases,
-          }))
-        );
+
+      // Update existing lessons in place and only insert new ones, so learner
+      // progress on an edited course is preserved (no repeating the course).
+      const payload = (l: LessonDraft, i: number) => ({
+        course_id: cid,
+        order_index: i,
+        title: l.title,
+        concept_markdown: l.concept_markdown,
+        image_url: l.image_url || null,
+        objective: l.objective,
+        hint: l.hint || null,
+        language: l.language,
+        starter_code: l.starter_code,
+        solution: l.solution,
+        test_mode: l.test_mode,
+        test_cases: l.test_cases,
+      });
+
+      if (isEditing) {
+        const keptIds = lessons.filter((l) => l.dbId).map((l) => l.dbId as string);
+        const { data: existing } = await supabase.from("lessons" as any).select("id").eq("course_id", courseId);
+        const removed = ((existing as any[]) || []).map((r) => r.id).filter((id: string) => !keptIds.includes(id));
+        if (removed.length > 0) await supabase.from("lessons" as any).delete().in("id", removed);
+        for (let i = 0; i < lessons.length; i++) {
+          const l = lessons[i];
+          if (l.dbId) await supabase.from("lessons" as any).update(payload(l, i)).eq("id", l.dbId);
+        }
+        const fresh = lessons.map((l, i) => ({ l, i })).filter(({ l }) => !l.dbId);
+        if (fresh.length > 0) {
+          await supabase.from("lessons" as any).insert(fresh.map(({ l, i }) => payload(l, i)));
+        }
+      } else if (lessons.length > 0) {
+        await supabase.from("lessons" as any).insert(lessons.map(payload));
       }
       navigate({ to: "/dashboard" });
     } catch (e: any) {
@@ -208,6 +252,56 @@ function LessonCourseCreator() {
             <Plus className="h-3 w-3" /> Add Lesson
           </Button>
         </div>
+
+        <div className="mb-3">
+          <Button variant="neon-outline" size="sm" onClick={() => setShowBulk(!showBulk)}>
+            Bulk Import Lessons
+          </Button>
+        </div>
+
+        {showBulk && (
+          <GlowCard className="mb-4">
+            <label className="mb-2 block text-sm text-muted-foreground">
+              Paste a course JSON (lessons with starter code, solution and test cases)
+            </label>
+            <textarea
+              value={bulkData}
+              onChange={(e) => setBulkData(e.target.value)}
+              className="w-full rounded-lg border border-input bg-background p-3 font-mono text-xs focus:outline-none"
+              rows={10}
+              placeholder={`{
+  "course": {"title":"Intro to Python","subject":"Programming","description":"Start coding"},
+  "lessons": [
+    {
+      "title": "Variables",
+      "concept_markdown": "A variable stores a value...",
+      "objective": "Print the value of x",
+      "hint": "Use print()",
+      "language": "python",
+      "starter_code": "x = 5\\n",
+      "solution": "x = 5\\nprint(x)",
+      "test_mode": "io",
+      "test_cases": [{"name":"prints 5","expected":"5"}]
+    }
+  ]
+}`}
+            />
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button variant="neon" size="sm" onClick={importBulk}>Import Lessons</Button>
+              <input
+                type="file"
+                accept=".json,.txt"
+                onChange={(e) => onBulkFile(e.target.files?.[0])}
+                className="text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
+              />
+            </div>
+            {bulkWarnings.length > 0 && (
+              <ul className="mt-3 list-inside list-disc rounded-lg border border-yellow-500/40 bg-yellow-500/5 p-3 text-xs text-yellow-500">
+                {bulkWarnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            )}
+          </GlowCard>
+        )}
 
         <div className="space-y-3">
           {lessons.map((l, i) => (

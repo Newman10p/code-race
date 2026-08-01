@@ -641,11 +641,11 @@ function RaceView() {
                       disabled={submitted}
                       className={`flex items-center gap-3 rounded-xl border p-4 text-left transition-all ${
                         submitted
-                          ? i === currentQ.correct_option
-                            ? "border-green-500 bg-green-500/10"
-                            : selected === i
-                              ? "border-destructive bg-destructive/10"
-                              : "border-border bg-card opacity-50"
+                          ? selected === i
+                            ? selected === currentQ.correct_option
+                              ? "border-green-500 bg-green-500/10"
+                              : "border-destructive bg-destructive/10"
+                            : "border-border bg-card opacity-50"
                           : selected === i
                             ? "border-primary bg-primary/10 glow-card"
                             : "border-border bg-card hover:border-primary/30"
@@ -678,8 +678,8 @@ function RaceView() {
                 <span className="text-sm text-muted-foreground">
                   {submitted && showResult
                     ? currentQ.type === "mcq" && selected === currentQ.correct_option
-                      ? "✅ Correct! Moving on..."
-                      : "❌ Wrong. Moving on..."
+                      ? "✅ Your answer was correct. Moving on..."
+                      : "❌ Your answer was incorrect. Moving on..."
                     : ""}
                 </span>
                 <Button variant="neon" size="xl" onClick={() => submitAnswer(false)} disabled={submitted || (currentQ.type === "mcq" && selected === null)}>

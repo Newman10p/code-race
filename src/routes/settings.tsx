@@ -10,7 +10,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useTheme, THEME_OPTIONS } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette, Globe, Lock } from "lucide-react";
+import { parseFlashcardBulk } from "@/lib/bulk-import";
+import { ArrowLeft, BookOpen, Plus, Trash2, Upload, Check, Palette, Globe, Lock, Gauge } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({
   component: SettingsPage,
@@ -69,23 +70,8 @@ function SettingsPage() {
     setLoading(false);
   };
 
-  const parseBulk = (text: string) => {
-    return text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        // Accept TSV (tab) or pipe or " - " or comma (first occurrence)
-        const sep = line.includes("\t") ? "\t" : line.includes("|") ? "|" : line.includes(" - ") ? " - " : ",";
-        const idx = line.indexOf(sep);
-        if (idx < 0) return null;
-        const front = line.slice(0, idx).trim();
-        const back = line.slice(idx + sep.length).trim();
-        if (!front || !back) return null;
-        return { front, back };
-      })
-      .filter((c): c is { front: string; back: string } => c !== null);
-  };
+  // Accepts TSV / pipe / " - " / comma lines, or a JSON array of {front, back}.
+  const parseBulk = (text: string) => parseFlashcardBulk(text);
 
   const createSet = async () => {
     if (!newTitle.trim() || !user) return;
@@ -232,8 +218,17 @@ function SettingsPage() {
                   <Textarea
                     value={bulkText}
                     onChange={(e) => setBulkText(e.target.value)}
-                    placeholder={`Paste one card per line. Format:\nfront, back\nor: front | back\nor: front\\tback (TSV)\n\nExample:\nWhat does CPU stand for?, Central Processing Unit\nRAM | Random Access Memory`}
+                    placeholder={`Paste one card per line. Format:\nfront, back\nor: front | back\nor: front\\tback (TSV)\n\nOr paste JSON:\n[{"front":"RAM","back":"Random Access Memory"}]`}
                     className="min-h-[160px] font-mono text-xs"
+                  />
+                  <input
+                    type="file"
+                    accept=".json,.csv,.txt,.tsv"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0];
+                      if (f) setBulkText(await f.text());
+                    }}
+                    className="mt-2 text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
                     {parseBulk(bulkText).length} card(s) detected

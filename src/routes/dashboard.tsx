@@ -4,7 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Edit, Eye, EyeOff } from "lucide-react";
+import { FolderOpen, Plus, BookOpen, Trophy, Zap, Trash2, LogOut, HelpCircle, Settings as SettingsIcon, GraduationCap, Gauge, Edit, Eye, EyeOff } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -157,6 +157,12 @@ function Dashboard() {
               <Button variant="neon-outline" size="sm">
                 <HelpCircle className="h-4 w-4" />
                 Manual
+              </Button>
+            </Link>
+            <Link to="/criteria">
+              <Button variant="neon-outline" size="sm">
+                <Gauge className="h-4 w-4" />
+                Criteria
               </Button>
             </Link>
             <Link to="/lessons/create" search={{ courseId: "" }}>
