@@ -281,7 +281,7 @@ function CriteriaPage() {
 
             <div className="rounded-lg border border-border bg-background/50 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm font-medium">Scoring algorithm</p>
+                <p className="text-sm font-medium">AI scoring criteria</p>
                 <span className={`text-xs ${totalWeight === 100 ? "text-primary" : "text-yellow-500"}`}>
                   Total weight: {totalWeight}%
                 </span>
@@ -304,7 +304,7 @@ function CriteriaPage() {
                     <Input
                       value={d.keywords.join(", ")}
                       onChange={(e) => updateDim(d.key, { keywords: e.target.value.split(",").map((k) => k.trim().toLowerCase()).filter(Boolean) })}
-                      placeholder="Evidence keywords (blank = compare against the brief)"
+                      placeholder="What the AI should look for (optional guidance)"
                       className="h-9 text-sm"
                     />
                     <Button variant="ghost" size="icon" onClick={() => removeDim(d.key)} className="h-9 w-9 text-destructive">
@@ -425,6 +425,11 @@ function CriteriaPage() {
                       {preview.total >= active.passing_score ? "PASS" : "BELOW CUTOFF"}
                     </span>
                   </div>
+                  {preview.feedback && (
+                    <p className="mb-3 whitespace-pre-wrap rounded-lg border border-border bg-card p-3 text-sm text-muted-foreground">
+                      {preview.feedback}
+                    </p>
+                  )}
                   <div className="space-y-2">
                     {active.dimensions.map((d) => (
                       <div key={d.key}>
