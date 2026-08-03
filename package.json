@@ -55,6 +55,7 @@
     "framer-motion": "^12.38.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.575.0",
+    "mammoth": "^1.12.0",
     "monaco-editor": "^0.55.1",
     "nitro": "3.0.260603-beta",
     "react": "^19.2.0",

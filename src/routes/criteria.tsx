@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { DEFAULT_DIMENSIONS, type CriteriaDimension } from "@/lib/bulk-import";
+import { readUploadedFileAsText } from "@/lib/read-upload";
 import { ArrowLeft, Gauge, Plus, Trash2, Upload, Globe, Lock, Sparkles, Trophy, Bot } from "lucide-react";
 
 export const Route = createFileRoute("/criteria")({
@@ -260,7 +261,7 @@ function CriteriaPage() {
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Rubric title (e.g. Term 2 Web Project)" />
             <div>
               <label className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
-                <Upload className="h-4 w-4" /> Project description / brief (paste, or upload a .txt / .md file)
+                <Upload className="h-4 w-4" /> Project description / brief (paste, or upload a .docx / .txt / .md file)
               </label>
               <Textarea
                 value={brief}
@@ -270,10 +271,15 @@ function CriteriaPage() {
               />
               <input
                 type="file"
-                accept=".txt,.md,.csv,.json"
+                accept=".docx,.txt,.md,.csv,.json"
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) setBrief(await f.text());
+                  if (!f) return;
+                  try {
+                    setBrief(await readUploadedFileAsText(f));
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Could not read that file.");
+                  }
                 }}
                 className="mt-2 text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
               />
@@ -396,10 +402,15 @@ function CriteriaPage() {
               />
               <input
                 type="file"
-                accept=".txt,.md,.json,.js,.ts,.py,.html,.css"
+                accept=".docx,.txt,.md,.json,.js,.ts,.py,.html,.css"
                 onChange={async (e) => {
                   const f = e.target.files?.[0];
-                  if (f) setSubmissionText(await f.text());
+                  if (!f) return;
+                  try {
+                    setSubmissionText(await readUploadedFileAsText(f));
+                  } catch (err) {
+                    alert(err instanceof Error ? err.message : "Could not read that file.");
+                  }
                 }}
                 className="text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
               />
