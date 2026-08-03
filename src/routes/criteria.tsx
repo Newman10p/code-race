@@ -384,7 +384,7 @@ function CriteriaPage() {
               <Sparkles className="h-5 w-5 text-primary" /> Score a submission — {active.title}
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              Paste (or upload) the learner's project write-up or code. The algorithm scores each criterion against your brief and weights.
+              Paste (or upload) the learner's project write-up or code. The AI evaluator reads your rubric text and scores every criterion against it.
             </p>
             <div className="space-y-3">
               <Input value={learnerName} onChange={(e) => setLearnerName(e.target.value)} placeholder="Learner name" />
@@ -404,13 +404,17 @@ function CriteriaPage() {
                 className="text-xs text-muted-foreground file:mr-2 file:rounded file:border file:border-input file:bg-background file:px-2 file:py-1 file:text-xs file:text-foreground"
               />
               <div className="flex gap-2">
-                <Button variant="neon-outline" onClick={runAlgorithm} disabled={!submissionText.trim()}>
-                  Run Algorithm
+                <Button variant="neon-outline" onClick={runAiEvaluation} disabled={evaluating || !submissionText.trim()}>
+                  <Bot className="h-4 w-4" /> {evaluating ? "AI evaluating..." : "Evaluate with AI"}
                 </Button>
                 <Button variant="neon" onClick={saveScored} disabled={!preview}>
                   Save Result
                 </Button>
               </div>
+
+              {evalError && (
+                <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">{evalError}</p>
+              )}
 
               {preview && (
                 <div className="rounded-lg border border-border bg-background/50 p-4">
