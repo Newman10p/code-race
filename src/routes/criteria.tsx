@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
-import { DEFAULT_DIMENSIONS, scoreSubmission, type CriteriaDimension } from "@/lib/bulk-import";
-import { ArrowLeft, Gauge, Plus, Trash2, Upload, Globe, Lock, Sparkles, Trophy } from "lucide-react";
+import { DEFAULT_DIMENSIONS, type CriteriaDimension } from "@/lib/bulk-import";
+import { ArrowLeft, Gauge, Plus, Trash2, Upload, Globe, Lock, Sparkles, Trophy, Bot } from "lucide-react";
 
 export const Route = createFileRoute("/criteria")({
   head: () => ({
@@ -66,7 +66,9 @@ function CriteriaPage() {
   // scoring workbench
   const [learnerName, setLearnerName] = useState("");
   const [submissionText, setSubmissionText] = useState("");
-  const [preview, setPreview] = useState<{ scores: Record<string, number>; total: number } | null>(null);
+  const [preview, setPreview] = useState<{ scores: Record<string, number>; total: number; feedback: string } | null>(null);
+  const [evaluating, setEvaluating] = useState(false);
+  const [evalError, setEvalError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !roleLoading && (!user || !isSetter)) navigate({ to: "/login" });
@@ -167,17 +169,45 @@ function CriteriaPage() {
 
   const totalWeight = dimensions.reduce((a, d) => a + (Number(d.weight) || 0), 0);
 
-  const runAlgorithm = () => {
+  const runAiEvaluation = async () => {
     if (!active || !submissionText.trim()) return;
-    setPreview(scoreSubmission(submissionText, active.project_description, active.dimensions));
+    setEvaluating(true);
+    setEvalError(null);
+    setPreview(null);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-evaluate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          ...(session ? { Authorization: `Bearer ${session.access_token}` } : {}),
+        },
+        body: JSON.stringify({
+          brief: active.project_description,
+          dimensions: active.dimensions,
+          submission: submissionText,
+          learnerName: learnerName.trim() || "Unnamed",
+          passingScore: active.passing_score,
+        }),
+      });
+      const data = await resp.json().catch(() => ({ error: "Request failed" }));
+      if (!resp.ok) throw new Error(data.error || `Error ${resp.status}`);
+      setPreview({ scores: data.scores || {}, total: data.total ?? 0, feedback: data.feedback || "" });
+    } catch (e: any) {
+      setEvalError(e.message);
+    } finally {
+      setEvaluating(false);
+    }
   };
 
   const saveScored = async () => {
     if (!active || !user || !preview) return;
     const passed = preview.total >= active.passing_score;
-    const feedback = active.dimensions
+    const breakdown = active.dimensions
       .map((d) => `${d.label}: ${preview.scores[d.key] ?? 0}/100`)
-      .join(" · ") + ` — ${passed ? "Meets" : "Below"} the passing score of ${active.passing_score}.`;
+      .join(" · ");
+    const feedback = `${preview.feedback ? preview.feedback + "\n\n" : ""}${breakdown} — ${passed ? "Meets" : "Below"} the passing score of ${active.passing_score}.`;
     const { error } = await supabase.from("criteria_submissions" as any).insert({
       rubric_id: active.id,
       user_id: user.id,
@@ -192,6 +222,7 @@ function CriteriaPage() {
     setLearnerName("");
     setSubmissionText("");
     setPreview(null);
+    setEvalError(null);
     loadSubmissions(active.id);
   };
 
