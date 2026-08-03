@@ -9,7 +9,6 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
-import { AiAssistant } from "@/components/AiAssistant";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -343,7 +342,6 @@ function Dashboard() {
           </div>
         )}
       </main>
-      <AiAssistant />
     </HoneycombLayout>
   );
 }

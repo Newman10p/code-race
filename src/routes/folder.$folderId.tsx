@@ -7,7 +7,6 @@ import { ArrowLeft, Plus, BookOpen, Zap, Play, Trash2, ClipboardCheck } from "lu
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { AiAssistant } from "@/components/AiAssistant";
 
 export const Route = createFileRoute("/folder/$folderId")({
   component: FolderView,
@@ -176,7 +175,6 @@ function FolderView() {
           </div>
         )}
       </main>
-      <AiAssistant />
     </HoneycombLayout>
   );
 }
