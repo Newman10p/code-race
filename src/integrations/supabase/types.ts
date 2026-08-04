@@ -963,6 +963,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_patron_invite: { Args: { _org: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
