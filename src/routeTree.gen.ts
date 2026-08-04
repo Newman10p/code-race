@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
@@ -38,6 +39,11 @@ const StandingsRoute = StandingsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportRoute = ReportRouteImport.update({
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/results'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/results'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/results'
     | '/settings'
     | '/standings'
     | '/folder/$folderId'
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
   ReportRoute: typeof ReportRoute
+  ResultsRoute: typeof ResultsRoute
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
@@ -304,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report': {
@@ -447,6 +467,7 @@ const rootRouteChildren: RootRouteChildren = {
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
   ReportRoute: ReportRoute,
+  ResultsRoute: ResultsRoute,
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
