@@ -73,6 +73,33 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          sender_id: string
+          sender_name: string
+          sender_role: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          sender_name: string
+          sender_role: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          sender_name?: string
+          sender_role?: string
+        }
+        Relationships: []
+      }
       criteria_rubrics: {
         Row: {
           created_at: string
@@ -504,6 +531,92 @@ export type Database = {
           },
         ]
       }
+      organization_members: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          invited_by: string | null
+          organization_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          organization_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          invited_by?: string | null
+          organization_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          created_by: string
+          id: string
+          location: string | null
+          notes: string | null
+          patron_email: string
+          patron_name: string
+          patron_phone: string | null
+          patron_user_id: string | null
+          school_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patron_email: string
+          patron_name: string
+          patron_phone?: string | null
+          patron_user_id?: string | null
+          school_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          patron_email?: string
+          patron_name?: string
+          patron_phone?: string | null
+          patron_user_id?: string | null
+          school_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       participant_answers: {
         Row: {
           answer: Json | null
@@ -786,6 +899,44 @@ export type Database = {
           },
         ]
       }
+      shared_resources: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          resource_id: string
+          resource_type: string
+          shared_by: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          resource_id: string
+          resource_type: string
+          shared_by: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          resource_id?: string
+          resource_type?: string
+          shared_by?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_resources_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -812,6 +963,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_patron_invite: { Args: { _org: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -819,9 +971,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_my_org_member: { Args: { _user: string }; Returns: boolean }
+      is_org_creator: { Args: { _org: string }; Returns: boolean }
+      is_org_patron: { Args: { _org: string }; Returns: boolean }
+      is_shared_with_me: {
+        Args: { _id: string; _type: string }
+        Returns: boolean
+      }
+      my_org_ids: { Args: never; Returns: string[] }
     }
     Enums: {
-      app_role: "setter" | "learner" | "admin"
+      app_role: "setter" | "learner" | "admin" | "patron"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -949,7 +1109,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["setter", "learner", "admin"],
+      app_role: ["setter", "learner", "admin", "patron"],
     },
   },
 } as const
