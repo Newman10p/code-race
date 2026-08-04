@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/Logo";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
@@ -26,7 +27,27 @@ function LoginPage() {
     setLoading(true);
     try {
       await signIn(email, password);
-      navigate({ to: "/dashboard" });
+      const { data: { user } } = await supabase.auth.getUser();
+      let target = "/learn";
+      if (user) {
+        const { data: roleRows } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        const roles = (roleRows || []).map((r) => r.role as string);
+        if (roles.includes("setter") || user.email === "bulegafarid@gmail.com") target = "/dashboard";
+        else if (roles.includes("patron")) target = "/organisation";
+        else {
+          const { data: invites } = await supabase
+            .from("organizations")
+            .select("id")
+            .is("patron_user_id", null)
+            .ilike("patron_email", user.email || "")
+            .limit(1);
+          if (invites && invites.length > 0) target = "/organisation";
+        }
+      }
+      navigate({ to: target });
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
