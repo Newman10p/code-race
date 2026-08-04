@@ -16,6 +16,7 @@ import { Route as ReportRouteImport } from './routes/report'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as PatronsRouteImport } from './routes/patrons'
+import { Route as OrganisationRouteImport } from './routes/organisation'
 import { Route as ManualRouteImport } from './routes/manual'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LaunchRouteImport } from './routes/launch'
@@ -65,6 +66,11 @@ const RaceRoute = RaceRouteImport.update({
 const PatronsRoute = PatronsRouteImport.update({
   id: '/patrons',
   path: '/patrons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganisationRoute = OrganisationRouteImport.update({
+  id: '/organisation',
+  path: '/organisation',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ManualRoute = ManualRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
+  '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
+  '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
@@ -201,6 +209,7 @@ export interface FileRoutesById {
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
   '/manual': typeof ManualRoute
+  '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/launch'
     | '/login'
     | '/manual'
+    | '/organisation'
     | '/patrons'
     | '/race'
     | '/register'
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/launch'
     | '/login'
     | '/manual'
+    | '/organisation'
     | '/patrons'
     | '/race'
     | '/register'
@@ -275,6 +286,7 @@ export interface FileRouteTypes {
     | '/launch'
     | '/login'
     | '/manual'
+    | '/organisation'
     | '/patrons'
     | '/race'
     | '/register'
@@ -300,6 +312,7 @@ export interface RootRouteChildren {
   LaunchRoute: typeof LaunchRoute
   LoginRoute: typeof LoginRoute
   ManualRoute: typeof ManualRoute
+  OrganisationRoute: typeof OrganisationRoute
   PatronsRoute: typeof PatronsRoute
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/patrons'
       fullPath: '/patrons'
       preLoaderRoute: typeof PatronsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organisation': {
+      id: '/organisation'
+      path: '/organisation'
+      fullPath: '/organisation'
+      preLoaderRoute: typeof OrganisationRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/manual': {
@@ -484,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   LaunchRoute: LaunchRoute,
   LoginRoute: LoginRoute,
   ManualRoute: ManualRoute,
+  OrganisationRoute: OrganisationRoute,
   PatronsRoute: PatronsRoute,
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
