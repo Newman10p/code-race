@@ -28,6 +28,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as CollabIndexRouteImport } from './routes/collab.index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
@@ -130,6 +131,11 @@ const LearnIndexRoute = LearnIndexRouteImport.update({
   path: '/learn/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollabIndexRoute = CollabIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CollabRoute,
+} as any)
 const QuizCreateRoute = QuizCreateRouteImport.update({
   id: '/quiz/create',
   path: '/quiz/create',
@@ -165,7 +171,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
-  '/collab': typeof CollabRoute
+  '/collab': typeof CollabRouteWithChildren
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/collab/': typeof CollabIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
@@ -192,7 +199,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
-  '/collab': typeof CollabRoute
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -211,6 +217,7 @@ export interface FileRoutesByTo {
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/collab': typeof CollabIndexRoute
   '/learn': typeof LearnIndexRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
@@ -220,7 +227,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
-  '/collab': typeof CollabRoute
+  '/collab': typeof CollabRouteWithChildren
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -239,6 +246,7 @@ export interface FileRoutesById {
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
+  '/collab/': typeof CollabIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
@@ -268,6 +276,7 @@ export interface FileRouteTypes {
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
+    | '/collab/'
     | '/learn/'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
@@ -276,7 +285,6 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/chat'
-    | '/collab'
     | '/criteria'
     | '/dashboard'
     | '/join'
@@ -295,6 +303,7 @@ export interface FileRouteTypes {
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
+    | '/collab'
     | '/learn'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
@@ -322,6 +331,7 @@ export interface FileRouteTypes {
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
+    | '/collab/'
     | '/learn/'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
@@ -331,7 +341,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
   ChatRoute: typeof ChatRoute
-  CollabRoute: typeof CollabRoute
+  CollabRoute: typeof CollabRouteWithChildren
   CriteriaRoute: typeof CriteriaRoute
   DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
@@ -490,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collab/': {
+      id: '/collab/'
+      path: '/'
+      fullPath: '/collab/'
+      preLoaderRoute: typeof CollabIndexRouteImport
+      parentRoute: typeof CollabRoute
+    }
     '/quiz/create': {
       id: '/quiz/create'
       path: '/quiz/create'
@@ -535,11 +552,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface CollabRouteChildren {
+  CollabIndexRoute: typeof CollabIndexRoute
+}
+
+const CollabRouteChildren: CollabRouteChildren = {
+  CollabIndexRoute: CollabIndexRoute,
+}
+
+const CollabRouteWithChildren =
+  CollabRoute._addFileChildren(CollabRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnnouncementsRoute: AnnouncementsRoute,
   ChatRoute: ChatRoute,
-  CollabRoute: CollabRoute,
+  CollabRoute: CollabRouteWithChildren,
   CriteriaRoute: CriteriaRoute,
   DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
