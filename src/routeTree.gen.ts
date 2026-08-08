@@ -36,6 +36,7 @@ import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
 import { Route as LearnLessonLessonIdRouteImport } from './routes/learn.lesson.$lessonId'
 import { Route as LearnCourseCourseIdRouteImport } from './routes/learn.course.$courseId'
+import { Route as CollabGGroupIdRouteImport } from './routes/collab.g.$groupId'
 
 const StandingsRoute = StandingsRouteImport.update({
   id: '/standings',
@@ -172,6 +173,11 @@ const LearnCourseCourseIdRoute = LearnCourseCourseIdRouteImport.update({
   path: '/learn/course/$courseId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollabGGroupIdRoute = CollabGGroupIdRouteImport.update({
+  id: '/g/$groupId',
+  path: '/g/$groupId',
+  getParentRoute: () => CollabRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/quiz/create': typeof QuizCreateRoute
   '/collab/': typeof CollabIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
 }
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/quiz/create': typeof QuizCreateRoute
   '/collab': typeof CollabIndexRoute
   '/learn': typeof LearnIndexRoute
+  '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
 }
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/quiz/create': typeof QuizCreateRoute
   '/collab/': typeof CollabIndexRoute
   '/learn/': typeof LearnIndexRoute
+  '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
   '/learn/lesson/$lessonId': typeof LearnLessonLessonIdRoute
 }
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/quiz/create'
     | '/collab/'
     | '/learn/'
+    | '/collab/g/$groupId'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
   fileRoutesByTo: FileRoutesByTo
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/quiz/create'
     | '/collab'
     | '/learn'
+    | '/collab/g/$groupId'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
   id:
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/quiz/create'
     | '/collab/'
     | '/learn/'
+    | '/collab/g/$groupId'
     | '/learn/course/$courseId'
     | '/learn/lesson/$lessonId'
   fileRoutesById: FileRoutesById
@@ -568,17 +580,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnCourseCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collab/g/$groupId': {
+      id: '/collab/g/$groupId'
+      path: '/g/$groupId'
+      fullPath: '/collab/g/$groupId'
+      preLoaderRoute: typeof CollabGGroupIdRouteImport
+      parentRoute: typeof CollabRoute
+    }
   }
 }
 
 interface CollabRouteChildren {
   CollabGroupsRoute: typeof CollabGroupsRoute
   CollabIndexRoute: typeof CollabIndexRoute
+  CollabGGroupIdRoute: typeof CollabGGroupIdRoute
 }
 
 const CollabRouteChildren: CollabRouteChildren = {
   CollabGroupsRoute: CollabGroupsRoute,
   CollabIndexRoute: CollabIndexRoute,
+  CollabGGroupIdRoute: CollabGGroupIdRoute,
 }
 
 const CollabRouteWithChildren =
