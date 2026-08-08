@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Play, HelpCircle, Settings, BookOpen, Megaphone, Building2, MessageSquare, Trophy } from "lucide-react";
+import { FolderOpen, Play, HelpCircle, Settings, BookOpen, Megaphone, Building2, MessageSquare, Trophy, Users } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -27,6 +27,7 @@ export function Navbar() {
         ]
       : [
           { label: "Learn", to: "/learn", icon: BookOpen },
+          { label: "Hub", to: "/collab", icon: Users },
           { label: "Results", to: "/results", icon: Trophy },
           { label: "Settings", to: "/settings", icon: Settings },
         ];
