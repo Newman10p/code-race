@@ -162,7 +162,8 @@ function GroupChat() {
       evidence_submitted_by_reporter: true,
       target_type: "message",
       target_id: reportOn.id,
-      target_label: `${reportOn.sender_name} in ${group?.name ?? "group"}`,
+      target_user_id: reportOn.sender_id,
+      target_user_name: reportOn.sender_name,
       severity: "normal",
     });
     if (error) return toast.error(error.message);
