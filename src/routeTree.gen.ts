@@ -33,6 +33,7 @@ import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
+import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
 import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
 import { Route as CollabDirectRouteImport } from './routes/collab.direct'
@@ -160,6 +161,11 @@ const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
   path: '/folder/$folderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollabSettingsRoute = CollabSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => CollabRoute,
+} as any)
 const CollabRequestsRoute = CollabRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
+  '/collab/settings': typeof CollabSettingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -244,6 +251,7 @@ export interface FileRoutesByTo {
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
+  '/collab/settings': typeof CollabSettingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -277,6 +285,7 @@ export interface FileRoutesById {
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
+  '/collab/settings': typeof CollabSettingsRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -311,6 +320,7 @@ export interface FileRouteTypes {
     | '/collab/direct'
     | '/collab/groups'
     | '/collab/requests'
+    | '/collab/settings'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/collab/direct'
     | '/collab/groups'
     | '/collab/requests'
+    | '/collab/settings'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/collab/direct'
     | '/collab/groups'
     | '/collab/requests'
+    | '/collab/settings'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -583,6 +595,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FolderFolderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collab/settings': {
+      id: '/collab/settings'
+      path: '/settings'
+      fullPath: '/collab/settings'
+      preLoaderRoute: typeof CollabSettingsRouteImport
+      parentRoute: typeof CollabRoute
+    }
     '/collab/requests': {
       id: '/collab/requests'
       path: '/requests'
@@ -632,6 +651,7 @@ interface CollabRouteChildren {
   CollabDirectRoute: typeof CollabDirectRoute
   CollabGroupsRoute: typeof CollabGroupsRoute
   CollabRequestsRoute: typeof CollabRequestsRoute
+  CollabSettingsRoute: typeof CollabSettingsRoute
   CollabIndexRoute: typeof CollabIndexRoute
   CollabGGroupIdRoute: typeof CollabGGroupIdRoute
 }
@@ -640,6 +660,7 @@ const CollabRouteChildren: CollabRouteChildren = {
   CollabDirectRoute: CollabDirectRoute,
   CollabGroupsRoute: CollabGroupsRoute,
   CollabRequestsRoute: CollabRequestsRoute,
+  CollabSettingsRoute: CollabSettingsRoute,
   CollabIndexRoute: CollabIndexRoute,
   CollabGGroupIdRoute: CollabGGroupIdRoute,
 }
