@@ -11,7 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/learn/")({
-  validateSearch: (s: Record<string, unknown>) => ({ tab: ((s.tab as string) || "flashcards") as "flashcards" | "lessons" }),
+  validateSearch: (s: Record<string, unknown>): { tab?: "flashcards" | "lessons" } => ({
+    tab: (s.tab as "flashcards" | "lessons" | undefined) || undefined,
+  }),
   component: LearnerDashboard,
 });
 
@@ -28,7 +30,7 @@ function LearnerDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const { isSetter, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
-  const { tab } = Route.useSearch();
+  const { tab = "flashcards" } = Route.useSearch();
   const [sets, setSets] = useState<FlashSet[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [search, setSearch] = useState("");

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string
+          actor_name: string
+          created_at: string
+          id: string
+          reason: string
+          result: string | null
+          target_id: string | null
+          target_label: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          actor_name: string
+          created_at?: string
+          id?: string
+          reason: string
+          result?: string | null
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          actor_name?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          result?: string | null
+          target_id?: string | null
+          target_label?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       announcement_dismissals: {
         Row: {
           announcement_id: string
@@ -73,6 +112,42 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_appearance: {
+        Row: {
+          accent: string
+          animations: string
+          bubble_style: string
+          density: string
+          sound: string
+          theme: string
+          updated_at: string
+          user_id: string
+          wallpaper: string
+        }
+        Insert: {
+          accent?: string
+          animations?: string
+          bubble_style?: string
+          density?: string
+          sound?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+          wallpaper?: string
+        }
+        Update: {
+          accent?: string
+          animations?: string
+          bubble_style?: string
+          density?: string
+          sound?: string
+          theme?: string
+          updated_at?: string
+          user_id?: string
+          wallpaper?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           body: string
@@ -97,6 +172,342 @@ export type Database = {
           sender_id?: string
           sender_name?: string
           sender_role?: string
+        }
+        Relationships: []
+      }
+      chat_requests: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          recipient_id: string
+          recipient_name: string | null
+          requester_id: string
+          requester_name: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["collab_request_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason?: string
+          recipient_id: string
+          recipient_name?: string | null
+          requester_id: string
+          requester_name: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["collab_request_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          recipient_id?: string
+          recipient_name?: string | null
+          requester_id?: string
+          requester_name?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["collab_request_status"]
+        }
+        Relationships: []
+      }
+      collab_group_members: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          group_id: string
+          id: string
+          role: Database["public"]["Enums"]["collab_group_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          group_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["collab_group_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          group_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["collab_group_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "collab_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_groups: {
+        Row: {
+          avatar_url: string | null
+          banner_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          organization_id: string | null
+          patron_user_id: string | null
+          privacy: Database["public"]["Enums"]["collab_group_privacy"]
+          status: Database["public"]["Enums"]["collab_group_status"]
+          theme: Json
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          organization_id?: string | null
+          patron_user_id?: string | null
+          privacy?: Database["public"]["Enums"]["collab_group_privacy"]
+          status?: Database["public"]["Enums"]["collab_group_status"]
+          theme?: Json
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          organization_id?: string | null
+          patron_user_id?: string | null
+          privacy?: Database["public"]["Enums"]["collab_group_privacy"]
+          status?: Database["public"]["Enums"]["collab_group_status"]
+          theme?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_groups_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_messages: {
+        Row: {
+          attachment_url: string | null
+          body: string
+          code_filename: string | null
+          code_language: string | null
+          created_at: string
+          deleted_at: string | null
+          edited_at: string | null
+          group_id: string
+          id: string
+          is_pinned: boolean
+          kind: string
+          reply_to_id: string | null
+          sender_id: string
+          sender_name: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          body: string
+          code_filename?: string | null
+          code_language?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          group_id: string
+          id?: string
+          is_pinned?: boolean
+          kind?: string
+          reply_to_id?: string | null
+          sender_id: string
+          sender_name: string
+        }
+        Update: {
+          attachment_url?: string | null
+          body?: string
+          code_filename?: string | null
+          code_language?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
+          group_id?: string
+          id?: string
+          is_pinned?: boolean
+          kind?: string
+          reply_to_id?: string | null
+          sender_id?: string
+          sender_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "collab_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collab_messages_reply_to_id_fkey"
+            columns: ["reply_to_id"]
+            isOneToOne: false
+            referencedRelation: "collab_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "collab_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_reports: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          created_at: string
+          description: string | null
+          evidence: string | null
+          evidence_submitted_by_reporter: boolean
+          id: string
+          reporter_id: string
+          reporter_name: string
+          resolution: string | null
+          severity: string
+          status: Database["public"]["Enums"]["collab_report_status"]
+          target_id: string | null
+          target_type: string
+          target_user_id: string | null
+          target_user_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          evidence?: string | null
+          evidence_submitted_by_reporter?: boolean
+          id?: string
+          reporter_id: string
+          reporter_name: string
+          resolution?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["collab_report_status"]
+          target_id?: string | null
+          target_type: string
+          target_user_id?: string | null
+          target_user_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          evidence?: string | null
+          evidence_submitted_by_reporter?: boolean
+          id?: string
+          reporter_id?: string
+          reporter_name?: string
+          resolution?: string | null
+          severity?: string
+          status?: Database["public"]["Enums"]["collab_report_status"]
+          target_id?: string | null
+          target_type?: string
+          target_user_id?: string | null
+          target_user_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      collab_settings: {
+        Row: {
+          allow_blocking: boolean
+          allow_discoverable_groups: boolean
+          allow_private_chat: boolean
+          allow_reporting: boolean
+          allow_student_groups: boolean
+          freeze_group_creation: boolean
+          freeze_group_messaging: boolean
+          id: boolean
+          max_requests_per_hour: number
+          request_policy: string
+          require_admin_approval: boolean
+          require_mutual_approval: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_blocking?: boolean
+          allow_discoverable_groups?: boolean
+          allow_private_chat?: boolean
+          allow_reporting?: boolean
+          allow_student_groups?: boolean
+          freeze_group_creation?: boolean
+          freeze_group_messaging?: boolean
+          id?: boolean
+          max_requests_per_hour?: number
+          request_policy?: string
+          require_admin_approval?: boolean
+          require_mutual_approval?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_blocking?: boolean
+          allow_discoverable_groups?: boolean
+          allow_private_chat?: boolean
+          allow_reporting?: boolean
+          allow_student_groups?: boolean
+          freeze_group_creation?: boolean
+          freeze_group_messaging?: boolean
+          id?: boolean
+          max_requests_per_hour?: number
+          request_policy?: string
+          require_admin_approval?: boolean
+          require_mutual_approval?: boolean
+          updated_at?: string
         }
         Relationships: []
       }
@@ -185,6 +596,74 @@ export type Database = {
             columns: ["rubric_id"]
             isOneToOne: false
             referencedRelation: "criteria_rubrics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dm_conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          user_a: string
+          user_a_name: string | null
+          user_b: string
+          user_b_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user_a: string
+          user_a_name?: string | null
+          user_b: string
+          user_b_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          user_a?: string
+          user_a_name?: string | null
+          user_b?: string
+          user_b_name?: string | null
+        }
+        Relationships: []
+      }
+      dm_messages: {
+        Row: {
+          ciphertext: string
+          conversation_id: string
+          created_at: string
+          id: string
+          iv: string
+          sender_ephemeral_key: Json | null
+          sender_id: string
+        }
+        Insert: {
+          ciphertext: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          iv: string
+          sender_ephemeral_key?: Json | null
+          sender_id: string
+        }
+        Update: {
+          ciphertext?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          iv?: string
+          sender_ephemeral_key?: Json | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dm_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "dm_conversations"
             referencedColumns: ["id"]
           },
         ]
@@ -937,6 +1416,54 @@ export type Database = {
           },
         ]
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_public_keys: {
+        Row: {
+          algorithm: string
+          created_at: string
+          fingerprint: string
+          public_key: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          algorithm?: string
+          created_at?: string
+          fingerprint: string
+          public_key: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          algorithm?: string
+          created_at?: string
+          fingerprint?: string
+          public_key?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -964,6 +1491,7 @@ export type Database = {
     }
     Functions: {
       accept_patron_invite: { Args: { _org: string }; Returns: boolean }
+      blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -971,6 +1499,9 @@ export type Database = {
         }
         Returns: boolean
       }
+      in_conversation: { Args: { _conv: string }; Returns: boolean }
+      is_group_manager: { Args: { _group: string }; Returns: boolean }
+      is_group_member: { Args: { _group: string }; Returns: boolean }
       is_my_org_member: { Args: { _user: string }; Returns: boolean }
       is_org_creator: { Args: { _org: string }; Returns: boolean }
       is_org_patron: { Args: { _org: string }; Returns: boolean }
@@ -978,10 +1509,26 @@ export type Database = {
         Args: { _id: string; _type: string }
         Returns: boolean
       }
+      is_staff: { Args: never; Returns: boolean }
       my_org_ids: { Args: never; Returns: string[] }
     }
     Enums: {
       app_role: "setter" | "learner" | "admin" | "patron"
+      collab_group_privacy:
+        | "invite_only"
+        | "request_to_join"
+        | "discoverable"
+        | "private"
+      collab_group_role: "owner" | "moderator" | "member" | "patron"
+      collab_group_status: "pending" | "active" | "frozen" | "archived"
+      collab_report_status:
+        | "new"
+        | "under_review"
+        | "escalated"
+        | "action_taken"
+        | "resolved"
+        | "dismissed"
+      collab_request_status: "pending" | "accepted" | "declined"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1110,6 +1657,23 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["setter", "learner", "admin", "patron"],
+      collab_group_privacy: [
+        "invite_only",
+        "request_to_join",
+        "discoverable",
+        "private",
+      ],
+      collab_group_role: ["owner", "moderator", "member", "patron"],
+      collab_group_status: ["pending", "active", "frozen", "archived"],
+      collab_report_status: [
+        "new",
+        "under_review",
+        "escalated",
+        "action_taken",
+        "resolved",
+        "dismissed",
+      ],
+      collab_request_status: ["pending", "accepted", "declined"],
     },
   },
 } as const

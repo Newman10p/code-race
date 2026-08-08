@@ -225,3 +225,17 @@
   color: var(--color-neon);
   text-shadow: 0 0 20px oklch(0.78 0.15 200 / 0.6), 0 0 40px oklch(0.78 0.15 200 / 0.3);
 }
+
+/* ===== Student Collaboration Hub surfaces ===== */
+.hub-bg { background-color: #696969; }
+.hub-surface { background-color: #5E5E5E; }
+.hub-elevated { background-color: #535353; }
+.hub-deep { background-color: #484848; }
+.hub-border { border-color: rgba(255,255,255,0.10); }
+.hub-text { color: #FFFFFF; }
+.hub-text-dim { color: rgba(255,255,255,0.70); }
+.hub-divide > * + * { border-top: 1px solid rgba(255,255,255,0.08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .hub-anim { animation: none !important; transition: none !important; }
+}
