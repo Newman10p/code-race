@@ -23,6 +23,7 @@ import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CriteriaRouteImport } from './routes/criteria'
+import { Route as CollabRouteImport } from './routes/collab'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
@@ -104,6 +105,11 @@ const CriteriaRoute = CriteriaRouteImport.update({
   path: '/criteria',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CollabRoute = CollabRouteImport.update({
+  id: '/collab',
+  path: '/collab',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
+  '/collab': typeof CollabRoute
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
+  '/collab': typeof CollabRoute
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/announcements': typeof AnnouncementsRoute
   '/chat': typeof ChatRoute
+  '/collab': typeof CollabRoute
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
   '/join': typeof JoinRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/chat'
+    | '/collab'
     | '/criteria'
     | '/dashboard'
     | '/join'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/chat'
+    | '/collab'
     | '/criteria'
     | '/dashboard'
     | '/join'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/'
     | '/announcements'
     | '/chat'
+    | '/collab'
     | '/criteria'
     | '/dashboard'
     | '/join'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AnnouncementsRoute: typeof AnnouncementsRoute
   ChatRoute: typeof ChatRoute
+  CollabRoute: typeof CollabRoute
   CriteriaRoute: typeof CriteriaRoute
   DashboardRoute: typeof DashboardRoute
   JoinRoute: typeof JoinRoute
@@ -442,6 +455,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CriteriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/collab': {
+      id: '/collab'
+      path: '/collab'
+      fullPath: '/collab'
+      preLoaderRoute: typeof CollabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AnnouncementsRoute: AnnouncementsRoute,
   ChatRoute: ChatRoute,
+  CollabRoute: CollabRoute,
   CriteriaRoute: CriteriaRoute,
   DashboardRoute: DashboardRoute,
   JoinRoute: JoinRoute,
