@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, MessageCircle, Inbox, SlidersHorizontal } from "lucide-react";
+import { Users, MessageCircle, Inbox, SlidersHorizontal, Code2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/collab")({
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/collab")({
 const TABS = [
   { to: "/collab/groups", label: "Groups", icon: Users },
   { to: "/collab/direct", label: "Direct", icon: MessageCircle },
+  { to: "/collab/code", label: "Code space", icon: Code2 },
   { to: "/collab/requests", label: "Requests", icon: Inbox },
   { to: "/collab/settings", label: "Settings", icon: SlidersHorizontal },
 ];
