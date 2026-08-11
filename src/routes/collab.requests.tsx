@@ -30,9 +30,12 @@ function RequestsPage() {
   const [people, setPeople] = useState<{ user_id: string; display_name: string | null }[]>([]);
   const [target, setTarget] = useState<string>("");
   const [reason, setReason] = useState("");
+  const [policy, setPolicy] = useState<{ allow_private_chat: boolean; max_requests_per_hour: number }>({ allow_private_chat: true, max_requests_per_hour: 10 });
 
   const load = useCallback(async () => {
     if (!user) return;
+    const { data: settings } = await supabase.from("collab_settings").select("allow_private_chat, max_requests_per_hour").maybeSingle();
+    if (settings) setPolicy(settings);
     const { data } = await supabase.from("chat_requests").select("*").order("created_at", { ascending: false });
     setReqs((data || []) as Req[]);
     const { data: mine } = await supabase.from("collab_group_members").select("group_id").eq("user_id", user.id);
@@ -48,6 +51,16 @@ function RequestsPage() {
 
   const sendRequest = async () => {
     if (!user || !target) return;
+    if (!policy.allow_private_chat) return toast.error("Private chat is currently switched off by your school administrator.");
+    const sinceHour = new Date(Date.now() - 3600_000).toISOString();
+    const { count } = await supabase
+      .from("chat_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("requester_id", user.id)
+      .gte("created_at", sinceHour);
+    if ((count ?? 0) >= policy.max_requests_per_hour) {
+      return toast.error(`You can only send ${policy.max_requests_per_hour} chat requests per hour.`);
+    }
     const name = await myDisplayName(user.id, user.email);
     const { error } = await supabase.from("chat_requests").insert({
       requester_id: user.id,
@@ -87,6 +100,11 @@ function RequestsPage() {
     <div className="grid gap-6 lg:grid-cols-2">
       <section className="rounded-xl border hub-border hub-surface p-4">
         <h2 className="mb-3 font-semibold hub-text">Ask to chat privately</h2>
+        {!policy.allow_private_chat && (
+          <p className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            Private conversations are currently switched off by your school administrator.
+          </p>
+        )}
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="who">Classmate</Label>
@@ -99,7 +117,7 @@ function RequestsPage() {
             <Label htmlFor="why">Reason (optional)</Label>
             <Textarea id="why" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder="Want to pair on the Python task?" />
           </div>
-          <Button variant="neon" onClick={sendRequest} disabled={!target}>Send request</Button>
+          <Button variant="neon" onClick={sendRequest} disabled={!target || !policy.allow_private_chat}>Send request</Button>
         </div>
       </section>
 
