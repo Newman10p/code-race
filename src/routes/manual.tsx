@@ -502,7 +502,7 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
           </GlowCard>
 
           {/* Themes */}
-          <GlowCard id="themes">
+          <GlowCard id="hub-admin">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
               <Palette className="h-5 w-5 text-primary" /> Student Hub — moderation &amp; code space
             </h2>
@@ -518,7 +518,7 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
             </div>
           </GlowCard>
 
-          <GlowCard id="themes2">
+          <GlowCard id="themes">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
               <Palette className="h-5 w-5 text-primary" /> Theme Picker
             </h2>
