@@ -504,6 +504,22 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
           {/* Themes */}
           <GlowCard id="themes">
             <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Palette className="h-5 w-5 text-primary" /> Student Hub — moderation &amp; code space
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p><strong>Hub admin</strong> in your navbar opens the control center. It has four tabs:</p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li><strong>Reports</strong> — every report students file, with severity, category and who filed it. Type a reason (required) and move the report through new → under review → escalated → action taken / resolved / dismissed.</li>
+                <li><strong>Groups</strong> — set any group to active, frozen (read-only) or archived. A reason is required.</li>
+                <li><strong>Policies</strong> — switch student group creation, approval-before-live, the discover directory, private chat, mutual approval, blocking and reporting on or off. Two emergency switches freeze all group messaging or all group creation instantly. You also cap how many chat requests a student may send per hour.</li>
+                <li><strong>Audit log</strong> — an immutable record of every administrative action: who, what, when and why. Message contents are never copied into it.</li>
+              </ul>
+              <p>Students get a <strong>Code space</strong> tab inside the hub: a scratch workbench with the same editor and runner used in races (JavaScript, Python, HTML/CSS). They run code in the browser and can share the result straight into a group conversation as a highlighted code block.</p>
+            </div>
+          </GlowCard>
+
+          <GlowCard id="themes2">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
               <Palette className="h-5 w-5 text-primary" /> Theme Picker
             </h2>
             <div className="space-y-3 text-sm text-muted-foreground">
