@@ -145,7 +145,7 @@ function AdminCollab() {
     void (async () => setActorName(await myDisplayName(user.id, user.email)))();
   }, [user, staff, load]);
 
-  const setStatus = async (rep: Report, status: string) => {
+  const setStatus = async (rep: Report, status: (typeof STATUSES)[number]) => {
     const reason = notes[rep.id]?.trim();
     if (!reason) {
       toast.error("A reason is required for every moderation action.");
@@ -154,7 +154,7 @@ function AdminCollab() {
     setBusy(true);
     const { error } = await supabase
       .from("collab_reports")
-      .update({ status: status as Report["status"], resolution: reason, assigned_to: user!.id })
+      .update({ status, resolution: reason, assigned_to: user!.id })
       .eq("id", rep.id);
     if (error) {
       toast.error(error.message);
@@ -175,7 +175,7 @@ function AdminCollab() {
     setBusy(false);
   };
 
-  const setGroupStatus = async (g: Group, status: string) => {
+  const setGroupStatus = async (g: Group, status: "active" | "frozen" | "archived") => {
     const reason = notes[g.id]?.trim();
     if (!reason) {
       toast.error("A reason is required before changing a group's status.");
@@ -184,7 +184,7 @@ function AdminCollab() {
     setBusy(true);
     const { error } = await supabase
       .from("collab_groups")
-      .update({ status: status as Group["status"] })
+      .update({ status })
       .eq("id", g.id);
     if (error) {
       toast.error(error.message);
@@ -310,7 +310,7 @@ function AdminCollab() {
                     onChange={(e) => setNotes((n) => ({ ...n, [g.id]: e.target.value }))}
                   />
                   <div className="mt-2 flex flex-wrap gap-2">
-                    {["active", "frozen", "archived"].filter((s) => s !== g.status).map((s) => (
+                    {(["active", "frozen", "archived"] as const).filter((s) => s !== g.status).map((s) => (
                       <Button key={s} size="sm" variant="outline" disabled={busy} onClick={() => setGroupStatus(g, s)}>
                         {s}
                       </Button>
