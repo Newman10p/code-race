@@ -69,6 +69,7 @@ function ManualPage() {
             <li><a href="#ai" className="text-primary hover:underline">AI Assistant</a></li>
             <li><a href="#leaderboard" className="text-primary hover:underline">Leaderboard & Scoring</a></li>
             <li><a href="#criteria" className="text-primary hover:underline">Criteria & Rubrics (Creativity / Problem Solving)</a></li>
+            <li><a href="#hub-admin" className="text-primary hover:underline">Student Hub — Moderation, Code Space & Arena</a></li>
             <li><a href="#tips" className="text-primary hover:underline">Tips & Best Practices</a></li>
           </ol>
         </GlowCard>
@@ -515,6 +516,13 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
                 <li><strong>Audit log</strong> — an immutable record of every administrative action: who, what, when and why. Message contents are never copied into it.</li>
               </ul>
               <p>Students get a <strong>Code space</strong> tab inside the hub: a scratch workbench with the same editor and runner used in races (JavaScript, Python, HTML/CSS). They run code in the browser and can share the result straight into a group conversation as a highlighted code block.</p>
+              <p><strong>Code arena</strong> is the competition tab. Group owners, moderators and patrons create a mini competition (title, brief, language, duration), then press <em>Start sprint</em> to open the timer for everyone in that group. Members solve the brief in the built-in editor, run it, paste their output and submit once — resubmits overwrite the same entry.</p>
+              <ul className="list-disc space-y-1 pl-5">
+                <li><strong>Scoring</strong> — a clean run scores 100 base (40 otherwise) plus a speed bonus of up to 100 based on how early in the window the entry lands.</li>
+                <li><strong>Leaderboard</strong> — updates live for the whole group; once the sprint is ended, everyone can read each other's submitted code to compare approaches.</li>
+                <li><strong>XP & badges</strong> — 50 XP for a clean submission, 20 otherwise, plus badges such as <em>First finisher</em> and <em>Sprinter</em>. Hub XP leaders appear on the arena page.</li>
+                <li><strong>Control</strong> — only group managers can start or end a sprint, and only members of that group can see or enter it.</li>
+              </ul>
             </div>
           </GlowCard>
 
