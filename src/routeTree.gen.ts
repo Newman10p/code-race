@@ -38,6 +38,7 @@ import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
 import { Route as CollabDirectRouteImport } from './routes/collab.direct'
 import { Route as CollabCodeRouteImport } from './routes/collab.code'
+import { Route as CollabArenaRouteImport } from './routes/collab.arena'
 import { Route as AdminCollabRouteImport } from './routes/admin.collab'
 import { Route as LearnLessonLessonIdRouteImport } from './routes/learn.lesson.$lessonId'
 import { Route as LearnCourseCourseIdRouteImport } from './routes/learn.course.$courseId'
@@ -188,6 +189,11 @@ const CollabCodeRoute = CollabCodeRouteImport.update({
   path: '/code',
   getParentRoute: () => CollabRoute,
 } as any)
+const CollabArenaRoute = CollabArenaRouteImport.update({
+  id: '/arena',
+  path: '/arena',
+  getParentRoute: () => CollabRoute,
+} as any)
 const AdminCollabRoute = AdminCollabRouteImport.update({
   id: '/admin/collab',
   path: '/admin/collab',
@@ -229,6 +235,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/admin/collab': typeof AdminCollabRoute
+  '/collab/arena': typeof CollabArenaRoute
   '/collab/code': typeof CollabCodeRoute
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
@@ -263,6 +270,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/admin/collab': typeof AdminCollabRoute
+  '/collab/arena': typeof CollabArenaRoute
   '/collab/code': typeof CollabCodeRoute
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
   '/admin/collab': typeof AdminCollabRoute
+  '/collab/arena': typeof CollabArenaRoute
   '/collab/code': typeof CollabCodeRoute
   '/collab/direct': typeof CollabDirectRoute
   '/collab/groups': typeof CollabGroupsRoute
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/standings'
     | '/admin/collab'
+    | '/collab/arena'
     | '/collab/code'
     | '/collab/direct'
     | '/collab/groups'
@@ -370,6 +380,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/standings'
     | '/admin/collab'
+    | '/collab/arena'
     | '/collab/code'
     | '/collab/direct'
     | '/collab/groups'
@@ -405,6 +416,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/standings'
     | '/admin/collab'
+    | '/collab/arena'
     | '/collab/code'
     | '/collab/direct'
     | '/collab/groups'
@@ -655,6 +667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollabCodeRouteImport
       parentRoute: typeof CollabRoute
     }
+    '/collab/arena': {
+      id: '/collab/arena'
+      path: '/arena'
+      fullPath: '/collab/arena'
+      preLoaderRoute: typeof CollabArenaRouteImport
+      parentRoute: typeof CollabRoute
+    }
     '/admin/collab': {
       id: '/admin/collab'
       path: '/admin/collab'
@@ -687,6 +706,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface CollabRouteChildren {
+  CollabArenaRoute: typeof CollabArenaRoute
   CollabCodeRoute: typeof CollabCodeRoute
   CollabDirectRoute: typeof CollabDirectRoute
   CollabGroupsRoute: typeof CollabGroupsRoute
@@ -697,6 +717,7 @@ interface CollabRouteChildren {
 }
 
 const CollabRouteChildren: CollabRouteChildren = {
+  CollabArenaRoute: CollabArenaRoute,
   CollabCodeRoute: CollabCodeRoute,
   CollabDirectRoute: CollabDirectRoute,
   CollabGroupsRoute: CollabGroupsRoute,
