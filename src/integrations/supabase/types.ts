@@ -211,6 +211,118 @@ export type Database = {
         }
         Relationships: []
       }
+      collab_competition_entries: {
+        Row: {
+          code: string
+          competition_id: string
+          created_at: string
+          elapsed_seconds: number
+          id: string
+          output: string | null
+          passed: boolean
+          score: number
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          code?: string
+          competition_id: string
+          created_at?: string
+          elapsed_seconds?: number
+          id?: string
+          output?: string | null
+          passed?: boolean
+          score?: number
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          code?: string
+          competition_id?: string
+          created_at?: string
+          elapsed_seconds?: number
+          id?: string
+          output?: string | null
+          passed?: boolean
+          score?: number
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_competition_entries_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "collab_competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collab_competitions: {
+        Row: {
+          brief: string
+          created_at: string
+          created_by: string
+          creator_name: string
+          duration_minutes: number
+          ends_at: string | null
+          group_id: string
+          id: string
+          language: string
+          started_at: string | null
+          starter_code: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          brief?: string
+          created_at?: string
+          created_by: string
+          creator_name?: string
+          duration_minutes?: number
+          ends_at?: string | null
+          group_id: string
+          id?: string
+          language?: string
+          started_at?: string | null
+          starter_code?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          brief?: string
+          created_at?: string
+          created_by?: string
+          creator_name?: string
+          duration_minutes?: number
+          ends_at?: string | null
+          group_id?: string
+          id?: string
+          language?: string
+          started_at?: string | null
+          starter_code?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collab_competitions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "collab_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collab_group_members: {
         Row: {
           created_at: string
@@ -370,6 +482,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      collab_points: {
+        Row: {
+          badges: Json
+          created_at: string
+          display_name: string
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          badges?: Json
+          created_at?: string
+          display_name?: string
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          badges?: Json
+          created_at?: string
+          display_name?: string
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
       }
       collab_reactions: {
         Row: {
