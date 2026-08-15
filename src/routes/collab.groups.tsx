@@ -235,9 +235,9 @@ function GroupsPage() {
       )}
 
       {groups.length === 0 ? (
-        <div className={`rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-12 text-center shadow-sm`}>
+        <div className={`rounded-2xl border ${colors.border} ${colors.bg} ${colors.darkBg} p-12 text-center shadow-sm`}>
           <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${colors.iconBg} ${colors.darkIconBg}`}>
-            <Users className={`h-8 w-8 ${colors.text} dark:${colors.darkText}`} aria-hidden />
+            <Users className={`h-8 w-8 ${colors.text} ${colors.darkText}`} aria-hidden />
           </div>
           <p className="mb-2 text-lg font-semibold text-slate-800 dark:text-slate-100">Create Your First Group</p>
           <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
@@ -253,12 +253,12 @@ function GroupsPage() {
                 <Link
                   to="/collab/g/$groupId"
                   params={{ groupId: g.id }}
-                  className={`group block h-full rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-5 transition-all duration-200 hover:shadow-xl hover:-translate-y-1 hover:border-${theme}-400 dark:hover:border-${theme}-600`}
+                  className={`group block h-full rounded-2xl border ${colors.border} ${colors.bg} ${colors.darkBg} p-5 transition-all duration-200 hover:shadow-xl hover:-translate-y-1 hover:border-${theme}-400 dark:hover:border-${theme}-600`}
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.iconBg} ${colors.darkIconBg}`}>
-                        <Icon className={`h-4 w-4 shrink-0 ${colors.text} dark:${colors.darkText}`} aria-hidden />
+                        <Icon className={`h-4 w-4 shrink-0 ${colors.text} ${colors.darkText}`} aria-hidden />
                       </div>
                       <span className="truncate font-semibold text-slate-800 dark:text-slate-100">{g.name}</span>
                     </div>
@@ -268,11 +268,11 @@ function GroupsPage() {
                       </span>
                     )}
                   </div>
-                  <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                  <p className="mb-4 line-clamp-2 text-sm text-slate-700 dark:text-slate-300">
                     {g.description || "No description yet."}
                   </p>
                   <div className="flex items-center gap-3 text-xs">
-                    <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400">
                       <Users className="h-3.5 w-3.5" />
                       {g.member_count} member{g.member_count === 1 ? "" : "s"}
                     </span>
@@ -300,9 +300,9 @@ function GroupsPage() {
           <h2 className="mb-4 text-xl font-bold text-slate-800 dark:text-slate-100">Discover Groups</h2>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {discover.map((g) => (
-              <li key={g.id} className={`rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-5 shadow-sm`}>
+              <li key={g.id} className={`rounded-2xl border ${colors.border} ${colors.bg} ${colors.darkBg} p-5 shadow-sm`}>
                 <p className="font-semibold text-slate-800 dark:text-slate-100 mb-2">{g.name}</p>
-                <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                <p className="mb-4 line-clamp-2 text-sm text-slate-700 dark:text-slate-300">
                   {g.description || "No description yet."}
                 </p>
                 <Button 
