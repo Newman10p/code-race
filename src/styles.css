@@ -226,15 +226,61 @@
   text-shadow: 0 0 20px oklch(0.78 0.15 200 / 0.6), 0 0 40px oklch(0.78 0.15 200 / 0.3);
 }
 
-/* ===== Student Collaboration Hub surfaces ===== */
-.hub-bg { background-color: #696969; }
-.hub-surface { background-color: #5E5E5E; }
-.hub-elevated { background-color: #535353; }
-.hub-deep { background-color: #484848; }
-.hub-border { border-color: rgba(255,255,255,0.10); }
-.hub-text { color: #FFFFFF; }
-.hub-text-dim { color: rgba(255,255,255,0.70); }
-.hub-divide > * + * { border-top: 1px solid rgba(255,255,255,0.08); }
+/* ===== Modern Student Hub & Dashboard Cards ===== */
+/* Vibrant gradient cards replacing grey design */
+.hub-bg { 
+  background: linear-gradient(135deg, oklch(0.15 0.08 280) 0%, oklch(0.12 0.06 260) 50%, oklch(0.1 0.05 240) 100%);
+}
+.hub-surface { 
+  background: linear-gradient(135deg, oklch(0.18 0.06 280) 0%, oklch(0.15 0.05 260) 100%);
+  border: 1px solid oklch(0.78 0.15 200 / 0.2);
+}
+.hub-elevated { 
+  background: linear-gradient(135deg, oklch(0.2 0.08 280) 0%, oklch(0.17 0.06 260) 100%);
+  box-shadow: 0 8px 32px oklch(0.78 0.15 200 / 0.15);
+}
+.hub-deep { 
+  background: linear-gradient(135deg, oklch(0.12 0.05 280) 0%, oklch(0.1 0.04 260) 100%);
+}
+.hub-border { 
+  border-color: oklch(0.78 0.15 200 / 0.3); 
+}
+.hub-text { 
+  color: oklch(0.95 0.02 280); 
+}
+.hub-text-dim { 
+  color: oklch(0.7 0.05 280); 
+}
+.hub-divide > * + * { 
+  border-top: 1px solid oklch(0.78 0.15 200 / 0.15); 
+}
+
+/* Enhanced card hover effects */
+.card-gradient {
+  background: linear-gradient(135deg, oklch(0.18 0.06 280) 0%, oklch(0.15 0.05 260) 100%);
+  border: 1px solid oklch(0.78 0.15 200 / 0.2);
+  transition: all 0.3s ease;
+}
+
+.card-gradient:hover {
+  background: linear-gradient(135deg, oklch(0.22 0.08 280) 0%, oklch(0.18 0.06 260) 100%);
+  border-color: oklch(0.78 0.15 200 / 0.5);
+  box-shadow: 0 8px 32px oklch(0.78 0.15 200 / 0.3), 0 0 20px oklch(0.78 0.15 200 / 0.2);
+  transform: translateY(-2px);
+}
+
+/* Icon containers with gradient backgrounds */
+.icon-gradient-primary {
+  background: linear-gradient(135deg, oklch(0.78 0.15 200 / 0.2) 0%, oklch(0.78 0.15 200 / 0.1) 100%);
+}
+
+.icon-gradient-success {
+  background: linear-gradient(135deg, oklch(0.7 0.2 160 / 0.2) 0%, oklch(0.7 0.2 160 / 0.1) 100%);
+}
+
+.icon-gradient-warning {
+  background: linear-gradient(135deg, oklch(0.8 0.15 90 / 0.2) 0%, oklch(0.8 0.15 90 / 0.1) 100%);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .hub-anim { animation: none !important; transition: none !important; }

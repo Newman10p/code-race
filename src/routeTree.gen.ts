@@ -9,119 +9,44 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as StandingsRouteImport } from './routes/standings'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ResultsRouteImport } from './routes/results'
-import { Route as ReportRouteImport } from './routes/report'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as RaceRouteImport } from './routes/race'
-import { Route as PatronsRouteImport } from './routes/patrons'
-import { Route as OrganisationRouteImport } from './routes/organisation'
-import { Route as ManualRouteImport } from './routes/manual'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as LaunchRouteImport } from './routes/launch'
-import { Route as JoinRouteImport } from './routes/join'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as CriteriaRouteImport } from './routes/criteria'
-import { Route as CollabRouteImport } from './routes/collab'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as LearnIndexRouteImport } from './routes/learn.index'
-import { Route as CollabIndexRouteImport } from './routes/collab.index'
-import { Route as QuizCreateRouteImport } from './routes/quiz.create'
-import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
-import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
-import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
-import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
-import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
-import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
-import { Route as CollabDirectRouteImport } from './routes/collab.direct'
-import { Route as CollabCodeRouteImport } from './routes/collab.code'
-import { Route as CollabArenaRouteImport } from './routes/collab.arena'
+import { Route as AnnouncementsRouteImport } from './routes/announcements'
+import { Route as ChatRouteImport } from './routes/chat'
+import { Route as CollabRouteImport } from './routes/collab'
+import { Route as CriteriaRouteImport } from './routes/criteria'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as JoinRouteImport } from './routes/join'
+import { Route as LaunchRouteImport } from './routes/launch'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ManualRouteImport } from './routes/manual'
+import { Route as OrganisationRouteImport } from './routes/organisation'
+import { Route as PatronsRouteImport } from './routes/patrons'
+import { Route as RaceRouteImport } from './routes/race'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ReportRouteImport } from './routes/report'
+import { Route as ResultsRouteImport } from './routes/results'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StandingsRouteImport } from './routes/standings'
 import { Route as AdminCollabRouteImport } from './routes/admin.collab'
-import { Route as LearnLessonLessonIdRouteImport } from './routes/learn.lesson.$lessonId'
-import { Route as LearnCourseCourseIdRouteImport } from './routes/learn.course.$courseId'
+import { Route as CollabIndexRouteImport } from './routes/collab.index'
+import { Route as CollabArenaRouteImport } from './routes/collab.arena'
+import { Route as CollabCodeRouteImport } from './routes/collab.code'
+import { Route as CollabDirectRouteImport } from './routes/collab.direct'
+import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
+import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
+import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
+import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
+import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
+import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
+import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as CollabGGroupIdRouteImport } from './routes/collab.g.$groupId'
+import { Route as LearnCourseCourseIdRouteImport } from './routes/learn.course.$courseId'
+import { Route as LearnLessonLessonIdRouteImport } from './routes/learn.lesson.$lessonId'
 
-const StandingsRoute = StandingsRouteImport.update({
-  id: '/standings',
-  path: '/standings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResultsRoute = ResultsRouteImport.update({
-  id: '/results',
-  path: '/results',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportRoute = ReportRouteImport.update({
-  id: '/report',
-  path: '/report',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RaceRoute = RaceRouteImport.update({
-  id: '/race',
-  path: '/race',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PatronsRoute = PatronsRouteImport.update({
-  id: '/patrons',
-  path: '/patrons',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OrganisationRoute = OrganisationRouteImport.update({
-  id: '/organisation',
-  path: '/organisation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManualRoute = ManualRouteImport.update({
-  id: '/manual',
-  path: '/manual',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LaunchRoute = LaunchRouteImport.update({
-  id: '/launch',
-  path: '/launch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const JoinRoute = JoinRouteImport.update({
-  id: '/join',
-  path: '/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CriteriaRoute = CriteriaRouteImport.update({
-  id: '/criteria',
-  path: '/criteria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CollabRoute = CollabRouteImport.update({
-  id: '/collab',
-  path: '/collab',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AnnouncementsRoute = AnnouncementsRouteImport.update({
@@ -129,14 +54,89 @@ const AnnouncementsRoute = AnnouncementsRouteImport.update({
   path: '/announcements',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnIndexRoute = LearnIndexRouteImport.update({
-  id: '/learn/',
-  path: '/learn/',
+const CollabRoute = CollabRouteImport.update({
+  id: '/collab',
+  path: '/collab',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CriteriaRoute = CriteriaRouteImport.update({
+  id: '/criteria',
+  path: '/criteria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaunchRoute = LaunchRouteImport.update({
+  id: '/launch',
+  path: '/launch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManualRoute = ManualRouteImport.update({
+  id: '/manual',
+  path: '/manual',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganisationRoute = OrganisationRouteImport.update({
+  id: '/organisation',
+  path: '/organisation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PatronsRoute = PatronsRouteImport.update({
+  id: '/patrons',
+  path: '/patrons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RaceRoute = RaceRouteImport.update({
+  id: '/race',
+  path: '/race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultsRoute = ResultsRouteImport.update({
+  id: '/results',
+  path: '/results',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StandingsRoute = StandingsRouteImport.update({
+  id: '/standings',
+  path: '/standings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCollabRoute = AdminCollabRouteImport.update({
+  id: '/admin/collab',
+  path: '/admin/collab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CollabIndexRoute = CollabIndexRouteImport.update({
@@ -144,44 +144,9 @@ const CollabIndexRoute = CollabIndexRouteImport.update({
   path: '/',
   getParentRoute: () => CollabRoute,
 } as any)
-const QuizCreateRoute = QuizCreateRouteImport.update({
-  id: '/quiz/create',
-  path: '/quiz/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LessonsCreateRoute = LessonsCreateRouteImport.update({
-  id: '/lessons/create',
-  path: '/lessons/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LearnSetIdRoute = LearnSetIdRouteImport.update({
-  id: '/learn/$setId',
-  path: '/learn/$setId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
-  id: '/folder/$folderId',
-  path: '/folder/$folderId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CollabSettingsRoute = CollabSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => CollabRoute,
-} as any)
-const CollabRequestsRoute = CollabRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => CollabRoute,
-} as any)
-const CollabGroupsRoute = CollabGroupsRouteImport.update({
-  id: '/groups',
-  path: '/groups',
-  getParentRoute: () => CollabRoute,
-} as any)
-const CollabDirectRoute = CollabDirectRouteImport.update({
-  id: '/direct',
-  path: '/direct',
+const CollabArenaRoute = CollabArenaRouteImport.update({
+  id: '/arena',
+  path: '/arena',
   getParentRoute: () => CollabRoute,
 } as any)
 const CollabCodeRoute = CollabCodeRouteImport.update({
@@ -189,30 +154,65 @@ const CollabCodeRoute = CollabCodeRouteImport.update({
   path: '/code',
   getParentRoute: () => CollabRoute,
 } as any)
-const CollabArenaRoute = CollabArenaRouteImport.update({
-  id: '/arena',
-  path: '/arena',
+const CollabDirectRoute = CollabDirectRouteImport.update({
+  id: '/direct',
+  path: '/direct',
   getParentRoute: () => CollabRoute,
 } as any)
-const AdminCollabRoute = AdminCollabRouteImport.update({
-  id: '/admin/collab',
-  path: '/admin/collab',
+const CollabGroupsRoute = CollabGroupsRouteImport.update({
+  id: '/groups',
+  path: '/groups',
+  getParentRoute: () => CollabRoute,
+} as any)
+const CollabRequestsRoute = CollabRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => CollabRoute,
+} as any)
+const CollabSettingsRoute = CollabSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => CollabRoute,
+} as any)
+const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
+  id: '/folder/$folderId',
+  path: '/folder/$folderId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnLessonLessonIdRoute = LearnLessonLessonIdRouteImport.update({
-  id: '/learn/lesson/$lessonId',
-  path: '/learn/lesson/$lessonId',
+const LearnIndexRoute = LearnIndexRouteImport.update({
+  id: '/learn/',
+  path: '/learn/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LearnCourseCourseIdRoute = LearnCourseCourseIdRouteImport.update({
-  id: '/learn/course/$courseId',
-  path: '/learn/course/$courseId',
+const LearnSetIdRoute = LearnSetIdRouteImport.update({
+  id: '/learn/$setId',
+  path: '/learn/$setId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsCreateRoute = LessonsCreateRouteImport.update({
+  id: '/lessons/create',
+  path: '/lessons/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizCreateRoute = QuizCreateRouteImport.update({
+  id: '/quiz/create',
+  path: '/quiz/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CollabGGroupIdRoute = CollabGGroupIdRouteImport.update({
   id: '/g/$groupId',
   path: '/g/$groupId',
   getParentRoute: () => CollabRoute,
+} as any)
+const LearnCourseCourseIdRoute = LearnCourseCourseIdRouteImport.update({
+  id: '/learn/course/$courseId',
+  path: '/learn/course/$courseId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LearnLessonLessonIdRoute = LearnLessonLessonIdRouteImport.update({
+  id: '/learn/lesson/$lessonId',
+  path: '/learn/lesson/$lessonId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -464,116 +464,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/standings': {
-      id: '/standings'
-      path: '/standings'
-      fullPath: '/standings'
-      preLoaderRoute: typeof StandingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/results': {
-      id: '/results'
-      path: '/results'
-      fullPath: '/results'
-      preLoaderRoute: typeof ResultsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/report': {
-      id: '/report'
-      path: '/report'
-      fullPath: '/report'
-      preLoaderRoute: typeof ReportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/race': {
-      id: '/race'
-      path: '/race'
-      fullPath: '/race'
-      preLoaderRoute: typeof RaceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/patrons': {
-      id: '/patrons'
-      path: '/patrons'
-      fullPath: '/patrons'
-      preLoaderRoute: typeof PatronsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/organisation': {
-      id: '/organisation'
-      path: '/organisation'
-      fullPath: '/organisation'
-      preLoaderRoute: typeof OrganisationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manual': {
-      id: '/manual'
-      path: '/manual'
-      fullPath: '/manual'
-      preLoaderRoute: typeof ManualRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/launch': {
-      id: '/launch'
-      path: '/launch'
-      fullPath: '/launch'
-      preLoaderRoute: typeof LaunchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/join': {
-      id: '/join'
-      path: '/join'
-      fullPath: '/join'
-      preLoaderRoute: typeof JoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/criteria': {
-      id: '/criteria'
-      path: '/criteria'
-      fullPath: '/criteria'
-      preLoaderRoute: typeof CriteriaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collab': {
-      id: '/collab'
-      path: '/collab'
-      fullPath: '/collab'
-      preLoaderRoute: typeof CollabRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/announcements': {
@@ -583,18 +478,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AnnouncementsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn/': {
-      id: '/learn/'
-      path: '/learn'
-      fullPath: '/learn/'
-      preLoaderRoute: typeof LearnIndexRouteImport
+    '/collab': {
+      id: '/collab'
+      path: '/collab'
+      fullPath: '/collab'
+      preLoaderRoute: typeof CollabRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/criteria': {
+      id: '/criteria'
+      path: '/criteria'
+      fullPath: '/criteria'
+      preLoaderRoute: typeof CriteriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/launch': {
+      id: '/launch'
+      path: '/launch'
+      fullPath: '/launch'
+      preLoaderRoute: typeof LaunchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manual': {
+      id: '/manual'
+      path: '/manual'
+      fullPath: '/manual'
+      preLoaderRoute: typeof ManualRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organisation': {
+      id: '/organisation'
+      path: '/organisation'
+      fullPath: '/organisation'
+      preLoaderRoute: typeof OrganisationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/patrons': {
+      id: '/patrons'
+      path: '/patrons'
+      fullPath: '/patrons'
+      preLoaderRoute: typeof PatronsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/race': {
+      id: '/race'
+      path: '/race'
+      fullPath: '/race'
+      preLoaderRoute: typeof RaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/results': {
+      id: '/results'
+      path: '/results'
+      fullPath: '/results'
+      preLoaderRoute: typeof ResultsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/standings': {
+      id: '/standings'
+      path: '/standings'
+      fullPath: '/standings'
+      preLoaderRoute: typeof StandingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/collab': {
+      id: '/admin/collab'
+      path: '/admin/collab'
+      fullPath: '/admin/collab'
+      preLoaderRoute: typeof AdminCollabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/collab/': {
@@ -604,60 +604,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollabIndexRouteImport
       parentRoute: typeof CollabRoute
     }
-    '/quiz/create': {
-      id: '/quiz/create'
-      path: '/quiz/create'
-      fullPath: '/quiz/create'
-      preLoaderRoute: typeof QuizCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lessons/create': {
-      id: '/lessons/create'
-      path: '/lessons/create'
-      fullPath: '/lessons/create'
-      preLoaderRoute: typeof LessonsCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/learn/$setId': {
-      id: '/learn/$setId'
-      path: '/learn/$setId'
-      fullPath: '/learn/$setId'
-      preLoaderRoute: typeof LearnSetIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/folder/$folderId': {
-      id: '/folder/$folderId'
-      path: '/folder/$folderId'
-      fullPath: '/folder/$folderId'
-      preLoaderRoute: typeof FolderFolderIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/collab/settings': {
-      id: '/collab/settings'
-      path: '/settings'
-      fullPath: '/collab/settings'
-      preLoaderRoute: typeof CollabSettingsRouteImport
-      parentRoute: typeof CollabRoute
-    }
-    '/collab/requests': {
-      id: '/collab/requests'
-      path: '/requests'
-      fullPath: '/collab/requests'
-      preLoaderRoute: typeof CollabRequestsRouteImport
-      parentRoute: typeof CollabRoute
-    }
-    '/collab/groups': {
-      id: '/collab/groups'
-      path: '/groups'
-      fullPath: '/collab/groups'
-      preLoaderRoute: typeof CollabGroupsRouteImport
-      parentRoute: typeof CollabRoute
-    }
-    '/collab/direct': {
-      id: '/collab/direct'
-      path: '/direct'
-      fullPath: '/collab/direct'
-      preLoaderRoute: typeof CollabDirectRouteImport
+    '/collab/arena': {
+      id: '/collab/arena'
+      path: '/arena'
+      fullPath: '/collab/arena'
+      preLoaderRoute: typeof CollabArenaRouteImport
       parentRoute: typeof CollabRoute
     }
     '/collab/code': {
@@ -667,32 +618,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CollabCodeRouteImport
       parentRoute: typeof CollabRoute
     }
-    '/collab/arena': {
-      id: '/collab/arena'
-      path: '/arena'
-      fullPath: '/collab/arena'
-      preLoaderRoute: typeof CollabArenaRouteImport
+    '/collab/direct': {
+      id: '/collab/direct'
+      path: '/direct'
+      fullPath: '/collab/direct'
+      preLoaderRoute: typeof CollabDirectRouteImport
       parentRoute: typeof CollabRoute
     }
-    '/admin/collab': {
-      id: '/admin/collab'
-      path: '/admin/collab'
-      fullPath: '/admin/collab'
-      preLoaderRoute: typeof AdminCollabRouteImport
+    '/collab/groups': {
+      id: '/collab/groups'
+      path: '/groups'
+      fullPath: '/collab/groups'
+      preLoaderRoute: typeof CollabGroupsRouteImport
+      parentRoute: typeof CollabRoute
+    }
+    '/collab/requests': {
+      id: '/collab/requests'
+      path: '/requests'
+      fullPath: '/collab/requests'
+      preLoaderRoute: typeof CollabRequestsRouteImport
+      parentRoute: typeof CollabRoute
+    }
+    '/collab/settings': {
+      id: '/collab/settings'
+      path: '/settings'
+      fullPath: '/collab/settings'
+      preLoaderRoute: typeof CollabSettingsRouteImport
+      parentRoute: typeof CollabRoute
+    }
+    '/folder/$folderId': {
+      id: '/folder/$folderId'
+      path: '/folder/$folderId'
+      fullPath: '/folder/$folderId'
+      preLoaderRoute: typeof FolderFolderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn/lesson/$lessonId': {
-      id: '/learn/lesson/$lessonId'
-      path: '/learn/lesson/$lessonId'
-      fullPath: '/learn/lesson/$lessonId'
-      preLoaderRoute: typeof LearnLessonLessonIdRouteImport
+    '/learn/': {
+      id: '/learn/'
+      path: '/learn'
+      fullPath: '/learn/'
+      preLoaderRoute: typeof LearnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/learn/course/$courseId': {
-      id: '/learn/course/$courseId'
-      path: '/learn/course/$courseId'
-      fullPath: '/learn/course/$courseId'
-      preLoaderRoute: typeof LearnCourseCourseIdRouteImport
+    '/learn/$setId': {
+      id: '/learn/$setId'
+      path: '/learn/$setId'
+      fullPath: '/learn/$setId'
+      preLoaderRoute: typeof LearnSetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons/create': {
+      id: '/lessons/create'
+      path: '/lessons/create'
+      fullPath: '/lessons/create'
+      preLoaderRoute: typeof LessonsCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/create': {
+      id: '/quiz/create'
+      path: '/quiz/create'
+      fullPath: '/quiz/create'
+      preLoaderRoute: typeof QuizCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/collab/g/$groupId': {
@@ -701,6 +687,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/collab/g/$groupId'
       preLoaderRoute: typeof CollabGGroupIdRouteImport
       parentRoute: typeof CollabRoute
+    }
+    '/learn/course/$courseId': {
+      id: '/learn/course/$courseId'
+      path: '/learn/course/$courseId'
+      fullPath: '/learn/course/$courseId'
+      preLoaderRoute: typeof LearnCourseCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/learn/lesson/$lessonId': {
+      id: '/learn/lesson/$lessonId'
+      path: '/learn/lesson/$lessonId'
+      fullPath: '/learn/lesson/$lessonId'
+      preLoaderRoute: typeof LearnLessonLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

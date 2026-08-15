@@ -139,7 +139,7 @@ function Dashboard() {
         <div className="mb-10 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              <span className="text-primary">Setter</span> Dashboard
+              <span className="bg-gradient-to-r from-primary via-purple-400 to-indigo-400 bg-clip-text text-transparent">Setter</span> Dashboard
             </h1>
             <p className="mt-1 text-muted-foreground">
               Manage your folders, quizzes, and launch live races.
@@ -165,7 +165,7 @@ function Dashboard() {
               </Button>
             </Link>
             <Link to="/lessons/create" search={{ courseId: "" }}>
-              <Button variant="neon" size="sm">
+              <Button variant="neon" size="sm" className="glow-btn">
                 <GraduationCap className="h-4 w-4" />
                 New Lesson Course
               </Button>
@@ -178,9 +178,9 @@ function Dashboard() {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <GlowCard>
+          <GlowCard className="card-gradient">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg icon-gradient-primary">
                 <FolderOpen className="h-5 w-5 text-primary" />
               </div>
               <div>
@@ -189,10 +189,10 @@ function Dashboard() {
               </div>
             </div>
           </GlowCard>
-          <GlowCard>
+          <GlowCard className="card-gradient">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <BookOpen className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg icon-gradient-success">
+                <BookOpen className="h-5 w-5 text-green-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{folders.reduce((a, f) => a + f.quizCount, 0)}</p>
@@ -200,10 +200,10 @@ function Dashboard() {
               </div>
             </div>
           </GlowCard>
-          <GlowCard>
+          <GlowCard className="card-gradient">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Trophy className="h-5 w-5 text-primary" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg icon-gradient-warning">
+                <Trophy className="h-5 w-5 text-yellow-500" />
               </div>
               <div>
                 <p className="text-2xl font-bold">{folders.reduce((a, f) => a + f.totalPoints, 0).toLocaleString()}</p>
@@ -215,7 +215,7 @@ function Dashboard() {
 
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">Your Folders</h2>
-          <Button variant="neon" size="sm" onClick={() => setShowNewFolder(true)}>
+          <Button variant="neon" size="sm" className="glow-btn" onClick={() => setShowNewFolder(true)}>
             <Plus className="h-4 w-4" />
             New Folder
           </Button>
@@ -239,8 +239,12 @@ function Dashboard() {
         )}
 
         {folders.length === 0 ? (
-          <GlowCard className="text-center py-12">
-            <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <GlowCard className="text-center py-12 card-gradient">
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl icon-gradient-primary">
+                <FolderOpen className="h-8 w-8 text-primary" />
+              </div>
+            </div>
             <p className="text-muted-foreground">No folders yet. Create one to get started.</p>
           </GlowCard>
         ) : (
@@ -248,13 +252,13 @@ function Dashboard() {
             {folders.map((folder) => (
               <div key={folder.id} className="group relative">
                 <Link to="/folder/$folderId" params={{ folderId: folder.id }}>
-                  <GlowCard className="transition-transform hover:scale-[1.02]">
+                  <GlowCard className="transition-all hover:scale-[1.03] card-gradient group">
                     <div className="mb-4 flex items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-indigo-500/20 group-hover:from-primary/30 group-hover:to-indigo-500/30 transition-all">
                         <FolderOpen className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="truncate font-semibold">{folder.name}</h3>
+                        <h3 className="truncate font-semibold group-hover:text-primary transition-colors">{folder.name}</h3>
                         <p className="text-xs text-muted-foreground">{folder.quizCount} quizzes</p>
                       </div>
                     </div>
@@ -269,7 +273,7 @@ function Dashboard() {
                 </Link>
                 <button
                   onClick={(e) => { e.preventDefault(); deleteFolder(folder.id); }}
-                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-destructive/20 text-destructive"
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all p-2 rounded-full hover:bg-destructive/20 text-destructive hover:scale-110"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -290,49 +294,53 @@ function Dashboard() {
         </div>
 
         {courses.length === 0 ? (
-          <GlowCard className="text-center py-8">
-            <GraduationCap className="mx-auto h-10 w-10 text-muted-foreground mb-3" />
+          <GlowCard className="text-center py-8 card-gradient">
+            <div className="mb-3 flex justify-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl icon-gradient-primary">
+                <GraduationCap className="h-7 w-7 text-primary" />
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground">No lesson courses yet. Create one or ask the AI Assistant to draft one.</p>
           </GlowCard>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
               <div key={c.id} className="group relative">
-                <GlowCard className="transition-transform hover:scale-[1.02]">
+                <GlowCard className="transition-all hover:scale-[1.03] card-gradient group">
                   {c.cover_image_url ? (
-                    <img src={c.cover_image_url} alt="" className="mb-3 h-24 w-full rounded-lg object-cover" />
+                    <img src={c.cover_image_url} alt="" className="mb-3 h-24 w-full rounded-lg object-cover ring-1 ring-primary/10 group-hover:ring-primary/30 transition-all" />
                   ) : (
-                    <div className="mb-3 flex h-24 w-full items-center justify-center rounded-lg bg-primary/10">
+                    <div className="mb-3 flex h-24 w-full items-center justify-center rounded-lg bg-gradient-to-br from-primary/15 to-indigo-500/15 group-hover:from-primary/25 group-hover:to-indigo-500/25 transition-all">
                       <GraduationCap className="h-8 w-8 text-primary" />
                     </div>
                   )}
                   <div className="mb-1 flex items-center gap-2">
-                    <h3 className="flex-1 truncate font-semibold">{c.title}</h3>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${c.is_public ? "bg-green-500/20 text-green-500" : "bg-muted text-muted-foreground"}`}>
+                    <h3 className="flex-1 truncate font-semibold group-hover:text-primary transition-colors">{c.title}</h3>
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${c.is_public ? "bg-green-500/25 text-green-400 ring-1 ring-green-500/30" : "bg-muted/50 text-muted-foreground ring-1 ring-border"}`}>
                       {c.is_public ? "Public" : "Draft"}
                     </span>
                   </div>
-                  {c.subject && <p className="mb-1 text-[11px] text-primary">{c.subject}</p>}
+                  {c.subject && <p className="mb-1 text-[11px] text-primary font-medium">{c.subject}</p>}
                   <p className="text-xs text-muted-foreground">{c.lesson_count} lesson{c.lesson_count === 1 ? "" : "s"}</p>
                   <div className="mt-3 flex flex-wrap items-center gap-1">
                     <Link to="/lessons/create" search={{ courseId: c.id }}>
-                      <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                      <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs hover:bg-primary/10 hover:text-primary">
                         <Edit className="h-3 w-3" /> Edit
                       </Button>
                     </Link>
                     {c.lesson_count > 0 && (
                       <Link to="/learn/course/$courseId" params={{ courseId: c.id }}>
-                        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+                        <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs hover:bg-primary/10 hover:text-primary">
                           <BookOpen className="h-3 w-3" /> Preview
                         </Button>
                       </Link>
                     )}
-                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs" onClick={() => toggleCoursePublish(c.id, c.is_public)}>
+                    <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs hover:bg-primary/10 hover:text-primary" onClick={() => toggleCoursePublish(c.id, c.is_public)}>
                       {c.is_public ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                       {c.is_public ? "Unpublish" : "Publish"}
                     </Button>
                     <div className="flex-1" />
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteCourse(c.id)}>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/20 hover:scale-110" onClick={() => deleteCourse(c.id)}>
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
