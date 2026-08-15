@@ -1,4 +1,7 @@
 ```
+# Database migrations
+supabase/migrations/*.sql
+
 # Dependencies
 node_modules/
 

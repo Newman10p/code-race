@@ -109,169 +109,111 @@ function ChatPage() {
   return (
     <HoneycombLayout>
       <Navbar />
-      <main className="relative mx-auto flex h-[calc(100vh-4rem)] max-w-5xl flex-col overflow-hidden px-4 py-6">
-        {/* Header with modern gradient */}
-        <div className="mb-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-4 shadow-lg shadow-purple-500/20">
-          <Link to={isSetter ? "/dashboard" : "/organisation"} className="group inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20">
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" /> 
-            Back
-          </Link>
-          <div className="flex items-center gap-3">
-            <div className="text-right">
-              <h1 className="flex items-center gap-2 text-xl font-bold text-white">
-                <MessageSquare className="h-5 w-5" /> 
-                Patron Chat
-              </h1>
-              <p className="text-xs text-white/80">Connect with setters & patrons</p>
-            </div>
-            <div className="flex items-center gap-2 rounded-full bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm">
-              <div className="relative">
-                <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
-                <div className="absolute inset-0 h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400/50" />
-              </div>
-              <span>{messages.length}</span>
-            </div>
+      <main className="mx-auto max-w-4xl px-4 py-8">
+        <Link to={isSetter ? "/dashboard" : "/organisation"} className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back
+        </Link>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="flex items-center gap-2 text-3xl font-bold tracking-tight">
+              <MessageSquare className="h-7 w-7 text-primary" /> 
+              Patron <span className="text-primary">Chat</span>
+            </h1>
+            <p className="mt-1 text-muted-foreground">A shared room for setters and school patrons.</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+            <span className="font-medium">{messages.length} messages</span>
           </div>
         </div>
 
-        {/* Chat Container */}
-        <GlowCard className="flex flex-1 overflow-hidden border-0 shadow-2xl shadow-purple-500/10">
-          <div className="relative flex flex-1 flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950">
+        <GlowCard className="overflow-hidden border-primary/30 shadow-lg">
+          <div className="relative mb-px h-[55vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-primary/30 hover:scrollbar-thumb-primary/50">
+            {/* Gradient overlay at top */}
+            <div className="pointer-events-none sticky top-0 z-10 h-8 bg-gradient-to-b from-background/80 to-transparent" />
             
-            {/* Messages Area */}
-            <div className="relative flex-1 overflow-y-auto px-4 py-6 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-purple-300 hover:scrollbar-thumb-purple-400 dark:scrollbar-thumb-purple-700 dark:hover:scrollbar-thumb-purple-600">
-              
-              {messages.length === 0 && (
-                <div className="flex h-full min-h-[400px] flex-col items-center justify-center gap-4 text-center">
-                  <div className="relative">
-                    <div className="absolute inset-0 animate-ping rounded-full bg-purple-200 opacity-20 dark:bg-purple-800" />
-                    <div className="relative rounded-full bg-gradient-to-br from-violet-500 to-purple-600 p-6 shadow-xl shadow-purple-500/30">
-                      <MessageSquare className="h-12 w-12 text-white" />
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xl font-bold text-slate-800 dark:text-slate-200">Start the Conversation</p>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Be the first to share ideas with your team!</p>
-                  </div>
+            {messages.length === 0 && (
+              <div className="flex h-full min-h-[300px] flex-col items-center justify-center gap-3 py-8 text-center">
+                <div className="rounded-full bg-primary/10 p-4">
+                  <MessageSquare className="h-8 w-8 text-primary" />
                 </div>
-              )}
-              
-              <div className="space-y-4">
-                {messages.map((m, idx) => {
-                  const mine = m.sender_id === user?.id;
-                  const prevMsg = idx > 0 ? messages[idx - 1] : null;
-                  const sameSender = prevMsg && prevMsg.sender_id === m.sender_id;
-                  const time = new Date(m.created_at);
-                  
-                  // Generate consistent color based on sender_id
-                  const colors = [
-                    'from-violet-500 to-purple-600',
-                    'from-blue-500 to-cyan-600',
-                    'from-emerald-500 to-teal-600',
-                    'from-orange-500 to-amber-600',
-                    'from-pink-500 to-rose-600',
-                    'from-indigo-500 to-blue-600',
-                  ];
-                  const colorIndex = m.sender_id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-                  const senderColor = colors[colorIndex];
-                  
-                  return (
-                    <div 
-                      key={m.id} 
-                      className={`flex ${mine ? "justify-end" : "justify-start"} ${sameSender ? "mt-1" : "mt-4"}`}
-                    >
-                      <div className={`flex max-w-[75%] items-end gap-2 ${mine ? "flex-row-reverse" : "flex-row"}`}>
-                        
-                        {/* Avatar */}
-                        {!sameSender && (
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${senderColor} shadow-md ring-2 ring-white dark:ring-slate-800`}>
-                            <span className="text-xs font-bold text-white">
-                              {m.sender_name.charAt(0).toUpperCase()}
-                            </span>
+                <div>
+                  <p className="text-lg font-medium">No messages yet</p>
+                  <p className="text-sm text-muted-foreground">Be the first to say hello!</p>
+                </div>
+              </div>
+            )}
+            
+            <div className="space-y-4 px-2 pb-4 pt-2">
+              {messages.map((m, idx) => {
+                const mine = m.sender_id === user?.id;
+                const showHeader = idx === 0 || messages[idx - 1].sender_id !== m.sender_id;
+                return (
+                  <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+                    <div className={`group relative max-w-[85%] transition-all duration-200 hover:scale-[1.01]`}>
+                      {showHeader && !mine && (
+                        <div className="mb-1.5 flex items-center gap-2 px-1">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-xs font-bold text-primary-foreground">
+                            {m.sender_name.charAt(0).toUpperCase()}
+                          </div>
+                          <span className="text-xs font-medium text-muted-foreground">{m.sender_name}</span>
+                        </div>
+                      )}
+                      <div
+                        className={`relative overflow-hidden rounded-2xl border p-4 shadow-sm backdrop-blur-sm ${
+                          mine
+                            ? "border-primary/50 bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 shadow-primary/10"
+                            : "border-border/60 bg-card/80 shadow-black/5"
+                        }`}
+                      >
+                        {!mine && showHeader && (
+                          <div className="absolute -left-3 top-4 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary/80 to-primary/40 text-xs font-bold text-primary-foreground shadow-md">
+                            {m.sender_name.charAt(0).toUpperCase()}
                           </div>
                         )}
-                        {sameSender && <div className="w-8" />}
-                        
-                        {/* Message Bubble */}
-                        <div className="group relative">
-                          {!sameSender && (
-                            <div className={`mb-1.5 px-1 text-xs font-semibold ${mine ? "text-right text-purple-600 dark:text-purple-400" : "text-slate-600 dark:text-slate-400"}`}>
-                              {m.sender_name}
-                              <span className="ml-2 font-normal text-slate-400 dark:text-slate-500">
-                                {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                          )}
-                          
-                          <div
-                            className={`relative overflow-hidden px-4 py-3 shadow-md transition-all duration-200 hover:shadow-lg ${
-                              mine
-                                ? "rounded-2xl rounded-tr-sm bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-600 text-white shadow-purple-500/25"
-                                : "rounded-2xl rounded-tl-sm bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-slate-200/50 dark:shadow-slate-900/50"
-                            }`}
-                          >
-                            <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>
-                            
-                            {/* Timestamp for grouped messages */}
-                            {sameSender && (
-                              <div className={`mt-1.5 text-xs ${mine ? "text-white/60" : "text-slate-400 dark:text-slate-500"}`}>
-                                {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        <p className={`mb-2 text-xs font-medium uppercase tracking-wide ${
+                          mine ? "text-primary/80" : "text-muted-foreground/70"
+                        }`}>
+                          {m.sender_role} • {new Date(m.created_at).toLocaleString(undefined, {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </p>
+                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{m.body}</p>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-              
-              <div ref={bottomRef} />
+                  </div>
+                );
+              })}
             </div>
             
-            {/* Input Area */}
-            <div className="border-t border-slate-200/60 bg-white/80 p-4 backdrop-blur-xl dark:border-slate-700/60 dark:bg-slate-900/80">
-              <div className="mx-auto flex max-w-4xl items-end gap-3">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hidden h-10 w-10 shrink-0 rounded-full text-slate-400 hover:text-purple-600 sm:flex"
-                >
-                  <Paperclip className="h-5 w-5" />
-                </Button>
-                
-                <div className="relative flex-1">
-                  <Textarea
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-                    }}
-                    placeholder="Type your message..."
-                    className="min-h-[50px] max-h-[120px] resize-none rounded-2xl border-0 bg-slate-100 px-4 py-3 pr-12 text-sm focus-visible:ring-2 focus-visible:ring-purple-500 dark:bg-slate-800 dark:placeholder:text-slate-500"
-                    rows={1}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute bottom-2 right-2 h-8 w-8 rounded-full text-slate-400 hover:text-purple-600"
-                  >
-                    <Smile className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <Button 
-                  onClick={send} 
-                  disabled={sending || !body.trim()}
-                  className="h-12 w-12 shrink-0 rounded-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 p-0 shadow-lg shadow-purple-500/30 transition-all hover:scale-105 hover:shadow-purple-500/50 disabled:opacity-50 disabled:hover:scale-100"
-                >
-                  <Send className={`h-5 w-5 text-white transition-transform ${sending ? "" : "ml-0.5"}`} />
-                </Button>
-              </div>
-              
-              <p className="mt-2 text-center text-xs text-slate-400 dark:text-slate-500">
-                Press Enter to send, Shift+Enter for new line
-              </p>
+            {/* Gradient overlay at bottom */}
+            <div ref={bottomRef} className="sticky bottom-0 h-8 bg-gradient-to-t from-background/80 to-transparent" />
+          </div>
+          
+          {/* Input area with gradient border effect */}
+          <div className="relative border-t border-border/50 bg-background/50 p-4 backdrop-blur-sm">
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+            <div className="flex gap-3">
+              <Textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                }}
+                placeholder="Write a message... (Enter to send, Shift+Enter for new line)"
+                className="min-h-[60px] resize-none rounded-xl border-border/60 bg-card/80 focus:border-primary/70 focus:ring-primary/20"
+              />
+              <Button 
+                variant="neon" 
+                onClick={send} 
+                disabled={sending || !body.trim()}
+                className="h-auto min-w-[50px] rounded-xl px-4 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+              >
+                <Send className={`h-4 w-4 transition-transform ${sending ? "" : "group-hover:translate-x-0.5"}`} />
+              </Button>
             </div>
           </div>
         </GlowCard>
