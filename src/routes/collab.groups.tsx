@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { myDisplayName } from "@/lib/collab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ const PRIVACY_ICON: Record<string, typeof Lock> = {
 
 function GroupsPage() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const [groups, setGroups] = useState<GroupRow[]>([]);
   const [discover, setDiscover] = useState<GroupRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +58,16 @@ function GroupsPage() {
   const [description, setDescription] = useState("");
   const [privacy, setPrivacy] = useState("invite_only");
   const [saving, setSaving] = useState(false);
+
+  // Theme-based color utilities
+  const themeColors = {
+    cyan:   { from: "from-cyan-500", to: "to-blue-500", bg: "bg-cyan-50", border: "border-cyan-200", text: "text-cyan-700", darkBg: "dark:bg-cyan-900/20", darkBorder: "dark:border-cyan-800", darkText: "dark:text-cyan-300", iconBg: "from-cyan-100 to-blue-100", darkIconBg: "dark:from-cyan-900/30 dark:to-blue-900/30" },
+    blue:   { from: "from-blue-500", to: "to-indigo-500", bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", darkBg: "dark:bg-blue-900/20", darkBorder: "dark:border-blue-800", darkText: "dark:text-blue-300", iconBg: "from-blue-100 to-indigo-100", darkIconBg: "dark:from-blue-900/30 dark:to-indigo-900/30" },
+    red:    { from: "from-red-500", to: "to-rose-500", bg: "bg-red-50", border: "border-red-200", text: "text-red-700", darkBg: "dark:bg-red-900/20", darkBorder: "dark:border-red-800", darkText: "dark:text-red-300", iconBg: "from-red-100 to-rose-100", darkIconBg: "dark:from-red-900/30 dark:to-rose-900/30" },
+    purple: { from: "from-purple-500", to: "to-violet-500", bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-700", darkBg: "dark:bg-purple-900/20", darkBorder: "dark:border-purple-800", darkText: "dark:text-purple-300", iconBg: "from-purple-100 to-violet-100", darkIconBg: "dark:from-purple-900/30 dark:to-violet-900/30" },
+    yellow: { from: "from-yellow-500", to: "to-amber-500", bg: "bg-yellow-50", border: "border-yellow-200", text: "text-yellow-700", darkBg: "dark:bg-yellow-900/20", darkBorder: "dark:border-yellow-800", darkText: "dark:text-yellow-300", iconBg: "from-yellow-100 to-amber-100", darkIconBg: "dark:from-yellow-900/30 dark:to-amber-900/30" },
+  };
+  const colors = themeColors[theme];
 
   useEffect(() => {
     if (!user) return;
@@ -133,7 +145,7 @@ function GroupsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <div className="animate-pulse text-slate-500 dark:text-slate-400">Loading your groups...</div>
+      <div className={`animate-pulse ${colors.text} dark:${colors.darkText}`}>Loading your groups...</div>
     </div>
   );
 
@@ -144,7 +156,7 @@ function GroupsPage() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button 
-              className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-200" 
+              className={`bg-gradient-to-r ${colors.from} ${colors.to} hover:opacity-90 text-white shadow-lg transition-all duration-200`} 
               size="sm" 
               disabled={!canCreate}
             >
@@ -153,7 +165,7 @@ function GroupsPage() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+              <DialogTitle className={`text-xl font-bold bg-gradient-to-r ${colors.from} ${colors.to} bg-clip-text text-transparent`}>
                 Create Collaboration Space
               </DialogTitle>
             </DialogHeader>
@@ -166,7 +178,7 @@ function GroupsPage() {
                   onChange={(e) => setName(e.target.value)} 
                   placeholder="e.g., Python Study Group" 
                   maxLength={60}
-                  className="border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+                  className={`focus:${colors.border.replace('border', 'border')} focus:ring-${theme}-500`}
                 />
               </div>
               <div className="space-y-1.5">
@@ -177,13 +189,13 @@ function GroupsPage() {
                   onChange={(e) => setDescription(e.target.value)} 
                   maxLength={300} 
                   placeholder="What will this group work on?"
-                  className="border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+                  className={`focus:${colors.border.replace('border', 'border')} focus:ring-${theme}-500`}
                 />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="g-priv" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Privacy</Label>
                 <Select value={privacy} onValueChange={setPrivacy}>
-                  <SelectTrigger id="g-priv" className="border-slate-200 dark:border-slate-700">
+                  <SelectTrigger id="g-priv">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -195,7 +207,7 @@ function GroupsPage() {
                 </Select>
               </div>
               <Button 
-                className="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" 
+                className={`w-full bg-gradient-to-r ${colors.from} ${colors.to} hover:opacity-90 text-white shadow-lg`} 
                 onClick={create} 
                 disabled={saving || !name.trim()}
               >
@@ -215,17 +227,17 @@ function GroupsPage() {
       </div>
 
       {!canCreate && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
+        <div className={`rounded-xl border ${colors.border} ${colors.bg} ${colors.darkBg} ${colors.darkBorder} p-4`}>
+          <p className={`text-sm ${colors.text} ${colors.darkText}`}>
             ⚠️ Group creation is currently disabled by your school administrator.
           </p>
         </div>
       )}
 
       {groups.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-12 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30">
-            <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" aria-hidden />
+        <div className={`rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-12 text-center shadow-sm`}>
+          <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br ${colors.iconBg} ${colors.darkIconBg}`}>
+            <Users className={`h-8 w-8 ${colors.text} dark:${colors.darkText}`} aria-hidden />
           </div>
           <p className="mb-2 text-lg font-semibold text-slate-800 dark:text-slate-100">Create Your First Group</p>
           <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
@@ -241,17 +253,17 @@ function GroupsPage() {
                 <Link
                   to="/collab/g/$groupId"
                   params={{ groupId: g.id }}
-                  className="group block h-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-indigo-300 dark:hover:border-indigo-700"
+                  className={`group block h-full rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-5 transition-all duration-200 hover:shadow-xl hover:-translate-y-1 hover:border-${theme}-400 dark:hover:border-${theme}-600`}
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2.5">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30">
-                        <Icon className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" aria-hidden />
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br ${colors.iconBg} ${colors.darkIconBg}`}>
+                        <Icon className={`h-4 w-4 shrink-0 ${colors.text} dark:${colors.darkText}`} aria-hidden />
                       </div>
                       <span className="truncate font-semibold text-slate-800 dark:text-slate-100">{g.name}</span>
                     </div>
                     {g.is_default && (
-                      <span className="rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                      <span className={`rounded-full bg-gradient-to-r ${colors.from} ${colors.to} px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm`}>
                         School
                       </span>
                     )}
@@ -265,7 +277,7 @@ function GroupsPage() {
                       {g.member_count} member{g.member_count === 1 ? "" : "s"}
                     </span>
                     {g.my_role && g.my_role !== "member" && (
-                      <span className="flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2 py-0.5 text-indigo-700 dark:text-indigo-300">
+                      <span className={`flex items-center gap-1 rounded-full ${colors.bg} ${colors.darkBg} ${colors.text} ${colors.darkText} px-2 py-0.5`}>
                         <ShieldCheck className="h-3 w-3" />
                         {g.my_role}
                       </span>
@@ -288,7 +300,7 @@ function GroupsPage() {
           <h2 className="mb-4 text-xl font-bold text-slate-800 dark:text-slate-100">Discover Groups</h2>
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {discover.map((g) => (
-              <li key={g.id} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+              <li key={g.id} className={`rounded-2xl border ${colors.border} bg-white dark:bg-slate-800 p-5 shadow-sm`}>
                 <p className="font-semibold text-slate-800 dark:text-slate-100 mb-2">{g.name}</p>
                 <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
                   {g.description || "No description yet."}
@@ -296,7 +308,7 @@ function GroupsPage() {
                 <Button 
                   size="sm" 
                   onClick={() => join(g.id)}
-                  className="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-md shadow-indigo-500/20"
+                  className={`w-full bg-gradient-to-r ${colors.from} ${colors.to} hover:opacity-90 text-white shadow-md`}
                 >
                   Join Group
                 </Button>
