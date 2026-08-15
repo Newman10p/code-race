@@ -51,8 +51,8 @@ function HubSettings() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="rounded-xl border hub-border hub-surface p-4">
-        <h2 className="mb-3 font-semibold hub-text">Chat appearance</h2>
+      <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Chat appearance</h2>
         <div className="space-y-4">
           {([["theme", THEMES], ["density", DENSITY], ["bubble_style", BUBBLES]] as const).map(([key, opts]) => (
             <div key={key} className="space-y-1.5">
@@ -61,7 +61,7 @@ function HubSettings() {
                 id={key}
                 value={prefs[key]}
                 onChange={(e) => save({ ...prefs, [key]: e.target.value })}
-                className="w-full rounded-md border hub-border hub-deep px-3 py-2 text-sm hub-text"
+                className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-800 dark:text-slate-100"
               >
                 {opts.map((o) => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -70,18 +70,18 @@ function HubSettings() {
         </div>
       </section>
 
-      <section className="rounded-xl border hub-border hub-surface p-4">
-        <h2 className="mb-1 font-semibold hub-text">Encryption key</h2>
-        <p className="mb-3 text-sm hub-text-dim">
+      <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <h2 className="mb-1 font-semibold text-slate-800 dark:text-slate-100">Encryption key</h2>
+        <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">
           Your private key lives only on this device. Copy the bundle below to read your private messages on another device.
         </p>
-        <p className="mb-3 font-mono text-xs text-primary">Fingerprint: {fp}</p>
+        <p className="mb-3 font-mono text-xs text-indigo-600 dark:text-indigo-400">Fingerprint: {fp}</p>
         <div className="space-y-2">
-          <Button size="sm" variant="outline" onClick={() => setBundle(exportDeviceKeyBundle(user!.id) || "")}>Show key bundle</Button>
+          <Button size="sm" className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg" onClick={() => setBundle(exportDeviceKeyBundle(user!.id) || "")}>Show key bundle</Button>
           <Textarea value={bundle} onChange={(e) => setBundle(e.target.value)} className="min-h-[100px] font-mono text-[10px]" aria-label="Key bundle" />
           <Button
             size="sm"
-            variant="neon"
+            className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25"
             onClick={() => {
               try {
                 importDeviceKeyBundle(user!.id, bundle);

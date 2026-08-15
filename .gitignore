@@ -1,37 +1,11 @@
 ```
-# Database migrations
-supabase/migrations/*.sql
-
 # Dependencies
 node_modules/
 
-# Build artifacts
+# Build outputs
 dist/
 build/
-*.tsbuildinfo
-
-# Environment variables
-.env
-.env.local
-*.env.*
-
-# Logs
-*.log
-
-# Coverage reports
-coverage/
-htmlcov/
-*.coverage
-
-# IDE specific
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS generated
-.DS_Store
-Thumbs.db
+target/
 
 # Python
 __pycache__/
@@ -39,30 +13,88 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-*.so
-
-# Virtual environments
+env/
 venv/
 .venv/
-.env/
+.ENV
+.ENV.local
+.env
+.env.local
+.env.
+.env.dev
+.env.prod
+.env.test
+.env.testing
 
-# Testing
-.pytest_cache/
-.mypy_cache/
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Coverage
 .coverage
+coverage/
+htmlcov/
 
-# Distribution / packaging
-*.tar.gz
-*.whl
-*.egg
-*.egg-info/
+# Database
+*.db
+*.sqlite
+*.sqlite3
 
 # Temporary files
 *.tmp
-*~
-```
+*.temp
+*.bak
 
-Wait, looking at the file changes again - only source files (.ts, .tsx, .css) and the existing .gitignore were modified. No build artifacts, dependencies, or temporary files were added. Following rule #6:
+# Compiled files
+*.class
+*.o
+*.obj
+*.out
+*.dll
+*.so
+*.a
+*.exe
 
-```
+# Compressed files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.Z
+*.lz
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyTest
+.pytest_cache/
+
+# Supabase
+supabase/.temp/
+supabase/logs/
+
+# Remix/React
+public/build/
+*.tsbuildinfo
 ```

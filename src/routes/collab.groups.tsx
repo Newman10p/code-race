@@ -131,45 +131,83 @@ function GroupsPage() {
 
   const canCreate = settings ? settings.allow_student_groups && !settings.freeze_group_creation : true;
 
-  if (loading) return <p className="py-16 text-center text-sm hub-text-dim">Loading your groups…</p>;
+  if (loading) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="animate-pulse text-slate-500 dark:text-slate-400">Loading your groups...</div>
+    </div>
+  );
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold hub-text">Your groups</h2>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Your Groups</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="neon" size="sm" disabled={!canCreate}>
-              <Plus className="h-4 w-4" /> New group
+            <Button 
+              className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-200" 
+              size="sm" 
+              disabled={!canCreate}
+            >
+              <Plus className="h-4 w-4 mr-1" /> Create Group
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Create a collaboration space</DialogTitle>
+              <DialogTitle className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                Create Collaboration Space
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
+            <div className="space-y-4 pt-4">
               <div className="space-y-1.5">
-                <Label htmlFor="g-name">Group name</Label>
-                <Input id="g-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Python Study Group" maxLength={60} />
+                <Label htmlFor="g-name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Group Name</Label>
+                <Input 
+                  id="g-name" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder="e.g., Python Study Group" 
+                  maxLength={60}
+                  className="border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="g-desc">Description</Label>
-                <Textarea id="g-desc" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={300} placeholder="What will this group work on?" />
+                <Label htmlFor="g-desc" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Description</Label>
+                <Textarea 
+                  id="g-desc" 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  maxLength={300} 
+                  placeholder="What will this group work on?"
+                  className="border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="g-priv">Privacy</Label>
+                <Label htmlFor="g-priv" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Privacy</Label>
                 <Select value={privacy} onValueChange={setPrivacy}>
-                  <SelectTrigger id="g-priv"><SelectValue /></SelectTrigger>
+                  <SelectTrigger id="g-priv" className="border-slate-200 dark:border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="invite_only">Invite only</SelectItem>
-                    <SelectItem value="request_to_join">Request to join</SelectItem>
-                    <SelectItem value="discoverable">Discoverable</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="invite_only">🔒 Invite Only</SelectItem>
+                    <SelectItem value="request_to_join">👥 Request to Join</SelectItem>
+                    <SelectItem value="discoverable">🌍 Discoverable</SelectItem>
+                    <SelectItem value="private">🔐 Private</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="neon" className="w-full" onClick={create} disabled={saving || !name.trim()}>
-                {saving ? "Creating…" : "Create group"}
+              <Button 
+                className="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" 
+                onClick={create} 
+                disabled={saving || !name.trim()}
+              >
+                {saving ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span> Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" /> Create Group
+                  </>
+                )}
               </Button>
             </div>
           </DialogContent>
@@ -177,19 +215,25 @@ function GroupsPage() {
       </div>
 
       {!canCreate && (
-        <p className="rounded-lg border hub-border hub-surface p-3 text-sm hub-text-dim">
-          Group creation is currently disabled by your school administrator.
-        </p>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4">
+          <p className="text-sm text-amber-800 dark:text-amber-200">
+            ⚠️ Group creation is currently disabled by your school administrator.
+          </p>
+        </div>
       )}
 
       {groups.length === 0 ? (
-        <div className="rounded-xl border hub-border hub-surface p-10 text-center">
-          <Users className="mx-auto mb-3 h-8 w-8 text-primary" aria-hidden />
-          <p className="mb-1 font-medium hub-text">Create your first collaboration space.</p>
-          <p className="text-sm hub-text-dim">Groups are where your class chats, shares code and runs coding sprints.</p>
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-12 text-center shadow-sm">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30">
+            <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" aria-hidden />
+          </div>
+          <p className="mb-2 text-lg font-semibold text-slate-800 dark:text-slate-100">Create Your First Group</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
+            Groups are where your class chats, shares code, and runs coding sprints together.
+          </p>
         </div>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((g) => {
             const Icon = PRIVACY_ICON[g.privacy] || Hash;
             return (
@@ -197,22 +241,40 @@ function GroupsPage() {
                 <Link
                   to="/collab/g/$groupId"
                   params={{ groupId: g.id }}
-                  className="block h-full rounded-xl border hub-border hub-surface p-4 transition-colors hover:hub-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                  className="group block h-full rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-indigo-300 dark:hover:border-indigo-700"
                 >
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="flex min-w-0 items-center gap-2">
-                      <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                      <span className="truncate font-semibold hub-text">{g.name}</span>
-                    </span>
-                    {g.is_default && <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">School</span>}
-                  </div>
-                  <p className="mb-3 line-clamp-2 text-sm hub-text-dim">{g.description || "No description yet."}</p>
-                  <div className="flex items-center gap-3 text-xs hub-text-dim">
-                    <span>{g.member_count} member{g.member_count === 1 ? "" : "s"}</span>
-                    {g.my_role && g.my_role !== "member" && (
-                      <span className="flex items-center gap-1 text-primary"><ShieldCheck className="h-3 w-3" aria-hidden />{g.my_role}</span>
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 to-violet-100 dark:from-indigo-900/30 dark:to-violet-900/30">
+                        <Icon className="h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400" aria-hidden />
+                      </div>
+                      <span className="truncate font-semibold text-slate-800 dark:text-slate-100">{g.name}</span>
+                    </div>
+                    {g.is_default && (
+                      <span className="rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+                        School
+                      </span>
                     )}
-                    {g.status === "frozen" && <span className="text-yellow-400">Restricted</span>}
+                  </div>
+                  <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                    {g.description || "No description yet."}
+                  </p>
+                  <div className="flex items-center gap-3 text-xs">
+                    <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                      <Users className="h-3.5 w-3.5" />
+                      {g.member_count} member{g.member_count === 1 ? "" : "s"}
+                    </span>
+                    {g.my_role && g.my_role !== "member" && (
+                      <span className="flex items-center gap-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 px-2 py-0.5 text-indigo-700 dark:text-indigo-300">
+                        <ShieldCheck className="h-3 w-3" />
+                        {g.my_role}
+                      </span>
+                    )}
+                    {g.status === "frozen" && (
+                      <span className="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-amber-700 dark:text-amber-300">
+                        🔒 Restricted
+                      </span>
+                    )}
                   </div>
                 </Link>
               </li>
@@ -223,13 +285,21 @@ function GroupsPage() {
 
       {discover.length > 0 && (
         <section>
-          <h2 className="mb-3 text-lg font-semibold hub-text">Discover</h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="mb-4 text-xl font-bold text-slate-800 dark:text-slate-100">Discover Groups</h2>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {discover.map((g) => (
-              <li key={g.id} className="rounded-xl border hub-border hub-surface p-4">
-                <p className="font-semibold hub-text">{g.name}</p>
-                <p className="mb-3 line-clamp-2 text-sm hub-text-dim">{g.description || "No description yet."}</p>
-                <Button size="sm" variant="outline" onClick={() => join(g.id)}>Join</Button>
+              <li key={g.id} className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-5 shadow-sm">
+                <p className="font-semibold text-slate-800 dark:text-slate-100 mb-2">{g.name}</p>
+                <p className="mb-4 line-clamp-2 text-sm text-slate-600 dark:text-slate-400">
+                  {g.description || "No description yet."}
+                </p>
+                <Button 
+                  size="sm" 
+                  onClick={() => join(g.id)}
+                  className="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-md shadow-indigo-500/20"
+                >
+                  Join Group
+                </Button>
               </li>
             ))}
           </ul>

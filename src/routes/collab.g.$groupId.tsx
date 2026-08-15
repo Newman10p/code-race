@@ -172,61 +172,61 @@ function GroupChat() {
     toast.success("Report sent to your school administrator.");
   };
 
-  if (loading) return <p className="py-16 text-center text-sm hub-text-dim">Loading conversation…</p>;
-  if (!group) return <p className="py-16 text-center text-sm hub-text-dim">This group is not available to you.</p>;
+  if (loading) return <p className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">Loading conversation…</p>;
+  if (!group) return <p className="py-16 text-center text-sm text-slate-500 dark:text-slate-400">This group is not available to you.</p>;
 
   const pinned = messages.filter((m) => m.is_pinned && !m.deleted_at);
   const frozen = group.status === "frozen";
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-      <div className="flex min-h-[60vh] flex-col rounded-xl border hub-border hub-surface">
-        <header className="flex items-center gap-3 border-b hub-border px-4 py-3">
-          <Link to="/collab/groups" aria-label="Back to groups" className="rounded p-1 hub-text-dim hover:text-white">
+      <div className="flex min-h-[60vh] flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+        <header className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 px-4 py-3">
+          <Link to="/collab/groups" aria-label="Back to groups" className="rounded p-1 text-slate-500 dark:text-slate-400 hover:text-white">
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className="min-w-0">
-            <h2 className="truncate font-semibold hub-text">{group.name}</h2>
-            <p className="truncate text-xs hub-text-dim">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
+            <h2 className="truncate font-semibold text-slate-800 dark:text-slate-100">{group.name}</h2>
+            <p className="truncate text-xs text-slate-500 dark:text-slate-400">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
           </div>
         </header>
 
         {pinned.length > 0 && (
-          <div className="border-b hub-border px-4 py-2">
-            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <div className="border-b border-slate-200 dark:border-slate-700 px-4 py-2">
+            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               <Pin className="h-3 w-3" aria-hidden /> Pinned
             </p>
             {pinned.slice(-2).map((m) => (
-              <p key={m.id} className="truncate text-xs hub-text-dim">{m.sender_name}: {m.body}</p>
+              <p key={m.id} className="truncate text-xs text-slate-500 dark:text-slate-400">{m.sender_name}: {m.body}</p>
             ))}
           </div>
         )}
 
         <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-          {messages.length === 0 && <p className="py-10 text-center text-sm hub-text-dim">No messages yet — start the conversation.</p>}
+          {messages.length === 0 && <p className="py-10 text-center text-sm text-slate-500 dark:text-slate-400">No messages yet — start the conversation.</p>}
           {messages.map((m) => {
             const mine = m.sender_id === user?.id;
             const parent = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
             const mrx = reactions.filter((r) => r.message_id === m.id);
             if (m.deleted_at) {
-              return <p key={m.id} className="text-xs italic hub-text-dim">Message removed.</p>;
+              return <p key={m.id} className="text-xs italic text-slate-500 dark:text-slate-400">Message removed.</p>;
             }
             return (
               <article key={m.id} className="group">
                 <div className="flex items-baseline gap-2">
-                  <span className={`text-sm font-semibold ${mine ? "text-primary" : "hub-text"}`}>{m.sender_name}</span>
-                  <time className="text-[11px] hub-text-dim">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
-                  {m.edited_at && <span className="text-[11px] hub-text-dim">(edited)</span>}
+                  <span className={`text-sm font-semibold ${mine ? "text-indigo-600 dark:text-indigo-400" : "text-slate-800 dark:text-slate-100"}`}>{m.sender_name}</span>
+                  <time className="text-[11px] text-slate-500 dark:text-slate-400">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
+                  {m.edited_at && <span className="text-[11px] text-slate-500 dark:text-slate-400">(edited)</span>}
                 </div>
                 {parent && (
-                  <p className="mt-1 border-l-2 border-primary/40 pl-2 text-xs hub-text-dim">
+                  <p className="mt-1 border-l-2 border-primary/40 pl-2 text-xs text-slate-500 dark:text-slate-400">
                     replying to {parent.sender_name}: {parent.body.slice(0, 80)}
                   </p>
                 )}
                 {m.kind === "code" ? (
                   <CodeBlock code={m.body} language={m.code_language} filename={m.code_filename} />
                 ) : (
-                  <p className="whitespace-pre-wrap text-sm hub-text">{m.body}</p>
+                  <p className="whitespace-pre-wrap text-sm text-slate-800 dark:text-slate-100">{m.body}</p>
                 )}
 
                 <div className="mt-1 flex flex-wrap items-center gap-1">
@@ -235,7 +235,7 @@ function GroupChat() {
                     if (!count) return null;
                     const active = mrx.some((r) => r.emoji === e && r.user_id === user?.id);
                     return (
-                      <button key={e} onClick={() => react(m.id, e)} aria-label={`React ${e}`} className={`rounded-full border px-2 py-0.5 text-xs ${active ? "border-primary text-primary" : "hub-border hub-text-dim"}`}>
+                      <button key={e} onClick={() => react(m.id, e)} aria-label={`React ${e}`} className={`rounded-full border px-2 py-0.5 text-xs ${active ? "border-primary text-indigo-600 dark:text-indigo-400" : "border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400"}`}>
                         {e} {count}
                       </button>
                     );
@@ -244,10 +244,10 @@ function GroupChat() {
                     {EMOJI.map((e) => (
                       <button key={e} onClick={() => react(m.id, e)} aria-label={`Add reaction ${e}`} className="rounded p-1 text-xs hover:bg-white/10">{e}</button>
                     ))}
-                    <button onClick={() => setReplyTo(m)} aria-label="Reply" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><CornerUpLeft className="h-3.5 w-3.5" /></button>
-                    {isMod && <button onClick={() => togglePin(m)} aria-label="Pin message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Pin className="h-3.5 w-3.5" /></button>}
-                    {(mine || isMod) && <button onClick={() => remove(m)} aria-label="Delete message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Trash2 className="h-3.5 w-3.5" /></button>}
-                    {!mine && <button onClick={() => setReportOn(m)} aria-label="Report message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Flag className="h-3.5 w-3.5" /></button>}
+                    <button onClick={() => setReplyTo(m)} aria-label="Reply" className="rounded p-1 text-slate-500 dark:text-slate-400 hover:bg-white/10 hover:text-white"><CornerUpLeft className="h-3.5 w-3.5" /></button>
+                    {isMod && <button onClick={() => togglePin(m)} aria-label="Pin message" className="rounded p-1 text-slate-500 dark:text-slate-400 hover:bg-white/10 hover:text-white"><Pin className="h-3.5 w-3.5" /></button>}
+                    {(mine || isMod) && <button onClick={() => remove(m)} aria-label="Delete message" className="rounded p-1 text-slate-500 dark:text-slate-400 hover:bg-white/10 hover:text-white"><Trash2 className="h-3.5 w-3.5" /></button>}
+                    {!mine && <button onClick={() => setReportOn(m)} aria-label="Report message" className="rounded p-1 text-slate-500 dark:text-slate-400 hover:bg-white/10 hover:text-white"><Flag className="h-3.5 w-3.5" /></button>}
                   </div>
                 </div>
               </article>
@@ -256,9 +256,9 @@ function GroupChat() {
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t hub-border p-3">
+        <div className="border-t border-slate-200 dark:border-slate-700 p-3">
           {replyTo && (
-            <div className="mb-2 flex items-center justify-between rounded border hub-border px-2 py-1 text-xs hub-text-dim">
+            <div className="mb-2 flex items-center justify-between rounded border border-slate-200 dark:border-slate-700 px-2 py-1 text-xs text-slate-500 dark:text-slate-400">
               <span className="truncate">Replying to {replyTo.sender_name}</span>
               <button onClick={() => setReplyTo(null)} aria-label="Cancel reply"><X className="h-3 w-3" /></button>
             </div>
@@ -267,7 +267,7 @@ function GroupChat() {
             <Input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder="filename (optional), e.g. solution.py" className="mb-2" />
           )}
           <div className="flex items-end gap-2">
-            <Button type="button" size="sm" variant={codeMode ? "neon" : "outline"} onClick={() => setCodeMode((v) => !v)} aria-pressed={codeMode}>
+            <Button type="button" size="sm" className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${codeMode ? "bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" : "border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"}`} onClick={() => setCodeMode((v) => !v)} aria-pressed={codeMode}>
               <Code2 className="h-4 w-4" /> Code
             </Button>
             <Textarea
@@ -284,20 +284,20 @@ function GroupChat() {
               className={codeMode ? "min-h-[120px] font-mono text-xs" : "min-h-[52px]"}
               aria-label="Message"
             />
-            <Button variant="neon" onClick={send} disabled={sending || !body.trim() || (frozen && !isMod)} aria-label="Send message">
+            <Button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" onClick={send} disabled={sending || !body.trim() || (frozen && !isMod)} aria-label="Send message">
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
       </div>
 
-      <aside className="h-fit rounded-xl border hub-border hub-surface p-4">
-        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold hub-text"><Smile className="h-4 w-4 text-primary" aria-hidden /> Members</h3>
+      <aside className="h-fit rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800 dark:text-slate-100"><Smile className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden /> Members</h3>
         <ul className="space-y-2">
           {members.map((m) => (
             <li key={m.user_id} className="flex items-center justify-between gap-2 text-sm">
-              <span className="truncate hub-text">{m.display_name || "Student"}</span>
-              {m.role !== "member" && <span className="shrink-0 text-[10px] uppercase text-primary">{m.role}</span>}
+              <span className="truncate text-slate-800 dark:text-slate-100">{m.display_name || "Student"}</span>
+              {m.role !== "member" && <span className="shrink-0 text-[10px] uppercase text-indigo-600 dark:text-indigo-400">{m.role}</span>}
             </li>
           ))}
         </ul>
@@ -320,8 +320,8 @@ function GroupChat() {
               <Label htmlFor="rn">What happened?</Label>
               <Textarea id="rn" value={reportNote} onChange={(e) => setReportNote(e.target.value)} maxLength={1000} />
             </div>
-            <p className="text-xs hub-text-dim">Your report goes to your school administrator. The reported message is attached as evidence.</p>
-            <Button variant="neon" className="w-full" onClick={submitReport}>Send report</Button>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Your report goes to your school administrator. The reported message is attached as evidence.</p>
+            <Button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" className="w-full" onClick={submitReport}>Send report</Button>
           </div>
         </DialogContent>
       </Dialog>

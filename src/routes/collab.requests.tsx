@@ -98,17 +98,17 @@ function RequestsPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <section className="rounded-xl border hub-border hub-surface p-4">
-        <h2 className="mb-3 font-semibold hub-text">Ask to chat privately</h2>
+      <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+        <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Ask to chat privately</h2>
         {!policy.allow_private_chat && (
-          <p className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <p className="mb-3 rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             Private conversations are currently switched off by your school administrator.
           </p>
         )}
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label htmlFor="who">Classmate</Label>
-            <select id="who" value={target} onChange={(e) => setTarget(e.target.value)} className="w-full rounded-md border hub-border hub-deep px-3 py-2 text-sm hub-text">
+            <select id="who" value={target} onChange={(e) => setTarget(e.target.value)} className="w-full rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-800 dark:text-slate-100">
               <option value="">Select someone from your groups…</option>
               {people.map((p) => <option key={p.user_id} value={p.user_id}>{p.display_name || "Student"}</option>)}
             </select>
@@ -117,37 +117,37 @@ function RequestsPage() {
             <Label htmlFor="why">Reason (optional)</Label>
             <Textarea id="why" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={300} placeholder="Want to pair on the Python task?" />
           </div>
-          <Button variant="neon" onClick={sendRequest} disabled={!target || !policy.allow_private_chat}>Send request</Button>
+          <Button className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" onClick={sendRequest} disabled={!target || !policy.allow_private_chat}>Send request</Button>
         </div>
       </section>
 
       <section className="space-y-4">
-        <div className="rounded-xl border hub-border hub-surface p-4">
-          <h2 className="mb-3 font-semibold hub-text">Incoming</h2>
-          {incoming.length === 0 ? <p className="text-sm hub-text-dim">No pending requests.</p> : (
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+          <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Incoming</h2>
+          {incoming.length === 0 ? <p className="text-sm text-slate-500 dark:text-slate-400">No pending requests.</p> : (
             <ul className="space-y-3">
               {incoming.map((r) => (
-                <li key={r.id} className="rounded-lg border hub-border p-3">
-                  <p className="text-sm hub-text">{r.requester_name}</p>
-                  {r.reason && <p className="mb-2 text-sm hub-text-dim">{r.reason}</p>}
+                <li key={r.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                  <p className="text-sm text-slate-800 dark:text-slate-100">{r.requester_name}</p>
+                  {r.reason && <p className="mb-2 text-sm text-slate-500 dark:text-slate-400">{r.reason}</p>}
                   <div className="flex gap-2">
-                    <Button size="sm" variant="neon" onClick={() => respond(r, "accepted")}>Accept</Button>
-                    <Button size="sm" variant="outline" onClick={() => respond(r, "declined")}>Decline</Button>
-                    <Button size="sm" variant="ghost" onClick={() => block(r.requester_id)}>Block</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 text-white shadow-lg shadow-indigo-500/25" onClick={() => respond(r, "accepted")}>Accept</Button>
+                    <Button size="sm" className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700" onClick={() => respond(r, "declined")}>Decline</Button>
+                    <Button size="sm" className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700" onClick={() => block(r.requester_id)}>Block</Button>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
-        <div className="rounded-xl border hub-border hub-surface p-4">
-          <h2 className="mb-3 font-semibold hub-text">Sent</h2>
-          {outgoing.length === 0 ? <p className="text-sm hub-text-dim">Nothing sent yet.</p> : (
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+          <h2 className="mb-3 font-semibold text-slate-800 dark:text-slate-100">Sent</h2>
+          {outgoing.length === 0 ? <p className="text-sm text-slate-500 dark:text-slate-400">Nothing sent yet.</p> : (
             <ul className="space-y-2">
               {outgoing.map((r) => (
                 <li key={r.id} className="flex items-center justify-between text-sm">
-                  <span className="hub-text">{r.recipient_name || "Student"}</span>
-                  <span className="text-xs uppercase hub-text-dim">{r.status}</span>
+                  <span className="text-slate-800 dark:text-slate-100">{r.recipient_name || "Student"}</span>
+                  <span className="text-xs uppercase text-slate-500 dark:text-slate-400">{r.status}</span>
                 </li>
               ))}
             </ul>

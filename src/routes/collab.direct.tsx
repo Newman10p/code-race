@@ -73,44 +73,121 @@ function DirectPage() {
   };
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[260px_1fr]">
-      <aside className="rounded-xl border hub-border hub-surface p-3">
-        <h2 className="mb-2 text-sm font-semibold hub-text">Conversations</h2>
-        {convos.length === 0 && <p className="text-sm hub-text-dim">Accepted chat requests appear here.</p>}
-        <ul className="space-y-1">
+    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+      <aside className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+        <h2 className="mb-3 text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <MessageCircle className="h-4 w-4 text-indigo-500" />
+          Conversations
+        </h2>
+        {convos.length === 0 && (
+          <div className="text-center py-8">
+            <Inbox className="h-8 w-8 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
+            <p className="text-sm text-slate-500 dark:text-slate-400">Accepted chat requests appear here</p>
+          </div>
+        )}
+        <ul className="space-y-1.5">
           {convos.map((c) => (
             <li key={c.id}>
-              <button onClick={() => openConvo(c)} className={`w-full truncate rounded px-2 py-1.5 text-left text-sm ${active?.id === c.id ? "bg-primary/15 text-primary" : "hub-text-dim hover:bg-white/5"}`}>
-                {other(c).name || "Student"}
+              <button 
+                onClick={() => openConvo(c)} 
+                className={`w-full truncate rounded-xl px-3 py-2.5 text-left text-sm font-medium transition-all duration-200 ${
+                  active?.id === c.id 
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-md shadow-indigo-500/20" 
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full ${active?.id === c.id ? "bg-white" : "bg-indigo-500"}`} />
+                  {other(c).name || "Student"}
+                </div>
               </button>
             </li>
           ))}
         </ul>
       </aside>
 
-      <section className="flex min-h-[55vh] flex-col rounded-xl border hub-border hub-surface">
+      <section className="flex min-h-[60vh] flex-col rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm overflow-hidden">
         {!active ? (
-          <p className="m-auto text-sm hub-text-dim">Select a conversation.</p>
+          <div className="m-auto text-center py-20">
+            <MessageCircle className="h-12 w-12 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+            <p className="text-slate-500 dark:text-slate-400">Select a conversation to start messaging</p>
+          </div>
         ) : (
           <>
-            <header className="flex items-center gap-2 border-b hub-border px-4 py-3">
-              <Lock className="h-4 w-4 text-primary" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold hub-text">{other(active).name || "Student"}</p>
-                <p className="text-xs hub-text-dim">Encrypted in your browser — the server stores ciphertext only.</p>
+            <header className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 px-5 py-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-md">
+                <Lock className="h-5 w-5" aria-hidden />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{other(active).name || "Student"}</p>
+                <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                    End-to-end encrypted
+                  </span>
+                </p>
               </div>
             </header>
-            <div className="flex-1 space-y-3 overflow-y-auto p-4">
-              {items.map((m) => (
-                <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${m.sender_id === user?.id ? "ml-auto bg-primary text-primary-foreground" : "hub-elevated hub-text"}`}>
-                  {m.text ?? <span className="italic opacity-70">Cannot decrypt on this device</span>}
+            <div className="flex-1 space-y-3 overflow-y-auto p-5 bg-slate-50 dark:bg-slate-900/50">
+              {items.map((m, idx) => {
+                const isMine = m.sender_id === user?.id;
+                const showAvatar = idx === 0 || items[idx - 1]?.sender_id !== m.sender_id;
+                return (
+                  <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                    <div className={`flex items-end gap-2 max-w-[75%] ${isMine ? "flex-row-reverse" : "flex-row"}`}>
+                      {showAvatar && (
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                          isMine 
+                            ? "bg-gradient-to-br from-indigo-500 to-violet-500 text-white" 
+                            : "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300"
+                        }`}>
+                          {(other(active).name || "S").charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
+                        isMine 
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-br-md" 
+                          : "bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 rounded-bl-md"
+                      }`}>
+                        {m.text ?? (
+                          <span className="italic opacity-70 flex items-center gap-1">
+                            <Lock className="h-3 w-3" /> Cannot decrypt
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {items.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">No messages yet — say hello! 👋</p>
                 </div>
-              ))}
-              {items.length === 0 && <p className="text-sm hub-text-dim">No messages yet.</p>}
+              )}
             </div>
-            <div className="flex items-end gap-2 border-t hub-border p-3">
-              <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Encrypted message…" className="min-h-[52px]" aria-label="Message" />
-              <Button variant="neon" onClick={send} disabled={!body.trim() || !peerKey} aria-label="Send"><Send className="h-4 w-4" /></Button>
+            <div className="flex items-end gap-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+              <Textarea 
+                value={body} 
+                onChange={(e) => setBody(e.target.value)} 
+                placeholder="Type your encrypted message..." 
+                className="min-h-[56px] flex-1 resize-none border-slate-200 dark:border-slate-700 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl" 
+                aria-label="Message"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    void send();
+                  }
+                }}
+              />
+              <Button 
+                
+                onClick={send} 
+                disabled={!body.trim() || !peerKey} 
+                aria-label="Send"
+                className="h-[56px] w-[56px] rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 shadow-lg shadow-indigo-500/25"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
             </div>
           </>
         )}
