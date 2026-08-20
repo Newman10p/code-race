@@ -1,0 +1,1 @@
+ALTER TABLE public.quizzes ADD COLUMN IF NOT EXISTS is_evaluation BOOLEAN NOT NULL DEFAULT false;
