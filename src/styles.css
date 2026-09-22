@@ -492,6 +492,16 @@
 .chat-send:hover:not(:disabled) { transform: translateY(-1px); }
 .chat-send:disabled { opacity: 0.4; }
 
+.chat-icon-btn--on {
+  background: var(--chat-accent);
+  color: var(--chat-accent-fg);
+  border-color: var(--chat-accent);
+}
+.chat-icon-btn--on:hover {
+  background: var(--chat-accent);
+  color: var(--chat-accent-fg);
+}
+
 .chat-divider {
   display: flex;
   align-items: center;

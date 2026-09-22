@@ -1,14 +1,16 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
-import { GlowCard } from "@/components/GlowCard";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { ChatSurface } from "@/components/chat/ChatSurface";
+import { ChatBubble } from "@/components/chat/ChatBubble";
+import { ChatAppearanceButton } from "@/components/chat/ChatAppearanceButton";
+import { useChatAppearance } from "@/hooks/useChatAppearance";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, MessageSquare, Send } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -36,6 +38,7 @@ interface Msg {
 function ChatPage() {
   const { user, loading: authLoading } = useAuth();
   const { isSetter, isPatron, loading: roleLoading } = useUserRole();
+  const { prefs, update } = useChatAppearance();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [body, setBody] = useState("");
@@ -72,7 +75,7 @@ function ChatPage() {
       .select("*")
       .order("created_at", { ascending: true })
       .limit(300);
-    setMessages(((data || []) as any[]) as Msg[]);
+    setMessages(((data || []) as unknown[]) as Msg[]);
     setLoading(false);
   };
 
@@ -91,7 +94,7 @@ function ChatPage() {
       body: body.trim(),
     });
     setSending(false);
-    if (error) { alert(error.message); return; }
+    if (error) { toast.error(error.message); return; }
     setBody("");
   };
 
@@ -118,42 +121,51 @@ function ChatPage() {
         </h1>
         <p className="mb-6 text-muted-foreground">A shared room for setters and school patrons.</p>
 
-        <GlowCard>
-          <div className="mb-4 max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+        <ChatSurface prefs={prefs} className="min-h-[62vh]">
+          <header className="chat-header">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold chat-strong">Setters &amp; patrons</p>
+              <p className="truncate text-xs chat-dim">{messages.length} messages in this room</p>
+            </div>
+            <ChatAppearanceButton prefs={prefs} onChange={update} />
+          </header>
+
+          <div className="chat-scroll">
             {messages.length === 0 && (
-              <p className="py-8 text-center text-sm text-muted-foreground">No messages yet. Say hello.</p>
+              <p className="py-10 text-center text-sm chat-dim">No messages yet. Say hello.</p>
             )}
-            {messages.map((m) => {
-              const mine = m.sender_id === user?.id;
-              return (
-                <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-lg border p-3 ${mine ? "border-primary bg-primary/10" : "border-border bg-background/50"}`}>
-                    <p className="mb-1 text-xs text-muted-foreground">
-                      {m.sender_name} · <span className="uppercase">{m.sender_role}</span> ·{" "}
-                      {new Date(m.created_at).toLocaleString()}
-                    </p>
-                    <p className="whitespace-pre-wrap text-sm">{m.body}</p>
-                  </div>
-                </div>
-              );
-            })}
+            {messages.map((m) => (
+              <ChatBubble
+                key={m.id}
+                mine={m.sender_id === user?.id}
+                name={m.sender_name}
+                meta={<span className="chat-chip">{m.sender_role}</span>}
+                time={new Date(m.created_at).toLocaleString([], { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+              >
+                <span className="whitespace-pre-wrap">{m.body}</span>
+              </ChatBubble>
+            ))}
             <div ref={bottomRef} />
           </div>
-          <div className="flex gap-2">
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-              }}
-              placeholder="Write a message... (Enter to send)"
-              className="min-h-[60px]"
-            />
-            <Button variant="neon" onClick={send} disabled={sending || !body.trim()}>
-              <Send className="h-4 w-4" />
-            </Button>
+
+          <div className="chat-composer">
+            <div className="flex items-end gap-2">
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
+                }}
+                placeholder="Write a message… (Enter to send)"
+                className="chat-input min-h-[56px]"
+                aria-label="Message"
+              />
+              <button type="button" onClick={send} disabled={sending || !body.trim()} aria-label="Send message" className="chat-send">
+                <Send className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-        </GlowCard>
+        </ChatSurface>
       </main>
     </HoneycombLayout>
   );
