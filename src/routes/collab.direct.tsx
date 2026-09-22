@@ -3,8 +3,10 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ensureDeviceKeys, encryptMessage, decryptMessage } from "@/lib/e2ee";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { ChatSurface } from "@/components/chat/ChatSurface";
+import { ChatBubble } from "@/components/chat/ChatBubble";
+import { ChatAppearanceButton } from "@/components/chat/ChatAppearanceButton";
+import { useChatAppearance } from "@/hooks/useChatAppearance";
 import { Lock, Send } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +28,7 @@ interface Convo { id: string; user_a: string; user_b: string; user_a_name: strin
 
 function DirectPage() {
   const { user } = useAuth();
+  const { prefs, update } = useChatAppearance();
   const [convos, setConvos] = useState<Convo[]>([]);
   const [active, setActive] = useState<Convo | null>(null);
   const [keys, setKeys] = useState<{ privateKey: CryptoKey; fp: string } | null>(null);
@@ -88,33 +91,54 @@ function DirectPage() {
         </ul>
       </aside>
 
-      <section className="flex min-h-[55vh] flex-col rounded-xl border hub-border hub-surface">
+      <ChatSurface prefs={prefs} className="min-h-[55vh]">
         {!active ? (
-          <p className="m-auto text-sm hub-text-dim">Select a conversation.</p>
+          <div className="flex flex-1 items-center justify-center p-8">
+            <p className="text-sm chat-dim">Select a conversation.</p>
+          </div>
         ) : (
           <>
-            <header className="flex items-center gap-2 border-b hub-border px-4 py-3">
-              <Lock className="h-4 w-4 text-primary" aria-hidden />
-              <div>
-                <p className="text-sm font-semibold hub-text">{other(active).name || "Student"}</p>
-                <p className="text-xs hub-text-dim">Encrypted in your browser — the server stores ciphertext only.</p>
+            <header className="chat-header">
+              <Lock className="h-4 w-4" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold chat-strong">{other(active).name || "Student"}</p>
+                <p className="truncate text-xs chat-dim">Encrypted in your browser — the server stores ciphertext only.</p>
               </div>
+              <ChatAppearanceButton prefs={prefs} onChange={update} />
             </header>
-            <div className="flex-1 space-y-3 overflow-y-auto p-4">
+            <div className="chat-scroll">
               {items.map((m) => (
-                <div key={m.id} className={`max-w-[75%] rounded-lg px-3 py-2 text-sm ${m.sender_id === user?.id ? "ml-auto bg-primary text-primary-foreground" : "hub-elevated hub-text"}`}>
+                <ChatBubble
+                  key={m.id}
+                  mine={m.sender_id === user?.id}
+                  name={m.sender_id === user?.id ? "You" : other(active).name || "Student"}
+                  time={new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                >
                   {m.text ?? <span className="italic opacity-70">Cannot decrypt on this device</span>}
-                </div>
+                </ChatBubble>
               ))}
-              {items.length === 0 && <p className="text-sm hub-text-dim">No messages yet.</p>}
+              {items.length === 0 && <p className="py-10 text-center text-sm chat-dim">No messages yet.</p>}
             </div>
-            <div className="flex items-end gap-2 border-t hub-border p-3">
-              <Textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Encrypted message…" className="min-h-[52px]" aria-label="Message" />
-              <Button variant="neon" onClick={send} disabled={!body.trim() || !peerKey} aria-label="Send"><Send className="h-4 w-4" /></Button>
+            <div className="chat-composer">
+              <div className="flex items-end gap-2">
+                <textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
+                  }}
+                  placeholder="Encrypted message…"
+                  className="chat-input min-h-[52px]"
+                  aria-label="Message"
+                />
+                <button type="button" onClick={send} disabled={!body.trim() || !peerKey} aria-label="Send" className="chat-send">
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </>
         )}
-      </section>
+      </ChatSurface>
     </div>
   );
 }
