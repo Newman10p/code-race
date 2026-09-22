@@ -4,6 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { myDisplayName, REPORT_CATEGORIES } from "@/lib/collab";
 import { CodeBlock, detectLanguage } from "@/components/collab/CodeBlock";
+import { ChatSurface } from "@/components/chat/ChatSurface";
+import { ChatBubble } from "@/components/chat/ChatBubble";
+import { ChatAppearanceButton } from "@/components/chat/ChatAppearanceButton";
+import { useChatAppearance } from "@/hooks/useChatAppearance";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -47,6 +51,7 @@ const EMOJI = ["👍", "🎉", "🔥", "💡", "❓", "✅"];
 function GroupChat() {
   const { groupId } = Route.useParams();
   const { user } = useAuth();
+  const { prefs, update } = useChatAppearance();
   const [group, setGroup] = useState<{ name: string; status: string; description: string | null } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -180,97 +185,113 @@ function GroupChat() {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
-      <div className="flex min-h-[60vh] flex-col rounded-xl border hub-border hub-surface">
-        <header className="flex items-center gap-3 border-b hub-border px-4 py-3">
-          <Link to="/collab/groups" aria-label="Back to groups" className="rounded p-1 hub-text-dim hover:text-white">
+      <ChatSurface prefs={prefs} className="min-h-[60vh]">
+        <header className="chat-header">
+          <Link to="/collab/groups" aria-label="Back to groups" className="chat-icon-btn">
             <ArrowLeft className="h-4 w-4" />
           </Link>
-          <div className="min-w-0">
-            <h2 className="truncate font-semibold hub-text">{group.name}</h2>
-            <p className="truncate text-xs hub-text-dim">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="truncate text-sm font-semibold chat-strong">{group.name}</h2>
+            <p className="truncate text-xs chat-dim">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
           </div>
+          <ChatAppearanceButton prefs={prefs} onChange={update} />
         </header>
 
         {pinned.length > 0 && (
-          <div className="border-b hub-border px-4 py-2">
-            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <div className="border-b px-4 py-2" style={{ borderColor: "var(--chat-border)" }}>
+            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider chat-strong">
               <Pin className="h-3 w-3" aria-hidden /> Pinned
             </p>
             {pinned.slice(-2).map((m) => (
-              <p key={m.id} className="truncate text-xs hub-text-dim">{m.sender_name}: {m.body}</p>
+              <p key={m.id} className="truncate text-xs chat-dim">{m.sender_name}: {m.body}</p>
             ))}
           </div>
         )}
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
-          {messages.length === 0 && <p className="py-10 text-center text-sm hub-text-dim">No messages yet — start the conversation.</p>}
+        <div className="chat-scroll">
+          {messages.length === 0 && <p className="py-10 text-center text-sm chat-dim">No messages yet — start the conversation.</p>}
           {messages.map((m) => {
             const mine = m.sender_id === user?.id;
             const parent = m.reply_to_id ? messages.find((x) => x.id === m.reply_to_id) : null;
             const mrx = reactions.filter((r) => r.message_id === m.id);
             if (m.deleted_at) {
-              return <p key={m.id} className="text-xs italic hub-text-dim">Message removed.</p>;
+              return <p key={m.id} className="text-xs italic chat-dim">Message removed.</p>;
             }
             return (
-              <article key={m.id} className="group">
-                <div className="flex items-baseline gap-2">
-                  <span className={`text-sm font-semibold ${mine ? "text-primary" : "hub-text"}`}>{m.sender_name}</span>
-                  <time className="text-[11px] hub-text-dim">{new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time>
-                  {m.edited_at && <span className="text-[11px] hub-text-dim">(edited)</span>}
-                </div>
-                {parent && (
-                  <p className="mt-1 border-l-2 border-primary/40 pl-2 text-xs hub-text-dim">
-                    replying to {parent.sender_name}: {parent.body.slice(0, 80)}
-                  </p>
-                )}
+              <ChatBubble
+                key={m.id}
+                mine={mine}
+                name={m.sender_name}
+                wide={m.kind === "code"}
+                time={new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                meta={m.edited_at ? <span className="chat-chip">edited</span> : m.is_pinned ? <span className="chat-chip chat-chip--on">pinned</span> : null}
+                reply={parent ? <span className="chat-reply">{parent.sender_name}: {parent.body.slice(0, 80)}</span> : null}
+                actions={
+                  <>
+                    <button onClick={() => setReplyTo(m)} aria-label="Reply"><CornerUpLeft className="h-3.5 w-3.5" /></button>
+                    {isMod && <button onClick={() => togglePin(m)} aria-label="Pin message"><Pin className="h-3.5 w-3.5" /></button>}
+                    {(mine || isMod) && <button onClick={() => remove(m)} aria-label="Delete message"><Trash2 className="h-3.5 w-3.5" /></button>}
+                    {!mine && <button onClick={() => setReportOn(m)} aria-label="Report message"><Flag className="h-3.5 w-3.5" /></button>}
+                  </>
+                }
+                footer={
+                  <>
+                    {EMOJI.map((e) => {
+                      const count = mrx.filter((r) => r.emoji === e).length;
+                      if (!count) return null;
+                      const active = mrx.some((r) => r.emoji === e && r.user_id === user?.id);
+                      return (
+                        <button key={e} onClick={() => react(m.id, e)} aria-label={`React ${e}`} className={`chat-chip${active ? " chat-chip--on" : ""}`}>
+                          {e} {count}
+                        </button>
+                      );
+                    })}
+                    <span className="flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+                      {EMOJI.map((e) => (
+                        <button key={e} onClick={() => react(m.id, e)} aria-label={`Add reaction ${e}`} className="rounded px-1 text-xs">{e}</button>
+                      ))}
+                    </span>
+                  </>
+                }
+              >
                 {m.kind === "code" ? (
                   <CodeBlock code={m.body} language={m.code_language} filename={m.code_filename} />
                 ) : (
-                  <p className="whitespace-pre-wrap text-sm hub-text">{m.body}</p>
+                  <span className="whitespace-pre-wrap">{m.body}</span>
                 )}
-
-                <div className="mt-1 flex flex-wrap items-center gap-1">
-                  {EMOJI.map((e) => {
-                    const count = mrx.filter((r) => r.emoji === e).length;
-                    if (!count) return null;
-                    const active = mrx.some((r) => r.emoji === e && r.user_id === user?.id);
-                    return (
-                      <button key={e} onClick={() => react(m.id, e)} aria-label={`React ${e}`} className={`rounded-full border px-2 py-0.5 text-xs ${active ? "border-primary text-primary" : "hub-border hub-text-dim"}`}>
-                        {e} {count}
-                      </button>
-                    );
-                  })}
-                  <div className="flex items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
-                    {EMOJI.map((e) => (
-                      <button key={e} onClick={() => react(m.id, e)} aria-label={`Add reaction ${e}`} className="rounded p-1 text-xs hover:bg-white/10">{e}</button>
-                    ))}
-                    <button onClick={() => setReplyTo(m)} aria-label="Reply" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><CornerUpLeft className="h-3.5 w-3.5" /></button>
-                    {isMod && <button onClick={() => togglePin(m)} aria-label="Pin message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Pin className="h-3.5 w-3.5" /></button>}
-                    {(mine || isMod) && <button onClick={() => remove(m)} aria-label="Delete message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Trash2 className="h-3.5 w-3.5" /></button>}
-                    {!mine && <button onClick={() => setReportOn(m)} aria-label="Report message" className="rounded p-1 hub-text-dim hover:bg-white/10 hover:text-white"><Flag className="h-3.5 w-3.5" /></button>}
-                  </div>
-                </div>
-              </article>
+              </ChatBubble>
             );
           })}
           <div ref={bottomRef} />
         </div>
 
-        <div className="border-t hub-border p-3">
+        <div className="chat-composer">
           {replyTo && (
-            <div className="mb-2 flex items-center justify-between rounded border hub-border px-2 py-1 text-xs hub-text-dim">
+            <div className="mb-2 flex items-center justify-between rounded-lg border px-2 py-1 text-xs chat-dim" style={{ borderColor: "var(--chat-border)" }}>
               <span className="truncate">Replying to {replyTo.sender_name}</span>
               <button onClick={() => setReplyTo(null)} aria-label="Cancel reply"><X className="h-3 w-3" /></button>
             </div>
           )}
           {codeMode && (
-            <Input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder="filename (optional), e.g. solution.py" className="mb-2" />
+            <input
+              value={filename}
+              onChange={(e) => setFilename(e.target.value)}
+              placeholder="filename (optional), e.g. solution.py"
+              aria-label="Filename"
+              className="chat-input mb-2"
+            />
           )}
           <div className="flex items-end gap-2">
-            <Button type="button" size="sm" variant={codeMode ? "neon" : "outline"} onClick={() => setCodeMode((v) => !v)} aria-pressed={codeMode}>
-              <Code2 className="h-4 w-4" /> Code
-            </Button>
-            <Textarea
+            <button
+              type="button"
+              onClick={() => setCodeMode((v) => !v)}
+              aria-pressed={codeMode}
+              aria-label="Toggle code mode"
+              className={`chat-icon-btn${codeMode ? " chat-icon-btn--on" : ""}`}
+            >
+              <Code2 className="h-4 w-4" />
+            </button>
+            <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               onKeyDown={(e) => {
@@ -281,15 +302,21 @@ function GroupChat() {
               }}
               disabled={frozen && !isMod}
               placeholder={frozen && !isMod ? "Messaging is temporarily restricted" : codeMode ? "Paste your code…" : "Message your group… (``` for code)"}
-              className={codeMode ? "min-h-[120px] font-mono text-xs" : "min-h-[52px]"}
+              className={`chat-input ${codeMode ? "min-h-[120px] font-mono text-xs" : "min-h-[52px]"}`}
               aria-label="Message"
             />
-            <Button variant="neon" onClick={send} disabled={sending || !body.trim() || (frozen && !isMod)} aria-label="Send message">
+            <button
+              type="button"
+              onClick={send}
+              disabled={sending || !body.trim() || (frozen && !isMod)}
+              aria-label="Send message"
+              className="chat-send"
+            >
               <Send className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
-      </div>
+      </ChatSurface>
 
       <aside className="h-fit rounded-xl border hub-border hub-surface p-4">
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold hub-text"><Smile className="h-4 w-4 text-primary" aria-hidden /> Members</h3>
