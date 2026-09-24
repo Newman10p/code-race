@@ -4,7 +4,7 @@
  */
 
 export type ChatThemeId = "onyx" | "graphite" | "paper" | "newsprint" | "contrast";
-export type WallpaperId = "none" | "grid" | "dots" | "hex" | "diagonal" | "arcs" | "noise";
+export type WallpaperId = "none" | "grid" | "dots" | "hex" | "diagonal" | "arcs" | "noise" | "custom";
 export type DensityId = "comfortable" | "compact";
 export type BubbleId = "rounded" | "square" | "minimal";
 export type AccentId = "mono" | "primary";
@@ -15,6 +15,8 @@ export interface ChatPrefs {
   density: DensityId;
   bubble_style: BubbleId;
   accent: AccentId;
+  custom_wallpaper_path: string | null;
+  custom_wallpaper_url: string | null;
 }
 
 export const DEFAULT_CHAT_PREFS: ChatPrefs = {
@@ -23,6 +25,8 @@ export const DEFAULT_CHAT_PREFS: ChatPrefs = {
   density: "comfortable",
   bubble_style: "rounded",
   accent: "mono",
+  custom_wallpaper_path: null,
+  custom_wallpaper_url: null,
 };
 
 interface ThemeDef {
@@ -194,6 +198,7 @@ export const CHAT_WALLPAPERS: Record<WallpaperId, WallpaperDef> = {
     size: "9px 9px, 13px 13px",
     opacity: 1,
   },
+  custom: { label: "My photo", image: "none", opacity: 1 },
 };
 
 export const DENSITY_OPTIONS: { id: DensityId; label: string }[] = [
@@ -223,6 +228,8 @@ export function normalisePrefs(raw: Partial<Record<keyof ChatPrefs, string>> | n
     density: pick("density", DENSITY_OPTIONS.map((d) => d.id)),
     bubble_style: pick("bubble_style", BUBBLE_OPTIONS.map((b) => b.id)),
     accent: pick("accent", ACCENT_OPTIONS.map((a) => a.id)),
+    custom_wallpaper_path: raw?.custom_wallpaper_path || null,
+    custom_wallpaper_url: raw?.custom_wallpaper_url || null,
   };
 }
 
@@ -237,6 +244,16 @@ export function chatVars(prefs: ChatPrefs): React.CSSProperties {
 }
 
 export function wallpaperStyle(prefs: ChatPrefs): React.CSSProperties {
+  if (prefs.wallpaper === "custom") {
+    if (!prefs.custom_wallpaper_url) return { display: "none" };
+    return {
+      backgroundImage: `linear-gradient(var(--chat-ink), var(--chat-ink)), url(${JSON.stringify(prefs.custom_wallpaper_url)})`,
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "cover",
+      opacity: 0.72,
+    };
+  }
   const wp = CHAT_WALLPAPERS[prefs.wallpaper];
   if (wp.image === "none") return { display: "none" };
   return { backgroundImage: wp.image, backgroundSize: wp.size, opacity: wp.opacity };

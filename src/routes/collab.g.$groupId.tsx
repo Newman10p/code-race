@@ -51,7 +51,7 @@ const EMOJI = ["👍", "🎉", "🔥", "💡", "❓", "✅"];
 function GroupChat() {
   const { groupId } = Route.useParams();
   const { user } = useAuth();
-  const { prefs, update } = useChatAppearance();
+  const { prefs, update, uploadWallpaper, removeWallpaper } = useChatAppearance();
   const [group, setGroup] = useState<{ name: string; status: string; description: string | null } | null>(null);
   const [role, setRole] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -194,7 +194,7 @@ function GroupChat() {
             <h2 className="truncate text-sm font-semibold chat-strong">{group.name}</h2>
             <p className="truncate text-xs chat-dim">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
           </div>
-          <ChatAppearanceButton prefs={prefs} onChange={update} />
+          <ChatAppearanceButton prefs={prefs} onChange={update} onUploadWallpaper={uploadWallpaper} onRemoveWallpaper={removeWallpaper} />
         </header>
 
         {pinned.length > 0 && (

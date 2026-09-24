@@ -38,7 +38,7 @@ interface Msg {
 function ChatPage() {
   const { user, loading: authLoading } = useAuth();
   const { isSetter, isPatron, loading: roleLoading } = useUserRole();
-  const { prefs, update } = useChatAppearance();
+  const { prefs, update, uploadWallpaper, removeWallpaper } = useChatAppearance();
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [body, setBody] = useState("");
@@ -127,7 +127,7 @@ function ChatPage() {
               <p className="truncate text-sm font-semibold chat-strong">Setters &amp; patrons</p>
               <p className="truncate text-xs chat-dim">{messages.length} messages in this room</p>
             </div>
-            <ChatAppearanceButton prefs={prefs} onChange={update} />
+            <ChatAppearanceButton prefs={prefs} onChange={update} onUploadWallpaper={uploadWallpaper} onRemoveWallpaper={removeWallpaper} />
           </header>
 
           <div className="chat-scroll">
