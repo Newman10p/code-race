@@ -26,7 +26,7 @@ export const Route = createFileRoute("/collab/settings")({
 
 function HubSettings() {
   const { user } = useAuth();
-  const { prefs, update } = useChatAppearance();
+  const { prefs, update, uploadWallpaper, removeWallpaper } = useChatAppearance();
   const [fp, setFp] = useState("");
   const [bundle, setBundle] = useState("");
 
@@ -43,7 +43,7 @@ function HubSettings() {
       <section className="rounded-xl border hub-border hub-surface p-4">
         <h2 className="mb-1 font-semibold hub-text">Chat appearance</h2>
         <p className="mb-4 text-sm hub-text-dim">These settings follow you across every chat in the hub.</p>
-        <ChatAppearancePanel prefs={prefs} onChange={update} />
+        <ChatAppearancePanel prefs={prefs} onChange={update} onUploadWallpaper={uploadWallpaper} onRemoveWallpaper={removeWallpaper} />
       </section>
 
       <div className="space-y-6">

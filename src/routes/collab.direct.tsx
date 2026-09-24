@@ -28,7 +28,7 @@ interface Convo { id: string; user_a: string; user_b: string; user_a_name: strin
 
 function DirectPage() {
   const { user } = useAuth();
-  const { prefs, update } = useChatAppearance();
+  const { prefs, update, uploadWallpaper, removeWallpaper } = useChatAppearance();
   const [convos, setConvos] = useState<Convo[]>([]);
   const [active, setActive] = useState<Convo | null>(null);
   const [keys, setKeys] = useState<{ privateKey: CryptoKey; fp: string } | null>(null);
@@ -104,7 +104,7 @@ function DirectPage() {
                 <p className="truncate text-sm font-semibold chat-strong">{other(active).name || "Student"}</p>
                 <p className="truncate text-xs chat-dim">Encrypted in your browser — the server stores ciphertext only.</p>
               </div>
-              <ChatAppearanceButton prefs={prefs} onChange={update} />
+              <ChatAppearanceButton prefs={prefs} onChange={update} onUploadWallpaper={uploadWallpaper} onRemoveWallpaper={removeWallpaper} />
             </header>
             <div className="chat-scroll">
               {items.map((m) => (

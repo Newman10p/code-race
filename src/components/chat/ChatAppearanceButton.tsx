@@ -7,9 +7,13 @@ import { ChatPrefs } from "@/lib/chat-theme";
 export function ChatAppearanceButton({
   prefs,
   onChange,
+  onUploadWallpaper,
+  onRemoveWallpaper,
 }: {
   prefs: ChatPrefs;
   onChange: (patch: Partial<ChatPrefs>) => void;
+  onUploadWallpaper?: (file: File) => Promise<void>;
+  onRemoveWallpaper?: () => Promise<void>;
 }) {
   const [open, setOpen] = useState(false);
   return (
@@ -29,7 +33,12 @@ export function ChatAppearanceButton({
           <DialogTitle>Chat appearance</DialogTitle>
           <DialogDescription>Pick a palette, wallpaper and bubble style. It follows you across every chat.</DialogDescription>
         </DialogHeader>
-        <ChatAppearancePanel prefs={prefs} onChange={onChange} />
+        <ChatAppearancePanel
+          prefs={prefs}
+          onChange={onChange}
+          onUploadWallpaper={onUploadWallpaper}
+          onRemoveWallpaper={onRemoveWallpaper}
+        />
       </DialogContent>
     </Dialog>
   );
