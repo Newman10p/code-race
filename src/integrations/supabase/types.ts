@@ -117,6 +117,7 @@ export type Database = {
           accent: string
           animations: string
           bubble_style: string
+          custom_wallpaper_path: string | null
           density: string
           sound: string
           theme: string
@@ -128,6 +129,7 @@ export type Database = {
           accent?: string
           animations?: string
           bubble_style?: string
+          custom_wallpaper_path?: string | null
           density?: string
           sound?: string
           theme?: string
@@ -139,6 +141,7 @@ export type Database = {
           accent?: string
           animations?: string
           bubble_style?: string
+          custom_wallpaper_path?: string | null
           density?: string
           sound?: string
           theme?: string
