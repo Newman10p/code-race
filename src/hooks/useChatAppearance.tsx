@@ -47,17 +47,23 @@ export function useChatAppearance() {
 
   const update = useCallback(
     async (patch: Partial<ChatPrefs>) => {
-      setPrefs((prev) => {
-        const next = { ...prev, ...patch };
-        localStorage.setItem(LOCAL_KEY, JSON.stringify({ ...next, custom_wallpaper_url: null }));
-        if (user) {
-          const { custom_wallpaper_url: _temporaryUrl, ...saved } = next;
-          void supabase.from("chat_appearance").upsert({ user_id: user.id, ...saved });
-        }
-        return next;
-      });
+      const next = { ...prefs, ...patch };
+      setPrefs(next);
+      localStorage.setItem(LOCAL_KEY, JSON.stringify({ ...next, custom_wallpaper_url: null }));
+      if (user) {
+        const saved = {
+          theme: next.theme,
+          wallpaper: next.wallpaper,
+          density: next.density,
+          bubble_style: next.bubble_style,
+          accent: next.accent,
+          custom_wallpaper_path: next.custom_wallpaper_path,
+        };
+        const { error } = await supabase.from("chat_appearance").upsert({ user_id: user.id, ...saved });
+        if (error) throw error;
+      }
     },
-    [user],
+    [prefs, user],
   );
 
   const uploadWallpaper = useCallback(async (file: File) => {
