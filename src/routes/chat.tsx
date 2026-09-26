@@ -57,7 +57,8 @@ function ChatPage() {
     const channel = supabase
       .channel("chat_messages_room")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "chat_messages" }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Msg]);
+        const n = payload.new as Msg;
+        setMessages((prev) => (prev.some((m) => m.id === n.id) ? prev : [...prev, n]));
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -79,23 +80,31 @@ function ChatPage() {
     setLoading(false);
   };
 
+  const nameRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user) return;
+    void supabase.from("profiles").select("display_name, email").eq("user_id", user.id).maybeSingle()
+      .then(({ data }) => { nameRef.current = data?.display_name || data?.email || null; });
+  }, [user]);
+
   const send = async () => {
     if (!body.trim() || !user) return;
-    setSending(true);
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("display_name, email")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    const { error } = await supabase.from("chat_messages").insert({
+    const row = {
+      id: crypto.randomUUID(),
       sender_id: user.id,
-      sender_name: profile?.display_name || profile?.email || user.email || "Unknown",
+      sender_name: nameRef.current || user.email || "Unknown",
       sender_role: isSetter ? "setter" : "patron",
       body: body.trim(),
-    });
-    setSending(false);
-    if (error) { toast.error(error.message); return; }
+    };
+    const draft = body;
+    setMessages((prev) => [...prev, { ...row, created_at: new Date().toISOString() }]);
     setBody("");
+    const { error } = await supabase.from("chat_messages").insert(row);
+    if (error) {
+      setMessages((prev) => prev.filter((m) => m.id !== row.id));
+      setBody(draft);
+      toast.error(error.message);
+    }
   };
 
   if (authLoading || roleLoading || loading) {

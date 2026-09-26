@@ -68,11 +68,17 @@ function DirectPage() {
 
   const send = async () => {
     if (!active || !keys || !peerKey || !body.trim() || !user) return;
-    const { ciphertext, iv } = await encryptMessage(keys.privateKey, peerKey, body.trim());
-    const { error } = await supabase.from("dm_messages").insert({ conversation_id: active.id, sender_id: user.id, ciphertext, iv });
-    if (error) return toast.error(error.message);
+    const text = body.trim();
+    const id = crypto.randomUUID();
+    setItems((prev) => [...prev, { id, sender_id: user.id, text, created_at: new Date().toISOString() }]);
     setBody("");
-    void openConvo(active);
+    const { ciphertext, iv } = await encryptMessage(keys.privateKey, peerKey, text);
+    const { error } = await supabase.from("dm_messages").insert({ id, conversation_id: active.id, sender_id: user.id, ciphertext, iv });
+    if (error) {
+      setItems((prev) => prev.filter((m) => m.id !== id));
+      setBody(text);
+      toast.error(error.message);
+    }
   };
 
   return (

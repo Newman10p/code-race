@@ -109,14 +109,19 @@ function GroupChat() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  const nameRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (user) void myDisplayName(user.id, user.email).then((n) => { nameRef.current = n; });
+  }, [user]);
+
   const send = async () => {
     if (!body.trim() || !user) return;
-    setSending(true);
-    const name = await myDisplayName(user.id, user.email);
+    const name = nameRef.current || user.email || "Student";
     const fenced = body.trim().match(/^```(\w+)?\n([\s\S]*?)```$/);
     const isCode = codeMode || !!fenced;
     const text = fenced ? fenced[2] : body.trim();
-    const { error } = await supabase.from("collab_messages").insert({
+    const row = {
+      id: crypto.randomUUID(),
       group_id: groupId,
       sender_id: user.id,
       sender_name: name,
@@ -125,13 +130,20 @@ function GroupChat() {
       code_language: isCode ? (fenced?.[1] || detectLanguage(text)) : null,
       code_filename: isCode && filename.trim() ? filename.trim() : null,
       reply_to_id: replyTo?.id ?? null,
-    });
-    setSending(false);
-    if (error) return toast.error(error.message);
+    };
+    const prev = { body, filename, replyTo, codeMode };
+    // Show instantly, confirm in background
+    setMessages((m) => [...m, { ...row, created_at: new Date().toISOString(), edited_at: null, deleted_at: null, is_pinned: false } as unknown as Msg]);
     setBody("");
     setFilename("");
     setReplyTo(null);
     setCodeMode(false);
+    const { error } = await supabase.from("collab_messages").insert(row as never);
+    if (error) {
+      setMessages((m) => m.filter((x) => x.id !== row.id));
+      setBody(prev.body); setFilename(prev.filename); setReplyTo(prev.replyTo); setCodeMode(prev.codeMode);
+      toast.error(error.message);
+    }
   };
 
   const react = async (messageId: string, emoji: string) => {
