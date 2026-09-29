@@ -76,7 +76,7 @@ function DirectPage() {
     void Promise.all(ids.map(async (id) => {
       const { data } = await supabase.rpc("chat_role_label", { _user: id });
       return [id, data] as const;
-    })).then((entries) => setLabels(Object.fromEntries(entries.filter(([, label]) => label))));
+    })).then((entries) => setLabels(Object.fromEntries(entries.map(([id, label]) => [id, label ?? ""]))));
   }, [user, convos, people]);
 
   const other = (c: Convo) => (c.user_a === user?.id ? { id: c.user_b, name: c.user_b_name } : { id: c.user_a, name: c.user_a_name });
