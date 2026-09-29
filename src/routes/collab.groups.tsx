@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { myDisplayName } from "@/lib/collab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ const PRIVACY_ICON: Record<string, typeof Lock> = {
 
 function GroupsPage() {
   const { user } = useAuth();
+  const { isSetter, isAdmin, isPatron } = useUserRole();
   const [groups, setGroups] = useState<GroupRow[]>([]);
   const [discover, setDiscover] = useState<GroupRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,7 +91,7 @@ function GroupsPage() {
         member_count: countBy(g.id),
         my_role: (memberships || []).find((m) => m.group_id === g.id)?.role,
       };
-      if (ids.includes(g.id)) mine.push(row);
+      if (ids.includes(g.id) || isSetter || isAdmin) mine.push(row);
       else if (g.privacy === "discoverable") other.push(row);
     }
     setGroups(mine);
@@ -129,14 +131,14 @@ function GroupsPage() {
     void load();
   };
 
-  const canCreate = settings ? settings.allow_student_groups && !settings.freeze_group_creation : true;
+  const canCreate = isSetter || isAdmin || isPatron || (settings ? settings.allow_student_groups && !settings.freeze_group_creation : true);
 
   if (loading) return <p className="py-16 text-center text-sm hub-text-dim">Loading your groups…</p>;
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold hub-text">Your groups</h2>
+         <h2 className="text-lg font-semibold hub-text">{isSetter || isAdmin ? "All groups" : "Your groups"}</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="neon" size="sm" disabled={!canCreate}>

@@ -13,6 +13,7 @@ export function Navbar() {
         { label: "Dashboard", to: "/dashboard", icon: FolderOpen },
         { label: "Launch", to: "/launch", icon: Play },
         { label: "Patrons", to: "/patrons", icon: Building2 },
+         { label: "Hub", to: "/collab", icon: Users },
         { label: "Chat", to: "/chat", icon: MessageSquare },
         { label: "Hub admin", to: "/admin/collab", icon: ShieldAlert },
         { label: "Announcements", to: "/announcements", icon: Megaphone },
@@ -22,6 +23,7 @@ export function Navbar() {
     : isPatron
       ? [
           { label: "Organisation", to: "/organisation", icon: Building2 },
+           { label: "Hub", to: "/collab", icon: Users },
           { label: "Chat", to: "/chat", icon: MessageSquare },
           { label: "Results", to: "/results", icon: Trophy },
           { label: "Settings", to: "/settings", icon: Settings },
