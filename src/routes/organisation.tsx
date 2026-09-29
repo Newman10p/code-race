@@ -289,6 +289,7 @@ function OrganisationPage() {
                             <td className="py-2">{p?.best ?? 0}</td>
                             <td className="py-2">{p?.avg ?? 0}</td>
                             <td className="py-2 text-right">
+                               {m.user_id && <Link to="/collab/direct" search={{ user: m.user_id }} aria-label={`Message ${m.full_name || m.email}`} className="mr-2 inline-flex rounded p-1.5 text-primary hover:bg-primary/10"><MessageSquare className="h-4 w-4" /></Link>}
                               <button onClick={() => removeMember(m.id)} className="rounded p-1.5 text-destructive hover:bg-destructive/10">
                                 <Trash2 className="h-4 w-4" />
                               </button>

@@ -1634,6 +1634,7 @@ export type Database = {
     Functions: {
       accept_patron_invite: { Args: { _org: string }; Returns: boolean }
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
+      chat_role_label: { Args: { _user: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
