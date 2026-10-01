@@ -240,6 +240,7 @@ function GroupChat() {
             <h2 className="truncate text-sm font-semibold chat-strong">{group.name}</h2>
             <p className="truncate text-xs chat-dim">{members.length} members{frozen ? " · messaging restricted" : ""}</p>
           </div>
+          {isManager && (<button className="chat-icon-btn" aria-label="Group controls" onClick={() => { setEditName(group.name); setEditDesc(group.description || ""); setControlsOpen(true); }}><Settings2 className="h-4 w-4" /></button>)}
           <ChatAppearanceButton prefs={prefs} onChange={update} onUploadWallpaper={uploadWallpaper} onRemoveWallpaper={removeWallpaper} />
         </header>
 
@@ -270,7 +271,7 @@ function GroupChat() {
                 name={m.sender_name}
                 wide={m.kind === "code"}
                 time={new Date(m.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                meta={m.edited_at ? <span className="chat-chip">edited</span> : m.is_pinned ? <span className="chat-chip chat-chip--on">pinned</span> : null}
+                meta={labels[m.sender_id] ? <span className="chat-chip chat-chip--on"><ShieldCheck className="inline h-3 w-3" /> {labels[m.sender_id]}</span> : m.edited_at ? <span className="chat-chip">edited</span> : m.is_pinned ? <span className="chat-chip chat-chip--on">pinned</span> : null}
                 reply={parent ? <span className="chat-reply">{parent.sender_name}: {parent.body.slice(0, 80)}</span> : null}
                 actions={
                   <>
@@ -370,11 +371,41 @@ function GroupChat() {
           {members.map((m) => (
             <li key={m.user_id} className="flex items-center justify-between gap-2 text-sm">
               <span className="truncate hub-text">{m.display_name || "Student"}</span>
-              {m.role !== "member" && <span className="shrink-0 text-[10px] uppercase text-primary">{m.role}</span>}
+              <span className="shrink-0 text-[10px] uppercase text-primary">{labels[m.user_id] || (m.role !== "member" ? m.role : "")}</span>
             </li>
           ))}
         </ul>
       </aside>
+
+      <Dialog open={controlsOpen} onOpenChange={setControlsOpen}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Group controls</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5"><Label htmlFor="gn">Name</Label><Input id="gn" value={editName} onChange={(e) => setEditName(e.target.value)} maxLength={80} /></div>
+            <div className="space-y-1.5"><Label htmlFor="gd">Description</Label><Textarea id="gd" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} maxLength={500} /></div>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="neon" onClick={() => editName.trim() && saveGroup({ name: editName.trim(), description: editDesc.trim() || null })}>Save details</Button>
+              <Button variant="outline" onClick={() => saveGroup({ status: frozen ? "active" : "frozen" })}>{frozen ? "Unfreeze messaging" : "Freeze messaging"}</Button>
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-semibold">Members</p>
+              <ul className="space-y-2">
+                {members.filter((m) => m.user_id !== user?.id).map((m) => (
+                  <li key={m.user_id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate">{m.display_name || "Student"} <span className="text-[10px] uppercase text-primary">{m.role}</span></span>
+                    {(m.role === "member" || m.role === "moderator") && (
+                      <span className="flex shrink-0 gap-1">
+                        <Button size="sm" variant="outline" onClick={() => setMemberRole(m.user_id, m.role === "member" ? "moderator" : "member")}>{m.role === "member" ? "Make mod" : "Remove mod"}</Button>
+                        <Button size="sm" variant="destructive" onClick={() => kick(m.user_id)}>Remove</Button>
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!reportOn} onOpenChange={(o) => !o && setReportOn(null)}>
         <DialogContent>
