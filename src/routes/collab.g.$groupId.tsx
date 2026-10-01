@@ -3,6 +3,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { myDisplayName, REPORT_CATEGORIES } from "@/lib/collab";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Settings2, ShieldCheck } from "lucide-react";
 import { CodeBlock, detectLanguage } from "@/components/collab/CodeBlock";
 import { ChatSurface } from "@/components/chat/ChatSurface";
 import { ChatBubble } from "@/components/chat/ChatBubble";
@@ -69,7 +71,14 @@ function GroupChat() {
   const [reportNote, setReportNote] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const isMod = role === "owner" || role === "moderator" || role === "patron";
+  const { isSetter, isAdmin } = useUserRole();
+  const isStaff = isSetter || isAdmin;
+  const isMod = isStaff || role === "owner" || role === "moderator" || role === "patron";
+  const isManager = isStaff || role === "owner" || role === "patron";
+  const [labels, setLabels] = useState<Record<string, string>>({});
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -89,6 +98,31 @@ function GroupChat() {
     }
     setLoading(false);
   }, [groupId, user]);
+
+  useEffect(() => {
+    const ids = Array.from(new Set([...members.map((m) => m.user_id), ...messages.map((m) => m.sender_id)])).filter((id) => !(id in labels));
+    if (!ids.length) return;
+    void Promise.all(ids.map(async (id) => [id, (await supabase.rpc("chat_role_label", { _user: id })).data || ""] as const)).then((rows) =>
+      setLabels((l) => ({ ...l, ...Object.fromEntries(rows) })),
+    );
+  }, [members, messages, labels]);
+
+  const saveGroup = async (patch: Record<string, unknown>) => {
+    const { error } = await supabase.from("collab_groups").update(patch as never).eq("id", groupId);
+    if (error) return toast.error(error.message);
+    toast.success("Group updated");
+    void load();
+  };
+  const kick = async (uid: string) => {
+    const { error } = await supabase.from("collab_group_members").delete().eq("group_id", groupId).eq("user_id", uid);
+    if (error) return toast.error(error.message);
+    void load();
+  };
+  const setMemberRole = async (uid: string, r: "moderator" | "member") => {
+    const { error } = await supabase.from("collab_group_members").update({ role: r }).eq("group_id", groupId).eq("user_id", uid);
+    if (error) return toast.error(error.message);
+    void load();
+  };
 
   useEffect(() => {
     void load();
