@@ -15,6 +15,13 @@
       "when": 1790673906192,
       "tag": "0001_allow_verified_adult_direct_chats_and_safe_group_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791026028296,
+      "tag": "0002_create_scheduled_competitions",
+      "breakpoints": true
     }
   ]
 }

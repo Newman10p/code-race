@@ -653,6 +653,238 @@ export type Database = {
         }
         Relationships: []
       }
+      competition_allowed_orgs: {
+        Row: {
+          competition_id: string
+          organization_id: string
+        }
+        Insert: {
+          competition_id: string
+          organization_id: string
+        }
+        Update: {
+          competition_id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_allowed_orgs_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_allowed_orgs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_question_keys: {
+        Row: {
+          accepted_answers: Json
+          correct_option: number | null
+          hidden_test_cases: Json
+          question_id: string
+          solution: string | null
+        }
+        Insert: {
+          accepted_answers?: Json
+          correct_option?: number | null
+          hidden_test_cases?: Json
+          question_id: string
+          solution?: string | null
+        }
+        Update: {
+          accepted_answers?: Json
+          correct_option?: number | null
+          hidden_test_cases?: Json
+          question_id?: string
+          solution?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_question_keys_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: true
+            referencedRelation: "competition_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_questions: {
+        Row: {
+          competition_id: string
+          content: string
+          created_at: string
+          id: string
+          language: string
+          options: Json | null
+          order_index: number
+          points: number
+          starter_code: string | null
+          test_mode: string
+          type: string
+          visible_test_cases: Json
+        }
+        Insert: {
+          competition_id: string
+          content: string
+          created_at?: string
+          id?: string
+          language?: string
+          options?: Json | null
+          order_index?: number
+          points?: number
+          starter_code?: string | null
+          test_mode?: string
+          type: string
+          visible_test_cases?: Json
+        }
+        Update: {
+          competition_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          language?: string
+          options?: Json | null
+          order_index?: number
+          points?: number
+          starter_code?: string | null
+          test_mode?: string
+          type?: string
+          visible_test_cases?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_questions_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_submissions: {
+        Row: {
+          answers: Json
+          competition_id: string
+          display_name: string
+          graded_at: string | null
+          id: string
+          organization_id: string | null
+          started_at: string
+          strikes_count: number
+          submitted_at: string | null
+          test_cases_passed: number
+          time_spent_seconds: number
+          total_score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          competition_id: string
+          display_name: string
+          graded_at?: string | null
+          id?: string
+          organization_id?: string | null
+          started_at?: string
+          strikes_count?: number
+          submitted_at?: string | null
+          test_cases_passed?: number
+          time_spent_seconds?: number
+          total_score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          competition_id?: string
+          display_name?: string
+          graded_at?: string | null
+          id?: string
+          organization_id?: string | null
+          started_at?: string
+          strikes_count?: number
+          submitted_at?: string | null
+          test_cases_passed?: number
+          time_spent_seconds?: number
+          total_score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_submissions_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitions: {
+        Row: {
+          appearance_at: string
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number | null
+          ends_at: string
+          id: string
+          scoring_mode: string
+          show_leaderboard_during: boolean
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          appearance_at: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number | null
+          ends_at: string
+          id?: string
+          scoring_mode?: string
+          show_leaderboard_during?: boolean
+          starts_at: string
+          status?: string
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          appearance_at?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number | null
+          ends_at?: string
+          id?: string
+          scoring_mode?: string
+          show_leaderboard_during?: boolean
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       criteria_rubrics: {
         Row: {
           created_at: string
@@ -1634,7 +1866,11 @@ export type Database = {
     Functions: {
       accept_patron_invite: { Args: { _org: string }; Returns: boolean }
       blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
+      can_see_competition: { Args: { _comp: string }; Returns: boolean }
       chat_role_label: { Args: { _user: string }; Returns: string }
+      competition_has_started: { Args: { _comp: string }; Returns: boolean }
+      competition_is_live: { Args: { _comp: string }; Returns: boolean }
+      competition_results_visible: { Args: { _comp: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
