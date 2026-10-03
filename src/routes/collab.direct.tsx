@@ -117,10 +117,13 @@ function DirectPage() {
   };
 
   useEffect(() => {
-    if (requestedUser && (isSetter || isAdmin || isPatron) && people.some((p) => p.id === requestedUser)) void startChat(requestedUser);
-    // A requested conversation should open only once when the directory arrives.
+    if (!requestedUser || !keys) return;
+    const existing = convos.find((c) => c.user_a === requestedUser || c.user_b === requestedUser);
+    if (existing) { if (active?.id !== existing.id) void openConvo(existing); return; }
+    if ((isSetter || isAdmin || isPatron) && people.some((p) => p.id === requestedUser)) void startChat(requestedUser);
+    // Open the requested conversation when the list or directory arrives.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [requestedUser, people.length]);
+  }, [requestedUser, people.length, convos.length, keys]);
 
   useEffect(() => {
     if (!active) return;

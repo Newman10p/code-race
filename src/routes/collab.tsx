@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { useAuth } from "@/hooks/useAuth";
 import { Users, MessageCircle, Inbox, SlidersHorizontal, Code2, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HubSidebar } from "@/components/collab/HubSidebar";
 
 export const Route = createFileRoute("/collab")({
   component: CollabLayout,
@@ -22,7 +23,8 @@ const TABS = [
 function CollabLayout() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const inRoom = pathname.startsWith("/collab/g/") || (pathname.startsWith("/collab/direct") && !!(search as { user?: string }).user);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -61,8 +63,12 @@ function CollabLayout() {
             })}
           </nav>
 
-          <div className="py-6">
-            <Outlet />
+          <div className="grid gap-4 py-6 lg:grid-cols-[340px_minmax(0,1fr)]">
+            <HubSidebar className={cn("lg:sticky lg:top-4 lg:h-[calc(100vh-14rem)]", inRoom && "hidden lg:flex")} />
+            <div className="min-w-0">
+              {inRoom && <Link to="/collab" className="mb-3 inline-block text-sm text-primary lg:hidden">← All chats</Link>}
+              <Outlet />
+            </div>
           </div>
         </div>
       </div>
