@@ -42,7 +42,7 @@ function CollabLayout() {
             </div>
           </header>
 
-          <nav aria-label="Collaboration sections" className="flex gap-1 overflow-x-auto border-b hub-border pb-2">
+          <nav aria-label="Collaboration sections" className="flex gap-2 overflow-x-auto rounded-2xl border hub-border hub-surface p-2">
             {TABS.map((t) => {
               const active = pathname.startsWith(t.to);
               return (
@@ -50,8 +50,8 @@ function CollabLayout() {
                   key={t.to}
                   to={t.to}
                   className={cn(
-                    "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    active ? "bg-primary/15 text-primary" : "hub-text-dim hover:bg-white/5 hover:text-white",
+                    "flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    active ? "hub-tab-active" : "hub-text-dim hover:bg-primary/10 hover:text-primary",
                   )}
                 >
                   <t.icon className="h-4 w-4" aria-hidden />

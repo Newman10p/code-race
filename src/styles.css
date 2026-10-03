@@ -226,15 +226,16 @@
   text-shadow: 0 0 20px oklch(0.78 0.15 200 / 0.6), 0 0 40px oklch(0.78 0.15 200 / 0.3);
 }
 
-/* ===== Student Collaboration Hub surfaces (monochrome) ===== */
-.hub-bg { background-color: #000000; }
-.hub-surface { background-color: #0A0A0A; }
-.hub-elevated { background-color: #131313; }
-.hub-deep { background-color: #060606; }
-.hub-border { border-color: rgba(255,255,255,0.10); }
-.hub-text { color: #FFFFFF; }
-.hub-text-dim { color: rgba(255,255,255,0.62); }
-.hub-divide > * + * { border-top: 1px solid rgba(255,255,255,0.08); }
+/* ===== Student Collaboration Hub surfaces (vibrant cyber social) ===== */
+.hub-bg { background: radial-gradient(1200px 500px at 10% -10%, rgba(0,212,255,0.10), transparent 60%), radial-gradient(900px 400px at 100% 0%, rgba(16,185,129,0.08), transparent 60%), #080B12; }
+.hub-surface { background-color: #0E131D; border-radius: 16px; }
+.hub-elevated { background-color: #151B28; }
+.hub-deep { background-color: #0A0E16; }
+.hub-border { border-color: rgba(0,212,255,0.14); }
+.hub-text { color: #F4F7FB; }
+.hub-text-dim { color: rgba(226,232,240,0.66); }
+.hub-divide > * + * { border-top: 1px solid rgba(0,212,255,0.08); }
+.hub-tab-active { background: linear-gradient(135deg, rgba(0,212,255,0.22), rgba(16,185,129,0.18)); color: #00D4FF; box-shadow: 0 0 0 1px rgba(0,212,255,0.35); }
 
 @media (prefers-reduced-motion: reduce) {
   .hub-anim { animation: none !important; transition: none !important; }
