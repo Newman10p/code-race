@@ -22,6 +22,13 @@
       "when": 1791026028296,
       "tag": "0002_create_scheduled_competitions",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791277061727,
+      "tag": "0003_competition_submit_and_grade",
+      "breakpoints": true
     }
   ]
 }

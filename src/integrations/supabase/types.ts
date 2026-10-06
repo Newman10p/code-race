@@ -1890,6 +1890,7 @@ export type Database = {
       }
       is_staff: { Args: never; Returns: boolean }
       my_org_ids: { Args: never; Returns: string[] }
+      submit_competition: { Args: { _comp: string }; Returns: number }
     }
     Enums: {
       app_role: "setter" | "learner" | "admin" | "patron"
