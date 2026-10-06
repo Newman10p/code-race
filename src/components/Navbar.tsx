@@ -31,6 +31,7 @@ export function Navbar() {
         ]
       : [
           { label: "Learn", to: "/learn", icon: BookOpen },
+          { label: "Competitions", to: "/competitions", icon: Trophy },
           { label: "Hub", to: "/collab", icon: Users },
           { label: "Results", to: "/results", icon: Trophy },
           { label: "Settings", to: "/settings", icon: Settings },
