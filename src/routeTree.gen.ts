@@ -28,12 +28,14 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AnnouncementsRouteImport } from './routes/announcements'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LearnIndexRouteImport } from './routes/learn.index'
+import { Route as CompetitionsIndexRouteImport } from './routes/competitions.index'
 import { Route as CollabIndexRouteImport } from './routes/collab.index'
 import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 import { Route as CompetitionsManageRouteImport } from './routes/competitions.manage'
+import { Route as CompetitionsIdRouteImport } from './routes/competitions.$id'
 import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
 import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
@@ -140,6 +142,11 @@ const LearnIndexRoute = LearnIndexRouteImport.update({
   path: '/learn/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompetitionsIndexRoute = CompetitionsIndexRouteImport.update({
+  id: '/competitions/',
+  path: '/competitions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollabIndexRoute = CollabIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -168,6 +175,11 @@ const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
 const CompetitionsManageRoute = CompetitionsManageRouteImport.update({
   id: '/competitions/manage',
   path: '/competitions/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompetitionsIdRoute = CompetitionsIdRouteImport.update({
+  id: '/competitions/$id',
+  path: '/competitions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CollabSettingsRoute = CollabSettingsRouteImport.update({
@@ -247,12 +259,14 @@ export interface FileRoutesByFullPath {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/collab/': typeof CollabIndexRoute
+  '/competitions/': typeof CompetitionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
@@ -283,12 +297,14 @@ export interface FileRoutesByTo {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/collab': typeof CollabIndexRoute
+  '/competitions': typeof CompetitionsIndexRoute
   '/learn': typeof LearnIndexRoute
   '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
@@ -321,12 +337,14 @@ export interface FileRoutesById {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
   '/quiz/create': typeof QuizCreateRoute
   '/collab/': typeof CollabIndexRoute
+  '/competitions/': typeof CompetitionsIndexRoute
   '/learn/': typeof LearnIndexRoute
   '/collab/g/$groupId': typeof CollabGGroupIdRoute
   '/learn/course/$courseId': typeof LearnCourseCourseIdRoute
@@ -360,12 +378,14 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
     | '/collab/'
+    | '/competitions/'
     | '/learn/'
     | '/collab/g/$groupId'
     | '/learn/course/$courseId'
@@ -396,12 +416,14 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
     | '/collab'
+    | '/competitions'
     | '/learn'
     | '/collab/g/$groupId'
     | '/learn/course/$courseId'
@@ -433,12 +455,14 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
     | '/quiz/create'
     | '/collab/'
+    | '/competitions/'
     | '/learn/'
     | '/collab/g/$groupId'
     | '/learn/course/$courseId'
@@ -465,11 +489,13 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   AdminCollabRoute: typeof AdminCollabRoute
+  CompetitionsIdRoute: typeof CompetitionsIdRoute
   CompetitionsManageRoute: typeof CompetitionsManageRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
   LearnSetIdRoute: typeof LearnSetIdRoute
   LessonsCreateRoute: typeof LessonsCreateRoute
   QuizCreateRoute: typeof QuizCreateRoute
+  CompetitionsIndexRoute: typeof CompetitionsIndexRoute
   LearnIndexRoute: typeof LearnIndexRoute
   LearnCourseCourseIdRoute: typeof LearnCourseCourseIdRoute
   LearnLessonLessonIdRoute: typeof LearnLessonLessonIdRoute
@@ -610,6 +636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LearnIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/competitions/': {
+      id: '/competitions/'
+      path: '/competitions'
+      fullPath: '/competitions/'
+      preLoaderRoute: typeof CompetitionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collab/': {
       id: '/collab/'
       path: '/'
@@ -650,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/competitions/manage'
       fullPath: '/competitions/manage'
       preLoaderRoute: typeof CompetitionsManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/competitions/$id': {
+      id: '/competitions/$id'
+      path: '/competitions/$id'
+      fullPath: '/competitions/$id'
+      preLoaderRoute: typeof CompetitionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/collab/settings': {
@@ -770,11 +810,13 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   AdminCollabRoute: AdminCollabRoute,
+  CompetitionsIdRoute: CompetitionsIdRoute,
   CompetitionsManageRoute: CompetitionsManageRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
   LearnSetIdRoute: LearnSetIdRoute,
   LessonsCreateRoute: LessonsCreateRoute,
   QuizCreateRoute: QuizCreateRoute,
+  CompetitionsIndexRoute: CompetitionsIndexRoute,
   LearnIndexRoute: LearnIndexRoute,
   LearnCourseCourseIdRoute: LearnCourseCourseIdRoute,
   LearnLessonLessonIdRoute: LearnLessonLessonIdRoute,
