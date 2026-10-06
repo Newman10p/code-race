@@ -33,6 +33,7 @@ import { Route as QuizCreateRouteImport } from './routes/quiz.create'
 import { Route as LessonsCreateRouteImport } from './routes/lessons.create'
 import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
+import { Route as CompetitionsManageRouteImport } from './routes/competitions.manage'
 import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
 import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
@@ -164,6 +165,11 @@ const FolderFolderIdRoute = FolderFolderIdRouteImport.update({
   path: '/folder/$folderId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompetitionsManageRoute = CompetitionsManageRouteImport.update({
+  id: '/competitions/manage',
+  path: '/competitions/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollabSettingsRoute = CollabSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -313,6 +321,7 @@ export interface FileRoutesById {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
   '/learn/$setId': typeof LearnSetIdRoute
   '/lessons/create': typeof LessonsCreateRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competitions/manage'
     | '/folder/$folderId'
     | '/learn/$setId'
     | '/lessons/create'
@@ -453,6 +465,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   AdminCollabRoute: typeof AdminCollabRoute
+  CompetitionsManageRoute: typeof CompetitionsManageRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
   LearnSetIdRoute: typeof LearnSetIdRoute
   LessonsCreateRoute: typeof LessonsCreateRoute
@@ -632,6 +645,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FolderFolderIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/competitions/manage': {
+      id: '/competitions/manage'
+      path: '/competitions/manage'
+      fullPath: '/competitions/manage'
+      preLoaderRoute: typeof CompetitionsManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collab/settings': {
       id: '/collab/settings'
       path: '/settings'
@@ -750,6 +770,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   AdminCollabRoute: AdminCollabRoute,
+  CompetitionsManageRoute: CompetitionsManageRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
   LearnSetIdRoute: LearnSetIdRoute,
   LessonsCreateRoute: LessonsCreateRoute,
