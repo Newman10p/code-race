@@ -36,6 +36,7 @@ import { Route as LearnSetIdRouteImport } from './routes/learn.$setId'
 import { Route as FolderFolderIdRouteImport } from './routes/folder.$folderId'
 import { Route as CompetitionsManageRouteImport } from './routes/competitions.manage'
 import { Route as CompetitionsIdRouteImport } from './routes/competitions.$id'
+import { Route as CompetitionResultsIdRouteImport } from './routes/competition-results.$id'
 import { Route as CollabSettingsRouteImport } from './routes/collab.settings'
 import { Route as CollabRequestsRouteImport } from './routes/collab.requests'
 import { Route as CollabGroupsRouteImport } from './routes/collab.groups'
@@ -182,6 +183,11 @@ const CompetitionsIdRoute = CompetitionsIdRouteImport.update({
   path: '/competitions/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompetitionResultsIdRoute = CompetitionResultsIdRouteImport.update({
+  id: '/competition-results/$id',
+  path: '/competition-results/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollabSettingsRoute = CollabSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -259,6 +265,7 @@ export interface FileRoutesByFullPath {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competition-results/$id': typeof CompetitionResultsIdRoute
   '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competition-results/$id': typeof CompetitionResultsIdRoute
   '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -337,6 +345,7 @@ export interface FileRoutesById {
   '/collab/groups': typeof CollabGroupsRoute
   '/collab/requests': typeof CollabRequestsRoute
   '/collab/settings': typeof CollabSettingsRoute
+  '/competition-results/$id': typeof CompetitionResultsIdRoute
   '/competitions/$id': typeof CompetitionsIdRoute
   '/competitions/manage': typeof CompetitionsManageRoute
   '/folder/$folderId': typeof FolderFolderIdRoute
@@ -378,6 +387,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competition-results/$id'
     | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
@@ -416,6 +426,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competition-results/$id'
     | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/collab/groups'
     | '/collab/requests'
     | '/collab/settings'
+    | '/competition-results/$id'
     | '/competitions/$id'
     | '/competitions/manage'
     | '/folder/$folderId'
@@ -489,6 +501,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
   AdminCollabRoute: typeof AdminCollabRoute
+  CompetitionResultsIdRoute: typeof CompetitionResultsIdRoute
   CompetitionsIdRoute: typeof CompetitionsIdRoute
   CompetitionsManageRoute: typeof CompetitionsManageRoute
   FolderFolderIdRoute: typeof FolderFolderIdRoute
@@ -692,6 +705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompetitionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/competition-results/$id': {
+      id: '/competition-results/$id'
+      path: '/competition-results/$id'
+      fullPath: '/competition-results/$id'
+      preLoaderRoute: typeof CompetitionResultsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collab/settings': {
       id: '/collab/settings'
       path: '/settings'
@@ -810,6 +830,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
   AdminCollabRoute: AdminCollabRoute,
+  CompetitionResultsIdRoute: CompetitionResultsIdRoute,
   CompetitionsIdRoute: CompetitionsIdRoute,
   CompetitionsManageRoute: CompetitionsManageRoute,
   FolderFolderIdRoute: FolderFolderIdRoute,
