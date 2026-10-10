@@ -24,7 +24,7 @@ export const Route = createFileRoute("/competition-results/$id")({
 export function rankSubmissions<T extends { total_score: number; time_spent_seconds: number }>(rows: T[], mode: string) {
   return [...rows].sort((a, b) =>
     Number(b.total_score) - Number(a.total_score) ||
-    (mode === "points_only" ? 0 : a.time_spent_seconds - b.time_spent_seconds));
+    (mode === "strict_points" ? 0 : a.time_spent_seconds - b.time_spent_seconds));
 }
 
 const fmt = (s: number) => `${Math.floor(s / 60)}m ${s % 60}s`;
@@ -53,7 +53,7 @@ function Results() {
     return () => clearInterval(t);
   }, [id]);
 
-  const ranked = rankSubmissions(rows, comp?.scoring_mode || "points_then_speed");
+  const ranked = rankSubmissions(rows, comp?.scoring_mode || "points_and_speed");
   const shown = org === "all" ? ranked : ranked.filter((r) => r.organization_id === org);
   const orgIds = Object.keys(orgs);
   const avg = shown.length ? Math.round(shown.reduce((s, r) => s + Number(r.total_score), 0) / shown.length) : 0;
