@@ -46,32 +46,26 @@ function ManualPage() {
         {/* Table of Contents */}
         <GlowCard className="mb-8">
           <h2 className="font-semibold mb-3">📑 Table of Contents</h2>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
-            <li><a href="#overview" className="text-primary hover:underline">Platform Overview</a></li>
-            <li><a href="#folders" className="text-primary hover:underline">Managing Folders</a></li>
-            <li><a href="#quizzes" className="text-primary hover:underline">Creating & Editing Quizzes</a></li>
-            <li><a href="#questions" className="text-primary hover:underline">Question Types</a></li>
-            <li><a href="#bulk" className="text-primary hover:underline">Bulk Import</a></li>
-            <li><a href="#launching" className="text-primary hover:underline">Launching a Race</a></li>
-            <li><a href="#hosting" className="text-primary hover:underline">Hosting a Live Race</a></li>
-            <li><a href="#anticheat" className="text-primary hover:underline">Anti-Cheat System</a></li>
-            <li><a href="#tournament" className="text-primary hover:underline">Tournament Mode (Rounds)</a></li>
-            <li><a href="#evaluation" className="text-primary hover:underline">Evaluation / Assessment Mode</a></li>
-            <li><a href="#reports" className="text-primary hover:underline">Performance Reports</a></li>
-            <li><a href="#authjoin" className="text-primary hover:underline">Sign-in Required to Join</a></li>
-            <li><a href="#announcements" className="text-primary hover:underline">Announcements</a></li>
-            <li><a href="#tutorial" className="text-primary hover:underline">Learner Tutorial</a></li>
-            <li><a href="#fullscreen" className="text-primary hover:underline">Fullscreen Security</a></li>
-            <li><a href="#flashcards" className="text-primary hover:underline">Flashcards for Learners</a></li>
-            <li><a href="#lessons" className="text-primary hover:underline">Interactive Lesson Courses</a></li>
-            <li><a href="#code-questions" className="text-primary hover:underline">Code Questions & Test Cases</a></li>
-            <li><a href="#themes" className="text-primary hover:underline">Theme Picker</a></li>
-            <li><a href="#ai" className="text-primary hover:underline">AI Assistant</a></li>
-            <li><a href="#leaderboard" className="text-primary hover:underline">Leaderboard & Scoring</a></li>
-            <li><a href="#criteria" className="text-primary hover:underline">Criteria & Rubrics (Creativity / Problem Solving)</a></li>
-            <li><a href="#hub-admin" className="text-primary hover:underline">Student Hub — Moderation, Code Space & Arena</a></li>
-            <li><a href="#tips" className="text-primary hover:underline">Tips & Best Practices</a></li>
-          </ol>
+          <div className="grid gap-4 sm:grid-cols-2 text-sm">
+            {[
+              { group: "Getting started", items: [["overview","Platform Overview"],["folders","Managing Folders"],["themes","Theme Picker"],["tips","Tips & Best Practices"]] },
+              { group: "Building content", items: [["quizzes","Creating & Editing Quizzes"],["questions","Question Types"],["code-questions","Code Questions & Test Cases"],["bulk","Bulk Import"],["bulk-format","Bulk Import Format Reference"],["ai","AI Assistant"]] },
+              { group: "Running races", items: [["launching","Launching a Race"],["hosting","Hosting a Live Race"],["tournament","Tournament Mode (Rounds)"],["evaluation","Evaluation Mode"],["leaderboard","Leaderboard & Scoring"],["reports","Performance Reports"]] },
+              { group: "Competitions", items: [["competitions","Scheduled Competitions"],["criteria","Criteria & Rubrics"]] },
+              { group: "Security", items: [["anticheat","Anti-Cheat System"],["fullscreen","Fullscreen Security"],["authjoin","Sign-in Required to Join"]] },
+              { group: "Learning", items: [["flashcards","Flashcards"],["lessons","Interactive Lesson Courses"],["tutorial","Learner Tutorial"]] },
+              { group: "Community", items: [["announcements","Announcements"],["patrons","Patrons, Chat & Hub Access"],["hub-admin","Hub Moderation, Code Space & Arena"]] },
+            ].map((g) => (
+              <div key={g.group}>
+                <p className="mb-1 font-semibold text-foreground">{g.group}</p>
+                <ul className="space-y-1">
+                  {g.items.map(([id, label]) => (
+                    <li key={id}><a href={`#${id}`} className="text-primary hover:underline">{label}</a></li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </GlowCard>
 
         <div className="space-y-6">
@@ -593,6 +587,96 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
                 brief into a 0–100 value; the final grade is the weighted average of those values. Adjust weights and keywords to tune it
                 to your subject.
               </p>
+            </div>
+          </GlowCard>
+
+          {/* Scheduled competitions */}
+          <GlowCard id="competitions">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Zap className="h-5 w-5 text-primary" /> Scheduled Competitions
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Host one competition for learners in many places at the same time. Open <strong>Competitions</strong> in the top menu.</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li><strong>Appears on:</strong> when learners first see it listed (with a countdown).</li>
+                <li><strong>Opens / Closes:</strong> the only window in which it can be taken. Questions stay hidden before it opens.</li>
+                <li><strong>Time limit (optional):</strong> each learner's personal timer once they press Start; it auto-submits when time runs out.</li>
+                <li><strong>Who can enter:</strong> everyone, or only chosen schools (patron organisations).</li>
+                <li><strong>Questions:</strong> multiple choice, short answer (accepted answers list) and code (visible + hidden test cases).</li>
+                <li><strong>Scoring:</strong> "points, then speed" breaks ties by finish time; "points only" keeps ties.</li>
+                <li><strong>Live leaderboard:</strong> optionally shown while it's open; otherwise results appear after it closes.</li>
+                <li>Keep it as <strong>Draft</strong> until ready, then <strong>Publish</strong>.</li>
+              </ol>
+              <p><strong>Results:</strong> each competition has a final rankings page showing school, time taken and score. Patrons see their own students' results.</p>
+              <p><strong>Bulk import:</strong> use the same quiz format below. Short answer questions are added by hand.</p>
+            </div>
+          </GlowCard>
+
+          {/* Bulk JSON reference */}
+          <GlowCard id="bulk-format">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Zap className="h-5 w-5 text-primary" /> Bulk Import Format Reference
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p>Works for quizzes, tournaments, evaluations and competitions. Paste JSON, CSV, or upload a .json/.csv/.docx file.</p>
+              <p className="font-semibold text-foreground">Quiz / competition JSON</p>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`{
+  "title": "Python Basics",
+  "description": "Week 3 check",
+  "mode": "tournament",          // optional: "tournament" or "evaluation"
+  "rounds": [
+    { "name": "Round 1", "durationSeconds": 300, "cutoffType": "top_n", "cutoffValue": 10 }
+  ],
+  "questions": [
+    {
+      "type": "mcq",
+      "content": "What does len('abc') return?",
+      "points": 10, "timeLimit": 30, "round": 1,
+      "options": ["2", "3", "4"],
+      "correctOption": 1           // 0 = first option (or "answer": "3")
+    },
+    {
+      "type": "code",
+      "content": "Print the sum of two numbers read from input.",
+      "points": 20, "language": "python",
+      "testMode": "io",            // "io" (stdin/expected) or "assert"
+      "starterCode": "a = int(input())\\nb = int(input())\\n",
+      "solution": "print(a + b)",
+      "testCases": [
+        { "name": "Basic", "stdin": "2\\n3", "expected": "5" },
+        { "name": "Hidden", "stdin": "10\\n5", "expected": "15", "hidden": true }
+      ]
+    }
+  ]
+}`}</pre>
+              <p className="font-semibold text-foreground">Quiz CSV (multiple choice only)</p>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`type,content,points,timeLimit,round,options,correct
+mcq,"Capital of Uganda?",10,30,1,Kampala|Entebbe|Jinja,0`}</pre>
+              <p className="font-semibold text-foreground">Lesson course JSON</p>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`{ "title": "Intro to JS", "subject": "ICT",
+  "lessons": [{ "title": "Variables", "concept_markdown": "# Variables...",
+    "objective": "Log 5", "language": "javascript", "test_mode": "io",
+    "starter_code": "", "solution": "console.log(5)",
+    "test_cases": [{ "expected": "5" }] }] }`}</pre>
+              <p className="font-semibold text-foreground">Flashcards</p>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`[{ "front": "CPU", "back": "Central Processing Unit" }]
+// or one per line:  CPU | Central Processing Unit`}</pre>
+            </div>
+          </GlowCard>
+
+          {/* Patrons */}
+          <GlowCard id="patrons">
+            <h2 className="flex items-center gap-2 text-lg font-bold mb-3">
+              <Zap className="h-5 w-5 text-primary" /> Patrons, Chat & Hub Access
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <ul className="list-disc list-inside space-y-1">
+                <li><strong>Patrons</strong> page: invite a school patron by email; they manage their students and see their progress and results.</li>
+                <li><strong>Chat:</strong> setter ↔ patron coordination room.</li>
+                <li><strong>Hub:</strong> setters and patrons can open groups and message students instantly; students need mutual approval to DM each other.</li>
+                <li>Adults are always labelled ("Platform Setter", "Patron · School") so learners know who they're talking to.</li>
+                <li>Group owners, patrons and setters use the gear icon to rename, freeze, promote moderators or remove members.</li>
+              </ul>
             </div>
           </GlowCard>
 
