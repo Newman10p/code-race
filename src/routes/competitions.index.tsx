@@ -45,7 +45,7 @@ function CompetitionsList() {
         {list.map((c) => {
           const p = phaseOf(c);
           return (
-            <Link key={c.id} to="/competitions/$id" params={{ id: c.id }}>
+            <Link key={c.id} to={p === "ended" ? "/competition-results/$id" : "/competitions/$id"} params={{ id: c.id }}>
               <GlowCard className="mb-3 p-4 transition hover:border-primary/60">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="font-semibold">{c.title}</h2>

@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { parseQuizBulk } from "@/lib/bulk-import";
+import { readUploadedFileAsText } from "@/lib/read-upload";
 import { useEffect, useState } from "react";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
@@ -162,6 +164,9 @@ function ManagePage() {
               <div className="text-xs text-muted-foreground">{c.status} · {new Date(c.starts_at).toLocaleString()}</div>
             </button>
           ))}
+          {list.filter((c) => c.status === "published").map((c) => (
+            <Link key={"r" + c.id} to="/competition-results/$id" params={{ id: c.id }} className="block px-2 text-xs text-primary underline">Results: {c.title}</Link>
+          ))}
         </GlowCard>
 
         <div className="space-y-4">
@@ -243,6 +248,18 @@ function ManagePage() {
             <Button variant="outline" onClick={() => setQs([...qs, blankQ("mcq")])}><Plus className="mr-1 h-4 w-4" />Multiple choice</Button>
             <Button variant="outline" onClick={() => setQs([...qs, blankQ("short_text")])}><Plus className="mr-1 h-4 w-4" />Short answer</Button>
             <Button variant="outline" onClick={() => setQs([...qs, blankQ("code")])}><Plus className="mr-1 h-4 w-4" />Code</Button>
+            <label className="inline-flex cursor-pointer items-center rounded-md border border-input px-3 py-2 text-sm hover:bg-muted">
+              Bulk import (JSON/CSV/DOCX)
+              <input type="file" accept=".json,.csv,.txt,.docx" className="hidden" onChange={async (e) => {
+                const f = e.target.files?.[0]; e.target.value = ""; if (!f) return;
+                const r = parseQuizBulk(await readUploadedFileAsText(f));
+                if (!r.ok || !r.data) { alert(r.error || "Could not read file"); return; }
+                setQs((a) => [...a, ...r.data!.questions.map((b) => ({ ...blankQ(b.type), content: b.content, points: b.points || 10,
+                  options: b.options?.length ? b.options : ["", ""], correct: b.correctOption ?? 0,
+                  language: b.language || "javascript", starter: b.starterCode || "", solution: b.solution || "",
+                  tests: JSON.stringify(b.testCases || []) }))]);
+              }} />
+            </label>
             <div className="ml-auto flex gap-2">
               {comp.id && <Button variant="destructive" onClick={remove}><Trash2 className="mr-1 h-4 w-4" />Delete</Button>}
               <Button onClick={save} disabled={saving}><Save className="mr-1 h-4 w-4" />{saving ? "Saving…" : "Save competition"}</Button>
