@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
@@ -161,6 +161,9 @@ function ManagePage() {
               <div className="font-medium">{c.title}</div>
               <div className="text-xs text-muted-foreground">{c.status} · {new Date(c.starts_at).toLocaleString()}</div>
             </button>
+          ))}
+          {list.filter((c) => c.status === "published").map((c) => (
+            <Link key={"r" + c.id} to="/competition-results/$id" params={{ id: c.id }} className="block px-2 text-xs text-primary underline">Results: {c.title}</Link>
           ))}
         </GlowCard>
 
