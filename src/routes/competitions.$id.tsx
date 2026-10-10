@@ -137,6 +137,7 @@ function Arena() {
     <p className="text-lg font-semibold">Your answers are in.</p>
     <p className="mt-1 text-3xl font-bold text-primary">{Number(sub.total_score)} pts</p>
     <p className="mt-1 text-sm text-muted-foreground">Final rankings appear when the competition closes.</p>
+    <Link to="/competition-results/$id" params={{ id }} className="mt-3 inline-block text-sm text-primary underline">View leaderboard</Link>
   </GlowCard></>);
 
   if (now < starts) return shell(<>{header}<GlowCard className="p-8 text-center">
