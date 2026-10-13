@@ -727,6 +727,7 @@ export type Database = {
           points: number
           starter_code: string | null
           test_mode: string
+          time_limit_seconds: number | null
           type: string
           visible_test_cases: Json
         }
@@ -741,6 +742,7 @@ export type Database = {
           points?: number
           starter_code?: string | null
           test_mode?: string
+          time_limit_seconds?: number | null
           type: string
           visible_test_cases?: Json
         }
@@ -755,6 +757,7 @@ export type Database = {
           points?: number
           starter_code?: string | null
           test_mode?: string
+          time_limit_seconds?: number | null
           type?: string
           visible_test_cases?: Json
         }
@@ -1890,6 +1893,8 @@ export type Database = {
       }
       is_staff: { Args: never; Returns: boolean }
       my_org_ids: { Args: never; Returns: string[] }
+      record_competition_strike: { Args: { _comp: string }; Returns: number }
+      server_now: { Args: never; Returns: string }
       submit_competition: { Args: { _comp: string }; Returns: number }
     }
     Enums: {

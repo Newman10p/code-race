@@ -29,6 +29,13 @@
       "when": 1791277061727,
       "tag": "0003_competition_submit_and_grade",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791880684958,
+      "tag": "0004_competition_timing_strikes_staff",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFullscreen, isMobile, isPageUnloading } from "@/hooks/useFullscreen";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
@@ -41,12 +42,25 @@ function Arena() {
   const [qs, setQs] = useState<any[]>([]);
   const [sub, setSub] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const offset = useRef(0);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [qStart, setQStart] = useState(0);
+  const [strikes, setStrikes] = useState(0);
+  const fs = useFullscreen();
   const dirty = useRef(false);
   const submitting = useRef(false);
 
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  // Use the server's clock, not the device clock.
+  useEffect(() => {
+    const t0 = Date.now();
+    supabase.rpc("server_now" as any).then(({ data }) => {
+      if (data) offset.current = new Date(data as any).getTime() - (t0 + Date.now()) / 2;
+    });
+    const t = setInterval(() => setNow(Date.now() + offset.current), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (loading || !user) return;
@@ -100,14 +114,53 @@ function Arena() {
 
   const enter = async () => {
     if (!user) return;
+    if (isMobile()) return toast.error("Competitions must be taken on a computer.");
+    await fs.enter();
     setBusy(true);
     const name = user.user_metadata?.display_name || user.email?.split("@")[0] || "Player";
     const { data, error } = await supabase.from("competition_submissions")
       .insert({ competition_id: id, user_id: user.id, display_name: name }).select("*").single();
     setBusy(false);
     if (error) return toast.error(error.message);
-    setSub(data);
+    setSub(data); setIdx(0); setQStart(Date.now() + offset.current);
   };
+
+  const active = !!sub && !sub.submitted_at;
+  // Anti-cheat: tab switches and leaving fullscreen count as strikes; 3 = disqualified (auto-submit).
+  const strike = async (why: string) => {
+    if (!active || isPageUnloading() || submitting.current) return;
+    const { data } = await supabase.rpc("record_competition_strike", { _comp: id });
+    const n = Number(data) || strikes + 1;
+    setStrikes(n);
+    if (n >= 3) { toast.error("3 strikes — you have been disqualified and your answers submitted."); submit(true); }
+    else toast.warning(`Strike ${n}/3: ${why}`);
+  };
+  useEffect(() => {
+    if (!active) return;
+    setStrikes(sub.strikes_count || 0);
+    const vis = () => { if (document.hidden) strike("you left the competition tab"); };
+    const noCopy = (e: Event) => e.preventDefault();
+    document.addEventListener("visibilitychange", vis);
+    document.addEventListener("copy", noCopy);
+    document.addEventListener("paste", noCopy);
+    return () => { document.removeEventListener("visibilitychange", vis); document.removeEventListener("copy", noCopy); document.removeEventListener("paste", noCopy); };
+  }, [active]);
+  const wasFs = useRef(false);
+  useEffect(() => {
+    if (!active) return;
+    if (fs.isFullscreen) wasFs.current = true;
+    else if (wasFs.current) { wasFs.current = false; strike("you left fullscreen"); }
+  }, [fs.isFullscreen, active]);
+
+  // Strict per-question timer: when time runs out, move on (no going back).
+  const cur = qs[idx];
+  const qLeft = cur?.time_limit_seconds ? qStart + cur.time_limit_seconds * 1000 - now : null;
+  const next = () => {
+    if (idx < qs.length - 1) { setIdx(idx + 1); setQStart(Date.now() + offset.current); }
+    else submit(true);
+  };
+  useEffect(() => { if (active && qLeft !== null && qLeft <= 0) next(); }, [qLeft !== null && qLeft <= 0]);
+  useEffect(() => { if (active && !qStart) setQStart(Date.now() + offset.current); }, [active]);
 
   const setA = (qid: string, p: Answer) => { dirty.current = true; setAnswers((a) => ({ ...a, [qid]: { ...a[qid], ...p } })); };
 
@@ -158,16 +211,22 @@ function Arena() {
         <div className="mx-auto flex max-w-4xl items-center justify-between p-3">
           <span className="truncate font-semibold">{comp.title}</span>
           <span className={`flex items-center gap-1 font-mono text-lg ${deadline - now < 60000 ? "text-destructive" : "text-primary"}`}><Clock className="h-4 w-4" />{fmt(deadline - now)}</span>
+          <span className="text-xs text-muted-foreground">Strikes {strikes}/3</span>
           <Button onClick={() => submit(false)} disabled={busy}><Send className="mr-1 h-4 w-4" />Submit</Button>
         </div>
+        <div className="mx-auto h-1 max-w-4xl bg-muted"><div className="h-1 bg-primary transition-all duration-500" style={{ width: `${qs.length ? ((idx + 1) / qs.length) * 100 : 0}%` }} /></div>
       </div>
       <div className="mx-auto max-w-4xl space-y-4 p-4">
-        {qs.map((q, i) => {
-          const a = answers[q.id] || {};
+        {!fs.isFullscreen && !isMobile() && (
+          <GlowCard className="flex items-center justify-between p-3 text-sm"><span>Fullscreen is required during the competition.</span><Button size="sm" onClick={fs.enter}>Return to fullscreen</Button></GlowCard>
+        )}
+        {cur && (() => {
+          const q = cur; const a = answers[q.id] || {};
           return (
-            <GlowCard key={q.id} className="space-y-3 p-5">
-              <div className="flex justify-between text-sm"><span className="font-semibold">Question {i + 1}</span><span className="text-muted-foreground">{q.points} pts</span></div>
-              <p className="whitespace-pre-wrap">{q.content}</p>
+            <GlowCard key={q.id} className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-3 p-5">
+              <div className="flex justify-between text-sm"><span className="font-semibold">Question {idx + 1} of {qs.length}</span>
+                <span className="text-muted-foreground">{q.points} pts{qLeft !== null && <span className={`ml-3 font-mono ${qLeft < 10000 ? "text-destructive" : "text-primary"}`}>{fmt(qLeft)}</span>}</span></div>
+              <p className="whitespace-pre-wrap select-none">{q.content}</p>
               {q.type === "mcq" && (q.options || []).map((o: string, j: number) => (
                 <button key={j} onClick={() => setA(q.id, { choice: j })}
                   className={`block w-full rounded-lg border p-3 text-left text-sm ${a.choice === j ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>{o}</button>
@@ -181,8 +240,11 @@ function Arena() {
               )}
             </GlowCard>
           );
-        })}
-        <Button className="w-full" size="lg" onClick={() => submit(false)} disabled={busy}><Send className="mr-1 h-4 w-4" />Submit answers</Button>
+        })()}
+        <p className="text-center text-xs text-muted-foreground">You can't go back to a question once you move on.</p>
+        <Button className="w-full" size="lg" onClick={() => (idx < qs.length - 1 ? next() : submit(false))} disabled={busy}>
+          {idx < qs.length - 1 ? "Next question →" : <><Send className="mr-1 h-4 w-4" />Submit answers</>}
+        </Button>
       </div>
     </HoneycombLayout>
   );

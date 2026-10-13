@@ -31,7 +31,7 @@ export const Route = createFileRoute("/competitions/manage")({
 
 type QType = "mcq" | "short_text" | "code";
 interface Q {
-  id?: string; type: QType; content: string; points: number;
+  id?: string; type: QType; content: string; points: number; time?: number | null;
   options: string[]; correct: number; accepted: string;
   language: string; starter: string; solution: string; tests: string;
 }
@@ -82,7 +82,7 @@ function ManagePage() {
     setAllowed((ao || []).map((a) => a.organization_id));
     setQs((qd || []).map((q: any) => {
       const k = Array.isArray(q.competition_question_keys) ? q.competition_question_keys[0] : q.competition_question_keys;
-      return { id: q.id, type: q.type, content: q.content, points: q.points, options: q.options || ["", ""],
+      return { id: q.id, type: q.type, content: q.content, points: q.points, time: q.time_limit_seconds ?? null, options: q.options || ["", ""],
         correct: k?.correct_option ?? 0, accepted: (k?.accepted_answers || []).join("\n"), language: q.language,
         starter: q.starter_code || "", solution: k?.solution || "",
         tests: JSON.stringify([...(q.visible_test_cases || []), ...(k?.hidden_test_cases || [])], null, 1) };
@@ -117,7 +117,7 @@ function ManagePage() {
       for (let i = 0; i < qs.length; i++) {
         const q = qs[i]; const t = tests[i];
         const { data: qrow, error } = await supabase.from("competition_questions").insert({
-          competition_id: id!, order_index: i, type: q.type, content: q.content, points: q.points,
+          competition_id: id!, order_index: i, type: q.type, content: q.content, points: q.points, time_limit_seconds: q.time || null,
           options: q.type === "mcq" ? q.options : null, language: q.language,
           starter_code: q.type === "code" ? q.starter : null,
           visible_test_cases: t.filter((x: any) => !(x.is_hidden ?? x.hidden)),
@@ -215,6 +215,8 @@ function ManagePage() {
                   <option value="mcq">Multiple choice</option><option value="short_text">Short answer</option><option value="code">Code</option></select>
                 <Input type="number" className="w-24" value={q.points} onChange={(e) => upQ(i, { points: Number(e.target.value) || 0 })} />
                 <span className="text-xs text-muted-foreground">pts</span>
+                <Input type="number" min={0} className="w-24" placeholder="No limit" value={q.time ?? ""} onChange={(e) => upQ(i, { time: e.target.value ? Number(e.target.value) : null })} />
+                <span className="text-xs text-muted-foreground">sec</span>
                 <Button variant="ghost" size="icon" className="ml-auto" onClick={() => setQs((a) => a.filter((_, j) => j !== i))}><Trash2 className="h-4 w-4" /></Button>
               </div>
               <Textarea placeholder="Question" value={q.content} onChange={(e) => upQ(i, { content: e.target.value })} />
