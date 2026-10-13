@@ -604,7 +604,12 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
                 <li><strong>Who can enter:</strong> everyone, or only chosen schools (patron organisations).</li>
                 <li><strong>Questions:</strong> multiple choice, short answer (accepted answers list) and code (visible + hidden test cases).</li>
                 <li><strong>Scoring:</strong> "points, then speed" breaks ties by finish time; "points only" keeps ties.</li>
-                <li><strong>Live leaderboard:</strong> optionally shown while it's open; otherwise results appear after it closes.</li>
+                <li><strong>Live leaderboard:</strong> optionally shown while it's open; otherwise results appear after it closes. Setters see every school's results; patrons see their own students.</li>
+                <li><strong>Question types:</strong> switch any question between Multiple choice, Short answer and Code with the type dropdown.</li>
+                <li><strong>Per-question time (sec):</strong> leave blank for no limit. When a question's time runs out the learner moves on automatically and can't go back. The overall competition time still applies.</li>
+                <li><strong>One question at a time:</strong> learners see questions one by one with a progress bar and a "Next question" button.</li>
+                <li><strong>Server clock:</strong> all countdowns use the platform's clock, so a wrong device clock can't change opening or closing times.</li>
+                <li><strong>Anti-cheat:</strong> computers only (phones blocked), fullscreen required, copy/paste disabled. Leaving the tab or fullscreen is a strike; 3 strikes disqualifies and submits automatically.</li>
                 <li>Keep it as <strong>Draft</strong> until ready, then <strong>Publish</strong>.</li>
               </ol>
               <p><strong>Results:</strong> each competition has a final rankings page showing school, time taken and score. Patrons see their own students' results.</p>
