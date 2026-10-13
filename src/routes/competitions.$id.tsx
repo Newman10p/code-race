@@ -211,16 +211,22 @@ function Arena() {
         <div className="mx-auto flex max-w-4xl items-center justify-between p-3">
           <span className="truncate font-semibold">{comp.title}</span>
           <span className={`flex items-center gap-1 font-mono text-lg ${deadline - now < 60000 ? "text-destructive" : "text-primary"}`}><Clock className="h-4 w-4" />{fmt(deadline - now)}</span>
+          <span className="text-xs text-muted-foreground">Strikes {strikes}/3</span>
           <Button onClick={() => submit(false)} disabled={busy}><Send className="mr-1 h-4 w-4" />Submit</Button>
         </div>
+        <div className="mx-auto h-1 max-w-4xl bg-muted"><div className="h-1 bg-primary transition-all duration-500" style={{ width: `${qs.length ? ((idx + 1) / qs.length) * 100 : 0}%` }} /></div>
       </div>
       <div className="mx-auto max-w-4xl space-y-4 p-4">
-        {qs.map((q, i) => {
-          const a = answers[q.id] || {};
+        {!fs.isFullscreen && !isMobile() && (
+          <GlowCard className="flex items-center justify-between p-3 text-sm"><span>Fullscreen is required during the competition.</span><Button size="sm" onClick={fs.enter}>Return to fullscreen</Button></GlowCard>
+        )}
+        {cur && (() => {
+          const q = cur; const a = answers[q.id] || {};
           return (
-            <GlowCard key={q.id} className="space-y-3 p-5">
-              <div className="flex justify-between text-sm"><span className="font-semibold">Question {i + 1}</span><span className="text-muted-foreground">{q.points} pts</span></div>
-              <p className="whitespace-pre-wrap">{q.content}</p>
+            <GlowCard key={q.id} className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-3 p-5">
+              <div className="flex justify-between text-sm"><span className="font-semibold">Question {idx + 1} of {qs.length}</span>
+                <span className="text-muted-foreground">{q.points} pts{qLeft !== null && <span className={`ml-3 font-mono ${qLeft < 10000 ? "text-destructive" : "text-primary"}`}>{fmt(qLeft)}</span>}</span></div>
+              <p className="whitespace-pre-wrap select-none">{q.content}</p>
               {q.type === "mcq" && (q.options || []).map((o: string, j: number) => (
                 <button key={j} onClick={() => setA(q.id, { choice: j })}
                   className={`block w-full rounded-lg border p-3 text-left text-sm ${a.choice === j ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>{o}</button>
@@ -234,8 +240,11 @@ function Arena() {
               )}
             </GlowCard>
           );
-        })}
-        <Button className="w-full" size="lg" onClick={() => submit(false)} disabled={busy}><Send className="mr-1 h-4 w-4" />Submit answers</Button>
+        })()}
+        <p className="text-center text-xs text-muted-foreground">You can't go back to a question once you move on.</p>
+        <Button className="w-full" size="lg" onClick={() => (idx < qs.length - 1 ? next() : submit(false))} disabled={busy}>
+          {idx < qs.length - 1 ? "Next question →" : <><Send className="mr-1 h-4 w-4" />Submit answers</>}
+        </Button>
       </div>
     </HoneycombLayout>
   );
