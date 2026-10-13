@@ -114,14 +114,53 @@ function Arena() {
 
   const enter = async () => {
     if (!user) return;
+    if (isMobile()) return toast.error("Competitions must be taken on a computer.");
+    await fs.enter();
     setBusy(true);
     const name = user.user_metadata?.display_name || user.email?.split("@")[0] || "Player";
     const { data, error } = await supabase.from("competition_submissions")
       .insert({ competition_id: id, user_id: user.id, display_name: name }).select("*").single();
     setBusy(false);
     if (error) return toast.error(error.message);
-    setSub(data);
+    setSub(data); setIdx(0); setQStart(Date.now() + offset.current);
   };
+
+  const active = !!sub && !sub.submitted_at;
+  // Anti-cheat: tab switches and leaving fullscreen count as strikes; 3 = disqualified (auto-submit).
+  const strike = async (why: string) => {
+    if (!active || isPageUnloading() || submitting.current) return;
+    const { data } = await supabase.rpc("record_competition_strike", { _comp: id });
+    const n = Number(data) || strikes + 1;
+    setStrikes(n);
+    if (n >= 3) { toast.error("3 strikes — you have been disqualified and your answers submitted."); submit(true); }
+    else toast.warning(`Strike ${n}/3: ${why}`);
+  };
+  useEffect(() => {
+    if (!active) return;
+    setStrikes(sub.strikes_count || 0);
+    const vis = () => { if (document.hidden) strike("you left the competition tab"); };
+    const noCopy = (e: Event) => e.preventDefault();
+    document.addEventListener("visibilitychange", vis);
+    document.addEventListener("copy", noCopy);
+    document.addEventListener("paste", noCopy);
+    return () => { document.removeEventListener("visibilitychange", vis); document.removeEventListener("copy", noCopy); document.removeEventListener("paste", noCopy); };
+  }, [active]);
+  const wasFs = useRef(false);
+  useEffect(() => {
+    if (!active) return;
+    if (fs.isFullscreen) wasFs.current = true;
+    else if (wasFs.current) { wasFs.current = false; strike("you left fullscreen"); }
+  }, [fs.isFullscreen, active]);
+
+  // Strict per-question timer: when time runs out, move on (no going back).
+  const cur = qs[idx];
+  const qLeft = cur?.time_limit_seconds ? qStart + cur.time_limit_seconds * 1000 - now : null;
+  const next = () => {
+    if (idx < qs.length - 1) { setIdx(idx + 1); setQStart(Date.now() + offset.current); }
+    else submit(true);
+  };
+  useEffect(() => { if (active && qLeft !== null && qLeft <= 0) next(); }, [qLeft !== null && qLeft <= 0]);
+  useEffect(() => { if (active && !qStart) setQStart(Date.now() + offset.current); }, [active]);
 
   const setA = (qid: string, p: Answer) => { dirty.current = true; setAnswers((a) => ({ ...a, [qid]: { ...a[qid], ...p } })); };
 
