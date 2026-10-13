@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useFullscreen, isMobile, isPageUnloading } from "@/hooks/useFullscreen";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
@@ -41,12 +42,25 @@ function Arena() {
   const [qs, setQs] = useState<any[]>([]);
   const [sub, setSub] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
+  const offset = useRef(0);
   const [now, setNow] = useState(Date.now());
   const [busy, setBusy] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [qStart, setQStart] = useState(0);
+  const [strikes, setStrikes] = useState(0);
+  const fs = useFullscreen();
   const dirty = useRef(false);
   const submitting = useRef(false);
 
-  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  // Use the server's clock, not the device clock.
+  useEffect(() => {
+    const t0 = Date.now();
+    supabase.rpc("server_now" as any).then(({ data }) => {
+      if (data) offset.current = new Date(data as any).getTime() - (t0 + Date.now()) / 2;
+    });
+    const t = setInterval(() => setNow(Date.now() + offset.current), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     if (loading || !user) return;
