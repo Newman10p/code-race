@@ -490,6 +490,10 @@ mcq,"Capital of Uganda?",10,30,1,Kampala|Entebbe|Jinja,0`}</pre>
               <p><strong>Results:</strong> each competition has a final rankings page showing school, time taken and score. Patrons see their own students' results.</p>
               <p><strong>Bulk import:</strong> use the same quiz format below. Short answer questions are added by hand.</p>
             </div>
+          <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">  <li><strong>Live boards:</strong> setters and patrons open <strong>Live boards</strong> in the menu to follow any competition's standings in real time (updates every 10 seconds), including who is still answering and strike counts. Patrons see their own school's students.</li>
+                <li><strong>Export to Excel:</strong> on any leaderboard, click <strong>Export to Excel</strong> to download rank, name, school, score, time, tests passed, strikes and status as a spreadsheet file.</li>
+                <li><strong>One attempt only:</strong> a learner who has already taken part only sees a summary of their past attempt, even if you later edit or reopen the competition.</li>
+              </ul>
           </GlowCard>
 
           <GlowCard id="criteria">
