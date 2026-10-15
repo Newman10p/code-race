@@ -95,6 +95,60 @@ function LessonPlayer() {
 
   const isHtml = lesson.language === "html";
 
+  if (lesson.language === "text") {
+    const complete = async () => {
+      setPassed(true);
+      confetti({ particleCount: 70, spread: 60, origin: { y: 0.7 } });
+      if (user) await supabase.from("lesson_progress" as any).upsert(
+        { user_id: user.id, lesson_id: lessonId, completed_at: new Date().toISOString(), attempts: 1 },
+        { onConflict: "user_id,lesson_id" });
+    };
+    return (
+      <HoneycombLayout>
+        <div className="mx-auto max-w-3xl space-y-4 p-4">
+          <div className="flex items-center justify-between">
+            <Link to="/learn/course/$courseId" params={{ courseId: lesson.course_id }}>
+              <Button variant="ghost" size="sm"><ArrowLeft className="h-4 w-4" /> Exit</Button>
+            </Link>
+            <span className="text-xs text-muted-foreground">Lesson {currentIdx + 1} of {siblings.length}</span>
+          </div>
+          <motion.article initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 rounded-xl border border-primary/20 bg-card p-6">
+            <h1 className="text-2xl font-bold">{lesson.title}</h1>
+            {lesson.image_url && <img src={lesson.image_url} alt="" className="w-full rounded-lg border border-border" />}
+            <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">{lesson.concept_markdown}</div>
+            {lesson.objective && (
+              <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-3">
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-primary">Objective</p>
+                <p className="text-sm font-medium">{lesson.objective}</p>
+              </div>
+            )}
+            {lesson.starter_code && (
+              <div className="rounded-lg border border-border bg-background p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-primary">Example / prompt</p>
+                  <Button size="sm" variant="outline" onClick={() => navigator.clipboard.writeText(lesson.starter_code)}>Copy</Button>
+                </div>
+                <pre className="whitespace-pre-wrap text-sm">{lesson.starter_code}</pre>
+              </div>
+            )}
+            {lesson.solution && (
+              <details className="rounded-lg border border-border p-3 text-sm">
+                <summary className="cursor-pointer font-medium">Sample answer</summary>
+                <pre className="mt-2 whitespace-pre-wrap">{lesson.solution}</pre>
+              </details>
+            )}
+            {lesson.hint && <p className="flex items-start gap-2 text-sm text-muted-foreground"><Lightbulb className="h-4 w-4 text-primary" />{lesson.hint}</p>}
+          </motion.article>
+          <div className="flex justify-end gap-2">
+            {!passed ? <Button onClick={complete}><CheckCircle2 className="h-4 w-4" /> Mark as complete</Button>
+              : nextLesson ? <Button onClick={() => navigate({ to: "/learn/lesson/$lessonId", params: { lessonId: nextLesson.id } })}>Next lesson <ChevronRight className="h-4 w-4" /></Button>
+              : <Link to="/learn/course/$courseId" params={{ courseId: lesson.course_id }}><Button>Finish course</Button></Link>}
+          </div>
+        </div>
+      </HoneycombLayout>
+    );
+  }
+
   return (
     <HoneycombLayout>
       <div className="flex h-screen flex-col">

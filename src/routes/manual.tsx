@@ -601,6 +601,7 @@ mcq,"Capital of Uganda?",10,30,1,Kampala|Entebbe|Jinja,0`}</pre>
                 <li>Languages: <strong>JavaScript</strong>, <strong>Python</strong> (Pyodide), <strong>HTML/CSS</strong> (live preview).</li>
                 <li>Test modes: <strong>I/O</strong> (compare stdout to expected) or <strong>Assertion</strong> (write test code that throws on failure).</li>
                 <li>Progress is saved per learner; the next lesson unlocks after the current one passes all tests.</li>
+                <li><strong>Plain text lessons</strong> (AI prompting, theory, etc.): pick "Plain text lesson" on the lesson card. Add your explanation, an optional example prompt learners can copy, and an optional sample answer. Learners read it and click <strong>Mark as complete</strong> — no code needed.</li>
                 <li>Manage your courses on the dashboard: edit, publish/unpublish, preview, or delete.</li>
               </ul>
             </div>
