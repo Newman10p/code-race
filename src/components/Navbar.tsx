@@ -14,6 +14,7 @@ export function Navbar() {
         { label: "Launch", to: "/launch", icon: Play },
         { label: "Patrons", to: "/patrons", icon: Building2 },
         { label: "Competitions", to: "/competitions/manage", icon: Trophy },
+        { label: "Live boards", to: "/competitions/live", icon: Trophy },
          { label: "Hub", to: "/collab", icon: Users },
         { label: "Chat", to: "/chat", icon: MessageSquare },
         { label: "Hub admin", to: "/admin/collab", icon: ShieldAlert },
@@ -26,7 +27,7 @@ export function Navbar() {
           { label: "Organisation", to: "/organisation", icon: Building2 },
            { label: "Hub", to: "/collab", icon: Users },
           { label: "Chat", to: "/chat", icon: MessageSquare },
-          { label: "Results", to: "/results", icon: Trophy },
+          { label: "Live boards", to: "/competitions/live", icon: Trophy },
           { label: "Settings", to: "/settings", icon: Settings },
         ]
       : [

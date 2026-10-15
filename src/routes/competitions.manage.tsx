@@ -165,7 +165,7 @@ function ManagePage() {
             </button>
           ))}
           {list.filter((c) => c.status === "published").map((c) => (
-            <Link key={"r" + c.id} to="/competition-results/$id" params={{ id: c.id }} className="block px-2 text-xs text-primary underline">Results: {c.title}</Link>
+            <Link key={"r" + c.id} to="/competition-results/$id" params={{ id: c.id }} className="block px-2 text-xs text-primary underline">Live leaderboard &amp; results: {c.title}</Link>
           ))}
         </GlowCard>
 
