@@ -28,6 +28,7 @@ export function Navbar() {
            { label: "Hub", to: "/collab", icon: Users },
           { label: "Chat", to: "/chat", icon: MessageSquare },
           { label: "Live boards", to: "/competitions/live", icon: Trophy },
+          { label: "Results", to: "/results", icon: Trophy },
           { label: "Settings", to: "/settings", icon: Settings },
         ]
       : [
