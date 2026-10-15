@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Textarea } from "@/components/ui/textarea";
 import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
@@ -348,6 +349,23 @@ function LessonCourseCreator() {
                     <label className="mb-1 block text-xs text-muted-foreground">Objective</label>
                     <Input value={l.objective} onChange={(e) => updateLesson(l.id, { objective: e.target.value })} placeholder="Change the background to blue" className="bg-background" />
                   </div>
+                  <div className="flex gap-2">
+                    {[["code", "Coding lesson"], ["text", "Plain text lesson (e.g. AI prompting)"]].map(([k, label]) => (
+                      <button key={k} type="button"
+                        onClick={() => updateLesson(l.id, k === "text" ? { language: "text", test_cases: [] } : { language: "javascript" })}
+                        className={`rounded-full border px-3 py-1 text-xs ${(l.language === "text") === (k === "text") ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{label}</button>
+                    ))}
+                  </div>
+                  {l.language === "text" ? (<>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Example / prompt to copy (optional)</label>
+                      <Textarea rows={5} value={l.starter_code} onChange={(e) => updateLesson(l.id, { starter_code: e.target.value })} className="bg-background" />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs text-muted-foreground">Sample answer (optional, learners can reveal it)</label>
+                      <Textarea rows={4} value={l.solution} onChange={(e) => updateLesson(l.id, { solution: e.target.value })} className="bg-background" />
+                    </div>
+                  </>) : (<>
                   <div>
                     <label className="mb-1 block text-xs text-muted-foreground">Starter Code</label>
                     <MonacoCodeEditor value={l.starter_code} onChange={(v) => updateLesson(l.id, { starter_code: v })} language={l.language} height="180px" />
@@ -364,6 +382,7 @@ function LessonCourseCreator() {
                     onModeChange={(m) => updateLesson(l.id, { test_mode: m })}
                     onChange={(t) => updateLesson(l.id, { test_cases: t })}
                   />
+                  </>)}
                 </div>
               )}
             </GlowCard>

@@ -186,10 +186,18 @@ function Arena() {
     </GlowCard>
   );
 
-  if (sub?.submitted_at) return shell(<>{header}<GlowCard className="p-6 text-center">
-    <p className="text-lg font-semibold">Your answers are in.</p>
+  // Anyone who already attended only sees their past attempt — even if the competition is edited or reopened later.
+  if (sub?.submitted_at || (sub && now >= ends)) return shell(<>{header}<GlowCard className="p-6 text-center">
+    <p className="text-lg font-semibold">You have already taken part in this competition.</p>
     <p className="mt-1 text-3xl font-bold text-primary">{Number(sub.total_score)} pts</p>
-    <p className="mt-1 text-sm text-muted-foreground">Final rankings appear when the competition closes.</p>
+    <div className="mx-auto mt-4 grid max-w-md grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+      {[["Status", sub.strikes_count >= 3 ? "Disqualified" : sub.submitted_at ? "Submitted" : "Not submitted"],
+        ["Time", `${Math.floor(sub.time_spent_seconds / 60)}m ${sub.time_spent_seconds % 60}s`],
+        ["Tests passed", sub.test_cases_passed], ["Strikes", sub.strikes_count]].map(([k, v]) => (
+        <div key={k as string} className="rounded-lg border border-border bg-card p-2"><p className="text-xs text-muted-foreground">{k}</p><p className="font-semibold">{v}</p></div>
+      ))}
+    </div>
+    {sub.submitted_at && <p className="mt-3 text-xs text-muted-foreground">Submitted {new Date(sub.submitted_at).toLocaleString()}. Re-taking is not allowed.</p>}
     <Link to="/competition-results/$id" params={{ id }} className="mt-3 inline-block text-sm text-primary underline">View leaderboard</Link>
   </GlowCard></>);
 

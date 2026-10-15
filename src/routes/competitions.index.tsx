@@ -4,6 +4,7 @@ import { HoneycombLayout } from "@/components/HoneycombLayout";
 import { Navbar } from "@/components/Navbar";
 import { GlowCard } from "@/components/GlowCard";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Trophy, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/competitions/")({
@@ -29,6 +30,13 @@ export function phaseOf(c: { starts_at: string; ends_at: string }, now = Date.no
 function CompetitionsList() {
   const [list, setList] = useState<any[]>([]);
   const [, tick] = useState(0);
+  const { user } = useAuth();
+  const [mine, setMine] = useState<Record<string, any>>({});
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("competition_submissions").select("competition_id,total_score,submitted_at").eq("user_id", user.id)
+      .then(({ data }) => setMine(Object.fromEntries((data || []).map((r) => [r.competition_id, r]))));
+  }, [user]);
   useEffect(() => {
     supabase.from("competitions").select("id,title,description,starts_at,ends_at,visibility,status")
       .eq("status", "published").order("starts_at").then(({ data }) => setList(data || []));
@@ -44,11 +52,13 @@ function CompetitionsList() {
         {list.length === 0 && <p className="text-muted-foreground">No competitions announced yet.</p>}
         {list.map((c) => {
           const p = phaseOf(c);
+          const done = mine[c.id]?.submitted_at;
           return (
-            <Link key={c.id} to={p === "ended" ? "/competition-results/$id" : "/competitions/$id"} params={{ id: c.id }}>
+            <Link key={c.id} to={p === "ended" || done ? "/competition-results/$id" : "/competitions/$id"} params={{ id: c.id }}>
               <GlowCard className="mb-3 p-4 transition hover:border-primary/60">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="font-semibold">{c.title}</h2>
+                  {done && <span className="rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">Completed · {Number(mine[c.id].total_score)} pts</span>}
                   <span className={`rounded-full px-2 py-0.5 text-xs ${p === "live" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
                     {p === "live" ? "Live now" : p === "upcoming" ? "Upcoming" : "Ended"}
                   </span>
