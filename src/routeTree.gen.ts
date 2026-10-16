@@ -15,6 +15,7 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PatronsRouteImport } from './routes/patrons'
 import { Route as OrganisationRouteImport } from './routes/organisation'
 import { Route as ManualRouteImport } from './routes/manual'
@@ -77,6 +78,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const RaceRoute = RaceRouteImport.update({
   id: '/race',
   path: '/race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PatronsRoute = PatronsRouteImport.update({
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/manual': typeof ManualRoute
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
+  '/profile': typeof ProfileRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -298,6 +305,7 @@ export interface FileRoutesByTo {
   '/manual': typeof ManualRoute
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
+  '/profile': typeof ProfileRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -340,6 +348,7 @@ export interface FileRoutesById {
   '/manual': typeof ManualRoute
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
+  '/profile': typeof ProfileRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -383,6 +392,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/organisation'
     | '/patrons'
+    | '/profile'
     | '/race'
     | '/register'
     | '/report'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/organisation'
     | '/patrons'
+    | '/profile'
     | '/race'
     | '/register'
     | '/report'
@@ -464,6 +475,7 @@ export interface FileRouteTypes {
     | '/manual'
     | '/organisation'
     | '/patrons'
+    | '/profile'
     | '/race'
     | '/register'
     | '/report'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   ManualRoute: typeof ManualRoute
   OrganisationRoute: typeof OrganisationRoute
   PatronsRoute: typeof PatronsRoute
+  ProfileRoute: typeof ProfileRoute
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
   ReportRoute: typeof ReportRoute
@@ -569,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/race'
       fullPath: '/race'
       preLoaderRoute: typeof RaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/patrons': {
@@ -843,6 +863,7 @@ const rootRouteChildren: RootRouteChildren = {
   ManualRoute: ManualRoute,
   OrganisationRoute: OrganisationRoute,
   PatronsRoute: PatronsRoute,
+  ProfileRoute: ProfileRoute,
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
   ReportRoute: ReportRoute,
