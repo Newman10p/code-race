@@ -1586,6 +1586,8 @@ export type Database = {
           display_name: string | null
           email: string
           id: string
+          name_changes_used: number
+          name_window_started_at: string | null
           theme_color: string
           tutorial_completed_at: string | null
           updated_at: string
@@ -1596,6 +1598,8 @@ export type Database = {
           display_name?: string | null
           email: string
           id?: string
+          name_changes_used?: number
+          name_window_started_at?: string | null
           theme_color?: string
           tutorial_completed_at?: string | null
           updated_at?: string
@@ -1606,12 +1610,73 @@ export type Database = {
           display_name?: string | null
           email?: string
           id?: string
+          name_changes_used?: number
+          name_window_started_at?: string | null
           theme_color?: string
           tutorial_completed_at?: string | null
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      project_submissions: {
+        Row: {
+          created_at: string
+          description: string
+          document_name: string | null
+          document_path: string | null
+          extra_links: Json
+          id: string
+          learner_name: string
+          organization_id: string | null
+          project_url: string | null
+          repo_url: string | null
+          school_name: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          document_name?: string | null
+          document_path?: string | null
+          extra_links?: Json
+          id?: string
+          learner_name: string
+          organization_id?: string | null
+          project_url?: string | null
+          repo_url?: string | null
+          school_name?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          document_name?: string | null
+          document_path?: string | null
+          extra_links?: Json
+          id?: string
+          learner_name?: string
+          organization_id?: string | null
+          project_url?: string | null
+          repo_url?: string | null
+          school_name?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_submissions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       questions: {
         Row: {
