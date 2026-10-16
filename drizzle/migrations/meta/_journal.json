@@ -43,6 +43,13 @@
       "when": 1792152901896,
       "tag": "0005_project_submissions_and_profile_names",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792152929535,
+      "tag": "0006_limit_display_name_changes",
+      "breakpoints": true
     }
   ]
 }
