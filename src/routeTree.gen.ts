@@ -15,6 +15,7 @@ import { Route as ResultsRouteImport } from './routes/results'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as RaceRouteImport } from './routes/race'
+import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as PatronsRouteImport } from './routes/patrons'
 import { Route as OrganisationRouteImport } from './routes/organisation'
@@ -78,6 +79,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const RaceRoute = RaceRouteImport.update({
   id: '/race',
   path: '/race',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsRoute = ProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -306,6 +313,7 @@ export interface FileRoutesByTo {
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/organisation': typeof OrganisationRoute
   '/patrons': typeof PatronsRoute
   '/profile': typeof ProfileRoute
+  '/projects': typeof ProjectsRoute
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/organisation'
     | '/patrons'
     | '/profile'
+    | '/projects'
     | '/race'
     | '/register'
     | '/report'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/organisation'
     | '/patrons'
     | '/profile'
+    | '/projects'
     | '/race'
     | '/register'
     | '/report'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/organisation'
     | '/patrons'
     | '/profile'
+    | '/projects'
     | '/race'
     | '/register'
     | '/report'
@@ -519,6 +531,7 @@ export interface RootRouteChildren {
   OrganisationRoute: typeof OrganisationRoute
   PatronsRoute: typeof PatronsRoute
   ProfileRoute: typeof ProfileRoute
+  ProjectsRoute: typeof ProjectsRoute
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
   ReportRoute: typeof ReportRoute
@@ -582,6 +595,13 @@ declare module '@tanstack/react-router' {
       path: '/race'
       fullPath: '/race'
       preLoaderRoute: typeof RaceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects': {
+      id: '/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -864,6 +884,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrganisationRoute: OrganisationRoute,
   PatronsRoute: PatronsRoute,
   ProfileRoute: ProfileRoute,
+  ProjectsRoute: ProjectsRoute,
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
   ReportRoute: ReportRoute,
