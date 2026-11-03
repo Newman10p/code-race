@@ -179,7 +179,7 @@ function Arena() {
       } else if (result.warning_at) {
         setWarningUntil(new Date(result.warning_at).getTime() + 10000);
       }
-    }).catch(() => toast.error("Security check failed. Please reconnect.")).finally(() => setSecurityBusy(false));
+    }).catch(() => { toast.error("Security check failed. Please reconnect."); }).finally(() => setSecurityBusy(false));
   };
   useEffect(() => {
     if (!active) return;
@@ -193,11 +193,14 @@ function Arena() {
     }
   }, [fs.isFullscreen, active]);
   useEffect(() => {
-    if (!active || !sub) return;
+    if (!active || !sub || !now) return;
     setFullscreenExits(sub.fullscreen_exits || 0);
     if (sub.fullscreen_warning_at) setWarningUntil(new Date(sub.fullscreen_warning_at).getTime() + 10000);
-    else if (!fs.isFullscreen && !isMobile()) setWarningUntil(currentTime() + 10000);
-  }, [active]);
+    else if (!fs.isFullscreen && !isMobile()) {
+      setWarningUntil(currentTime() + 10000);
+      fullscreenEvent("exit");
+    }
+  }, [active, !!now]);
   const warningLeft = warningUntil === null ? null : Math.max(0, Math.ceil((warningUntil - now) / 1000));
   useEffect(() => {
     if (active && warningLeft === 0 && !securityBusy) fullscreenEvent("timeout");
