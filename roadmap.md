@@ -1,4 +1,7 @@
 # Hub updates
+- [ ] Phase 1: center competition questions and finish fullscreen countdown / second-exit disqualification.
+- [ ] Phase 2: text-lesson JSON imports and manual examples; Projects / Profile menu access.
+- [ ] Patron school registries and setter-controlled resource folders / patron hosting (later phases, awaiting request).
 - [ ] Add role-aware Hub navigation and conversation layout.
 - [ ] Enable verified patron-to-student and setter-to-user direct chats with visible adult labels.
 - [ ] Add group discovery, setter access, and group management controls.
