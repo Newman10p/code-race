@@ -50,6 +50,13 @@
       "when": 1792152929535,
       "tag": "0006_limit_display_name_changes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793726704495,
+      "tag": "0007_competition_fullscreen_exit_limits",
+      "breakpoints": true
     }
   ]
 }
