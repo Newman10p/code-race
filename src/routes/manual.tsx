@@ -8,6 +8,14 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/manual")({
+  head: () => ({ meta: [
+    { title: "Setter Manual | CodeRace" },
+    { name: "description", content: "CodeRace setter guide to lessons, competitions, imports and school collaboration." },
+    { property: "og:title", content: "Setter Manual | CodeRace" },
+    { property: "og:description", content: "Content formats, competition security and learner project workflows." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: ManualPage,
 });
 
@@ -259,7 +267,7 @@ mcq,"What does CPU stand for?",10,30,1,"Central Processing Unit|Computer Power U
                 Assertion mode: <code>name</code>, <code>code</code> (the assertion), <code>is_hidden</code>. Set the question's
                 <code> testMode</code> to <code>"io"</code> or <code>"assert"</code>.</p>
 
-              <p><strong>G. Lesson courses</strong> — in the lesson creator click "Bulk Import Lessons":</p>
+              <p><strong>G. Lesson courses</strong> — in the lesson creator click "Bulk Import Lessons". Coding and plain text lessons can be mixed; see the plain text example in section 9.</p>
               <pre className="rounded-lg border border-input bg-background p-3 font-mono text-xs overflow-x-auto">
 {`{
   "course": { "title": "Intro to Python", "subject": "Programming",
@@ -335,6 +343,19 @@ mcq,"Capital of Uganda?",10,30,1,Kampala|Entebbe|Jinja,0`}</pre>
     "objective": "Log 5", "language": "javascript", "test_mode": "io",
     "starter_code": "", "solution": "console.log(5)",
     "test_cases": [{ "expected": "5" }] }] }`}</pre>
+              <p className="font-semibold text-foreground">Plain text / AI prompting course JSON</p>
+              <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`{
+  "course": { "title": "AI Prompting", "subject": "ICT" },
+  "lessons": [{
+    "type": "text",
+    "title": "Write a clear prompt",
+    "concept_markdown": "# Clear prompts\\nDescribe the task, context and output format.",
+    "objective": "Compose a useful prompt",
+    "example_prompt": "Explain a computer network to a beginner in three bullet points.",
+    "sample_answer": "A network connects devices so they can share data and resources."
+  }]
+}`}</pre>
+              <p>Use <code>type: "text"</code>, <code>lesson_type: "text"</code> or <code>language: "text"</code>. Text lessons need no code or tests. The optional <code>example_prompt</code> and <code>sample_answer</code> fields appear in the reader; <code>starter_code</code> and <code>solution</code> are also accepted. Learners use <strong>Mark as complete</strong> to record progress.</p>
               <p className="font-semibold text-foreground">Flashcards</p>
               <pre className="overflow-x-auto rounded-lg bg-muted p-3 font-mono text-xs">{`[{ "front": "CPU", "back": "Central Processing Unit" }]
 // or one per line:  CPU | Central Processing Unit`}</pre>
@@ -484,7 +505,7 @@ mcq,"Capital of Uganda?",10,30,1,Kampala|Entebbe|Jinja,0`}</pre>
                 <li><strong>Per-question time (sec):</strong> leave blank for no limit. When a question's time runs out the learner moves on automatically and can't go back. The overall competition time still applies.</li>
                 <li><strong>One question at a time:</strong> learners see questions one by one with a progress bar and a "Next question" button.</li>
                 <li><strong>Server clock:</strong> all countdowns use the platform's clock, so a wrong device clock can't change opening or closing times.</li>
-                <li><strong>Anti-cheat:</strong> computers only (phones blocked), fullscreen required, copy/paste disabled. Leaving the tab or fullscreen is a strike; 3 strikes disqualifies and submits automatically.</li>
+                <li><strong>Anti-cheat:</strong> computers only (phones blocked), fullscreen required, copy/paste disabled. The first fullscreen exit starts a 10-second warning: return in time or be disqualified. A second fullscreen exit disqualifies immediately. Leaving the competition tab still counts toward the separate 3-strike limit. Disqualification submits the attempt automatically.</li>
                 <li>Keep it as <strong>Draft</strong> until ready, then <strong>Publish</strong>.</li>
               </ol>
               <p><strong>Results:</strong> each competition has a final rankings page showing school, time taken and score. Patrons see their own students' results.</p>

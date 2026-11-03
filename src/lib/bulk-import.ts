@@ -236,19 +236,20 @@ export function parseCourseBulk(text: string): BulkResult<BulkCourse> {
     .map((l: any, i: number) => {
       const title = String(l.title ?? "").trim();
       if (!title) { warnings.push(`Lesson ${i + 1} skipped — missing title.`); return null; }
+      const isText = [l.type, l.lesson_type, l.language].some((value) => String(value ?? "").toLowerCase() === "text");
       const lesson: BulkLesson = {
         title,
         concept_markdown: String(l.concept_markdown ?? l.concept ?? ""),
         image_url: String(l.image_url ?? l.image ?? ""),
         objective: String(l.objective ?? ""),
         hint: String(l.hint ?? ""),
-        language: String(l.language ?? "javascript"),
-        starter_code: String(l.starter_code ?? l.starterCode ?? ""),
-        solution: String(l.solution ?? ""),
+        language: isText ? "text" : String(l.language ?? "javascript"),
+        starter_code: String(l.example_prompt ?? l.prompt_template ?? l.starter_code ?? l.starterCode ?? ""),
+        solution: String(l.sample_answer ?? l.sample_output ?? l.solution ?? ""),
         test_mode: (l.test_mode ?? l.testMode) === "assert" ? "assert" : "io",
-        test_cases: normalizeTests(l.test_cases ?? l.testCases, warnings, `Lesson ${i + 1}`),
+        test_cases: isText ? [] : normalizeTests(l.test_cases ?? l.testCases, warnings, `Lesson ${i + 1}`),
       };
-      if (lesson.test_cases.length === 0) warnings.push(`Lesson ${i + 1}: no test cases — learners cannot be auto-checked.`);
+      if (!isText && lesson.test_cases.length === 0) warnings.push(`Lesson ${i + 1}: no test cases — learners cannot be auto-checked.`);
       return lesson;
     })
     .filter((l): l is BulkLesson => l !== null);

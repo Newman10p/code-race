@@ -17,6 +17,14 @@ import type { TestCase } from "@/lib/code-runners";
 import { parseCourseBulk } from "@/lib/bulk-import";
 
 export const Route = createFileRoute("/lessons/create")({
+  head: () => ({ meta: [
+    { title: "Create Lesson Courses | CodeRace" },
+    { name: "description", content: "Build coding and plain text courses for CodeRace learners." },
+    { property: "og:title", content: "Create Lesson Courses | CodeRace" },
+    { property: "og:description", content: "Prepare lessons, prompting examples and practice activities." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   validateSearch: (s: Record<string, unknown>) => ({ courseId: (s.courseId as string) || "" }),
   component: LessonCourseCreator,
 });
@@ -263,7 +271,7 @@ function LessonCourseCreator() {
         {showBulk && (
           <GlowCard className="mb-4">
             <label className="mb-2 block text-sm text-muted-foreground">
-              Paste a course JSON (lessons with starter code, solution and test cases)
+              Course JSON — coding or plain text lessons
             </label>
             <textarea
               value={bulkData}
@@ -283,6 +291,14 @@ function LessonCourseCreator() {
       "solution": "x = 5\\nprint(x)",
       "test_mode": "io",
       "test_cases": [{"name":"prints 5","expected":"5"}]
+    },
+    {
+      "type": "text",
+      "title": "Writing AI prompts",
+      "concept_markdown": "State the task, context and desired format.",
+      "objective": "Write a clear prompt",
+      "example_prompt": "Explain variables to a beginner in three sentences.",
+      "sample_answer": "A variable stores a value you can use later."
     }
   ]
 }`}
@@ -351,9 +367,9 @@ function LessonCourseCreator() {
                   </div>
                   <div className="flex gap-2">
                     {[["code", "Coding lesson"], ["text", "Plain text lesson (e.g. AI prompting)"]].map(([k, label]) => (
-                      <button key={k} type="button"
+                      <Button key={k} type="button" variant="outline" size="sm"
                         onClick={() => updateLesson(l.id, k === "text" ? { language: "text", test_cases: [] } : { language: "javascript" })}
-                        className={`rounded-full border px-3 py-1 text-xs ${(l.language === "text") === (k === "text") ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{label}</button>
+                        className={`${(l.language === "text") === (k === "text") ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"}`}>{label}</Button>
                     ))}
                   </div>
                   {l.language === "text" ? (<>
