@@ -10,7 +10,7 @@ import { CodeRunner } from "@/components/code/CodeRunner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, Send, Trophy } from "lucide-react";
+import { ArrowLeft, Clock, Send, Trophy, ShieldAlert, Maximize } from "lucide-react";
 
 export const Route = createFileRoute("/competitions/$id")({
   head: () => ({
@@ -42,8 +42,8 @@ function Arena() {
   const [qs, setQs] = useState<any[]>([]);
   const [sub, setSub] = useState<any>(null);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
-  const offset = useRef(0);
-  const [now, setNow] = useState(Date.now());
+  const clock = useRef<{ server: number; tick: number } | null>(null);
+  const [now, setNow] = useState(0);
   const [busy, setBusy] = useState(false);
   const [idx, setIdx] = useState(0);
   const [qStart, setQStart] = useState(0);
@@ -51,15 +51,27 @@ function Arena() {
   const fs = useFullscreen();
   const dirty = useRef(false);
   const submitting = useRef(false);
+  const [warningUntil, setWarningUntil] = useState<number | null>(null);
+  const [fullscreenExits, setFullscreenExits] = useState(0);
+  const [securityBusy, setSecurityBusy] = useState(false);
+  const fullscreenQueue = useRef(Promise.resolve());
+  const currentTime = () => clock.current ? clock.current.server + performance.now() - clock.current.tick : 0;
 
-  // Use the server's clock, not the device clock.
+  // Server time plus monotonic elapsed time; never use the device wall clock.
   useEffect(() => {
-    const t0 = Date.now();
-    supabase.rpc("server_now" as any).then(({ data }) => {
-      if (data) offset.current = new Date(data as any).getTime() - (t0 + Date.now()) / 2;
-    });
-    const t = setInterval(() => setNow(Date.now() + offset.current), 1000);
-    return () => clearInterval(t);
+    let cancelled = false;
+    const sync = async () => {
+      const t0 = performance.now();
+      const { data } = await supabase.rpc("server_now");
+      const t1 = performance.now();
+      if (cancelled || !data) return;
+      clock.current = { server: new Date(data).getTime() + (t1 - t0) / 2, tick: t1 };
+      setNow(currentTime());
+    };
+    void sync();
+    const heartbeat = setInterval(sync, 30000);
+    const t = setInterval(() => { if (clock.current) setNow(currentTime()); }, 250);
+    return () => { cancelled = true; clearInterval(t); clearInterval(heartbeat); };
   }, []);
 
   useEffect(() => {
@@ -80,7 +92,7 @@ function Arena() {
 
   // Load questions once open (the database only releases them after the start time).
   useEffect(() => {
-    if (!comp || now < starts || qs.length) return;
+    if (!comp || !now || now < starts || qs.length) return;
     supabase.from("competition_questions").select("*").eq("competition_id", id).order("order_index").then(({ data }) => setQs(data || []));
   }, [comp, now >= starts]);
 
@@ -116,17 +128,20 @@ function Arena() {
     if (!user) return;
     if (isMobile()) return toast.error("Competitions must be taken on a computer.");
     await fs.enter();
+    if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+      return toast.error("Allow fullscreen before starting the competition.");
+    }
     setBusy(true);
     const name = user.user_metadata?.display_name || user.email?.split("@")[0] || "Player";
     const { data, error } = await supabase.from("competition_submissions")
       .insert({ competition_id: id, user_id: user.id, display_name: name }).select("*").single();
     setBusy(false);
     if (error) return toast.error(error.message);
-    setSub(data); setIdx(0); setQStart(Date.now() + offset.current);
+    setSub(data); setIdx(0); setQStart(currentTime());
   };
 
   const active = !!sub && !sub.submitted_at;
-  // Anti-cheat: tab switches and leaving fullscreen count as strikes; 3 = disqualified (auto-submit).
+  // Tab strikes remain separate from the two-exit fullscreen limit.
   const strike = async (why: string) => {
     if (!active || isPageUnloading() || submitting.current) return;
     const { data } = await supabase.rpc("record_competition_strike", { _comp: id });
@@ -146,21 +161,60 @@ function Arena() {
     return () => { document.removeEventListener("visibilitychange", vis); document.removeEventListener("copy", noCopy); document.removeEventListener("paste", noCopy); };
   }, [active]);
   const wasFs = useRef(false);
+  const fullscreenEvent = (event: "exit" | "return" | "timeout") => {
+    setSecurityBusy(true);
+    fullscreenQueue.current = fullscreenQueue.current.then(async () => {
+      const { data, error } = await supabase.rpc("record_competition_fullscreen", { _comp: id, _event: event });
+      if (error) { toast.error("Security check could not be saved. Please reconnect and return to fullscreen."); return; }
+      const result = data as { exits: number; disqualified: boolean; warning_at?: string | null };
+      setFullscreenExits(result.exits);
+      if (result.disqualified) {
+        setStrikes(3);
+        setWarningUntil(null);
+        const { data: attempt } = await supabase.from("competition_submissions").select("*").eq("competition_id", id).eq("user_id", user?.id || "").single();
+        if (attempt) setSub(attempt);
+        toast.error("Disqualified — your competition attempt has been closed.");
+      } else if (event === "return") {
+        setWarningUntil(null);
+      } else if (result.warning_at) {
+        setWarningUntil(new Date(result.warning_at).getTime() + 10000);
+      }
+    }).catch(() => { toast.error("Security check failed. Please reconnect."); }).finally(() => setSecurityBusy(false));
+  };
   useEffect(() => {
     if (!active) return;
-    if (fs.isFullscreen) wasFs.current = true;
-    else if (wasFs.current) { wasFs.current = false; strike("you left fullscreen"); }
+    if (fs.isFullscreen) {
+      wasFs.current = true;
+      if (warningUntil !== null) fullscreenEvent("return");
+    } else if (wasFs.current && !isPageUnloading()) {
+      wasFs.current = false;
+      setWarningUntil(currentTime() + 10000);
+      fullscreenEvent("exit");
+    }
   }, [fs.isFullscreen, active]);
+  useEffect(() => {
+    if (!active || !sub || !now) return;
+    setFullscreenExits(sub.fullscreen_exits || 0);
+    if (sub.fullscreen_warning_at) setWarningUntil(new Date(sub.fullscreen_warning_at).getTime() + 10000);
+    else if (!fs.isFullscreen && !isMobile()) {
+      setWarningUntil(currentTime() + 10000);
+      fullscreenEvent("exit");
+    }
+  }, [active, !!now]);
+  const warningLeft = warningUntil === null ? null : Math.max(0, Math.ceil((warningUntil - now) / 1000));
+  useEffect(() => {
+    if (active && warningLeft === 0 && !securityBusy) fullscreenEvent("timeout");
+  }, [warningLeft, securityBusy, active]);
 
   // Strict per-question timer: when time runs out, move on (no going back).
   const cur = qs[idx];
   const qLeft = cur?.time_limit_seconds ? qStart + cur.time_limit_seconds * 1000 - now : null;
   const next = () => {
-    if (idx < qs.length - 1) { setIdx(idx + 1); setQStart(Date.now() + offset.current); }
+    if (idx < qs.length - 1) { setIdx(idx + 1); setQStart(currentTime()); }
     else submit(true);
   };
   useEffect(() => { if (active && qLeft !== null && qLeft <= 0) next(); }, [qLeft !== null && qLeft <= 0]);
-  useEffect(() => { if (active && !qStart) setQStart(Date.now() + offset.current); }, [active]);
+  useEffect(() => { if (active && !qStart && now) setQStart(currentTime()); }, [active, now, qStart]);
 
   const setA = (qid: string, p: Answer) => { dirty.current = true; setAnswers((a) => ({ ...a, [qid]: { ...a[qid], ...p } })); };
 
@@ -175,7 +229,7 @@ function Arena() {
 
   if (!loading && !user) return shell(<GlowCard className="p-6 text-center">Please <Link to="/login" className="text-primary underline">sign in</Link> to take part.</GlowCard>);
   if (missing) return shell(<GlowCard className="p-6 text-center text-muted-foreground">This competition isn't available to you.</GlowCard>);
-  if (!comp) return shell(<p className="text-muted-foreground">Loading…</p>);
+  if (!comp || !now) return shell(<p className="text-muted-foreground">Synchronising competition time…</p>);
 
   const header = (
     <GlowCard className="p-5">
@@ -215,29 +269,38 @@ function Arena() {
 
   return (
     <HoneycombLayout><Navbar />
-      <div className="sticky top-14 z-40 border-b border-border/50 bg-background/90 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center justify-between p-3">
-          <span className="truncate font-semibold">{comp.title}</span>
+      <div className="border-b border-border/50 bg-background/90 backdrop-blur">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 p-3">
+          <span className="min-w-0 break-words font-semibold">{comp.title}</span>
           <span className={`flex items-center gap-1 font-mono text-lg ${deadline - now < 60000 ? "text-destructive" : "text-primary"}`}><Clock className="h-4 w-4" />{fmt(deadline - now)}</span>
-          <span className="text-xs text-muted-foreground">Strikes {strikes}/3</span>
+          <span className="text-xs text-muted-foreground">Tab strikes {strikes}/3 · Fullscreen exits {fullscreenExits}/2</span>
           <Button onClick={() => submit(false)} disabled={busy}><Send className="mr-1 h-4 w-4" />Submit</Button>
         </div>
-        <div className="mx-auto h-1 max-w-4xl bg-muted"><div className="h-1 bg-primary transition-all duration-500" style={{ width: `${qs.length ? ((idx + 1) / qs.length) * 100 : 0}%` }} /></div>
+        <progress aria-label="Question progress" className="mx-auto block h-1 w-full max-w-5xl accent-primary" max={Math.max(qs.length, 1)} value={idx + 1} />
       </div>
-      <div className="mx-auto max-w-4xl space-y-4 p-4">
-        {!fs.isFullscreen && !isMobile() && (
-          <GlowCard className="flex items-center justify-between p-3 text-sm"><span>Fullscreen is required during the competition.</span><Button size="sm" onClick={fs.enter}>Return to fullscreen</Button></GlowCard>
+      <main className="mx-auto flex min-h-[calc(100dvh-10rem)] w-full max-w-5xl min-w-0 items-center px-4 py-6">
+        {(!fs.isFullscreen || warningUntil !== null) && !isMobile() && (
+          <div role="alertdialog" aria-modal="true" aria-labelledby="fullscreen-warning-title" className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 p-4 backdrop-blur-sm">
+            <GlowCard className="w-full max-w-md border border-destructive p-6 text-center">
+              <ShieldAlert className="mx-auto mb-3 h-10 w-10 text-destructive" />
+              <h2 id="fullscreen-warning-title" className="text-xl font-semibold">Return to fullscreen</h2>
+              <p className="my-3 text-sm text-muted-foreground">Return within 10 seconds to stay in the competition. A second exit disqualifies you immediately.</p>
+              <p aria-live="polite" className="mb-4 font-mono text-4xl font-bold text-destructive">{warningLeft ?? 10}s</p>
+              <Button disabled={securityBusy} onClick={async () => { await fs.enter(); if (document.fullscreenElement || (document as any).webkitFullscreenElement) fullscreenEvent("return"); }}><Maximize className="mr-2 h-4 w-4" />Return to fullscreen</Button>
+            </GlowCard>
+          </div>
         )}
+        <div className="w-full min-w-0 space-y-4">
         {cur && (() => {
           const q = cur; const a = answers[q.id] || {};
           return (
-            <GlowCard key={q.id} className="animate-in fade-in slide-in-from-right-8 duration-500 space-y-3 p-5">
+            <GlowCard key={q.id} className="w-full min-w-0 space-y-4 overflow-hidden p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-8 motion-safe:duration-500">
               <div className="flex justify-between text-sm"><span className="font-semibold">Question {idx + 1} of {qs.length}</span>
                 <span className="text-muted-foreground">{q.points} pts{qLeft !== null && <span className={`ml-3 font-mono ${qLeft < 10000 ? "text-destructive" : "text-primary"}`}>{fmt(qLeft)}</span>}</span></div>
-              <p className="whitespace-pre-wrap select-none">{q.content}</p>
+              <p className="break-words whitespace-pre-wrap select-none">{q.content}</p>
               {q.type === "mcq" && (q.options || []).map((o: string, j: number) => (
-                <button key={j} onClick={() => setA(q.id, { choice: j })}
-                  className={`block w-full rounded-lg border p-3 text-left text-sm ${a.choice === j ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>{o}</button>
+                <Button variant="outline" key={j} onClick={() => setA(q.id, { choice: j })}
+                  className={`h-auto min-h-12 w-full justify-start whitespace-normal break-words p-3 text-left text-sm ${a.choice === j ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"}`}>{o}</Button>
               ))}
               {q.type === "short_text" && <Input placeholder="Your answer" value={a.text || ""} onChange={(e) => setA(q.id, { text: e.target.value })} />}
               {q.type === "code" && (
@@ -253,7 +316,8 @@ function Arena() {
         <Button className="w-full" size="lg" onClick={() => (idx < qs.length - 1 ? next() : submit(false))} disabled={busy}>
           {idx < qs.length - 1 ? "Next question →" : <><Send className="mr-1 h-4 w-4" />Submit answers</>}
         </Button>
-      </div>
+        </div>
+      </main>
     </HoneycombLayout>
   );
 }

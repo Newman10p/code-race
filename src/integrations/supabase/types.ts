@@ -776,6 +776,9 @@ export type Database = {
           answers: Json
           competition_id: string
           display_name: string
+          disqualified_at: string | null
+          fullscreen_exits: number
+          fullscreen_warning_at: string | null
           graded_at: string | null
           id: string
           organization_id: string | null
@@ -792,6 +795,9 @@ export type Database = {
           answers?: Json
           competition_id: string
           display_name: string
+          disqualified_at?: string | null
+          fullscreen_exits?: number
+          fullscreen_warning_at?: string | null
           graded_at?: string | null
           id?: string
           organization_id?: string | null
@@ -808,6 +814,9 @@ export type Database = {
           answers?: Json
           competition_id?: string
           display_name?: string
+          disqualified_at?: string | null
+          fullscreen_exits?: number
+          fullscreen_warning_at?: string | null
           graded_at?: string | null
           id?: string
           organization_id?: string | null
@@ -1958,6 +1967,10 @@ export type Database = {
       }
       is_staff: { Args: never; Returns: boolean }
       my_org_ids: { Args: never; Returns: string[] }
+      record_competition_fullscreen: {
+        Args: { _comp: string; _event: string }
+        Returns: Json
+      }
       record_competition_strike: { Args: { _comp: string }; Returns: number }
       server_now: { Args: never; Returns: string }
       submit_competition: { Args: { _comp: string }; Returns: number }

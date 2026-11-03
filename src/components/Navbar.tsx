@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { FolderOpen, Play, HelpCircle, Settings, BookOpen, Megaphone, Building2, MessageSquare, Trophy, Users, ShieldAlert } from "lucide-react";
+import { FolderOpen, Play, HelpCircle, Settings, BookOpen, Megaphone, Building2, MessageSquare, Trophy, Users, ShieldAlert, FileText, UserRound } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useUserRole } from "@/hooks/useUserRole";
 
@@ -13,6 +13,7 @@ export function Navbar() {
         { label: "Dashboard", to: "/dashboard", icon: FolderOpen },
         { label: "Launch", to: "/launch", icon: Play },
         { label: "Patrons", to: "/patrons", icon: Building2 },
+        { label: "Projects", to: "/projects", icon: FileText },
         { label: "Competitions", to: "/competitions/manage", icon: Trophy },
         { label: "Live boards", to: "/competitions/live", icon: Trophy },
          { label: "Hub", to: "/collab", icon: Users },
@@ -25,6 +26,8 @@ export function Navbar() {
     : isPatron
       ? [
           { label: "Organisation", to: "/organisation", icon: Building2 },
+          { label: "Projects", to: "/projects", icon: FileText },
+          { label: "Competitions", to: "/competitions", icon: Trophy },
            { label: "Hub", to: "/collab", icon: Users },
           { label: "Chat", to: "/chat", icon: MessageSquare },
           { label: "Live boards", to: "/competitions/live", icon: Trophy },
@@ -33,6 +36,8 @@ export function Navbar() {
         ]
       : [
           { label: "Learn", to: "/learn", icon: BookOpen },
+          { label: "Projects", to: "/projects", icon: FileText },
+          { label: "Profile", to: "/profile", icon: UserRound },
           { label: "Competitions", to: "/competitions", icon: Trophy },
           { label: "Hub", to: "/collab", icon: Users },
           { label: "Results", to: "/results", icon: Trophy },
@@ -41,7 +46,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+      <div className="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2">
         <Link to={isSetter ? "/dashboard" : isPatron ? "/organisation" : "/learn"} className="flex items-center gap-2 group">
           <Logo className="h-8 w-8" />
           <span className="text-lg font-bold tracking-tight text-foreground">
@@ -49,7 +54,7 @@ export function Navbar() {
           </span>
         </Link>
 
-        <nav className="flex flex-wrap items-center gap-1">
+        <nav className="flex min-w-0 flex-wrap items-center gap-1">
           {navItems.map((item) => {
             const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
             return (

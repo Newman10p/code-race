@@ -11,6 +11,14 @@ import { runCode, type TestCase, type TestResult } from "@/lib/code-runners";
 import confetti from "canvas-confetti";
 
 export const Route = createFileRoute("/learn/lesson/$lessonId")({
+  head: () => ({ meta: [
+    { title: "Study Lesson | CodeRace" },
+    { name: "description", content: "Read concepts, explore AI prompting and complete coding lessons on CodeRace." },
+    { property: "og:title", content: "Study Lesson | CodeRace" },
+    { property: "og:description", content: "Learn at your own pace with text and interactive coding lessons." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
   component: LessonPlayer,
 });
 
