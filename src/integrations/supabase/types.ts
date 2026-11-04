@@ -1398,6 +1398,8 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          admission_no: string | null
+          class_name: string | null
           created_at: string
           email: string
           full_name: string | null
@@ -1407,6 +1409,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          admission_no?: string | null
+          class_name?: string | null
           created_at?: string
           email: string
           full_name?: string | null
@@ -1416,6 +1420,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          admission_no?: string | null
+          class_name?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
@@ -1967,6 +1973,8 @@ export type Database = {
       }
       is_staff: { Args: never; Returns: boolean }
       my_org_ids: { Args: never; Returns: string[] }
+      patron_can_use_folder: { Args: { _folder: string }; Returns: boolean }
+      patron_can_use_quiz: { Args: { _quiz: string }; Returns: boolean }
       record_competition_fullscreen: {
         Args: { _comp: string; _event: string }
         Returns: Json

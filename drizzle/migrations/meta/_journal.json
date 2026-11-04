@@ -64,6 +64,13 @@
       "when": 1793726832695,
       "tag": "0008_protect_competition_fullscreen_state",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793800319256,
+      "tag": "0009_class_registry_and_shared_folders",
+      "breakpoints": true
     }
   ]
 }
