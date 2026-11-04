@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Building2, UserPlus, Trash2, BookOpen, BarChart3, Mail, MessageSquare } from "lucide-react";
+import { ArrowLeft, Building2, UserPlus, Trash2, BookOpen, BarChart3, Mail, MessageSquare, Play, Folder, Upload } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/organisation")({
   head: () => ({
@@ -38,6 +39,8 @@ interface Member {
   email: string;
   full_name: string | null;
   user_id: string | null;
+  class_name: string | null;
+  admission_no: string | null;
 }
 
 interface Perf {
@@ -60,6 +63,11 @@ function OrganisationPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [klass, setKlass] = useState("");
+  const [bulk, setBulk] = useState("");
+  const [classFilter, setClassFilter] = useState("all");
+  const [folderQuizzes, setFolderQuizzes] = useState<Record<string, { id: string; title: string }[]>>({});
+  const [hosting, setHosting] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) navigate({ to: "/login" });
@@ -105,6 +113,15 @@ function OrganisationPage() {
     const list = ((memberData || []) as any[]) as Member[];
     setMembers(list);
     setShared(sharedData || []);
+    const folderIds = (sharedData || []).filter((s: any) => s.resource_type === "folder").map((s: any) => s.resource_id);
+    const directQuizIds = (sharedData || []).filter((s: any) => s.resource_type === "quiz").map((s: any) => s.resource_id);
+    const fq: Record<string, { id: string; title: string }[]> = {};
+    if (folderIds.length) {
+      const { data: qs } = await supabase.from("quizzes").select("id, title, folder_id").in("folder_id", folderIds);
+      ((qs || []) as any[]).forEach((q) => { (fq[q.folder_id] ||= []).push({ id: q.id, title: q.title }); });
+    }
+    if (directQuizIds.length) fq["__direct"] = [];
+    setFolderQuizzes(fq);
 
     const userIds = list.map((m) => m.user_id).filter(Boolean) as string[];
     if (userIds.length === 0) { setPerf({}); return; }
@@ -135,12 +152,44 @@ function OrganisationPage() {
       organization_id: activeOrg,
       email: email.trim().toLowerCase(),
       full_name: name.trim() || null,
+      class_name: klass.trim() || null,
       invited_by: user.id,
     });
     setAdding(false);
     if (error) { alert(error.message); return; }
     setEmail(""); setName("");
     loadOrgDetail(activeOrg);
+  };
+
+  const bulkAdd = async () => {
+    if (!activeOrg || !user || !bulk.trim()) return;
+    const rows = bulk.split(/\r?\n/).map((l) => l.split(/[,\t;]/).map((c) => c.trim())).filter((r) => r[0] && r[0].includes("@"));
+    if (!rows.length) { alert("Each line needs: email, full name, class, admission number"); return; }
+    setAdding(true);
+    const { error } = await supabase.from("organization_members").insert(rows.map((r) => ({
+      organization_id: activeOrg, email: r[0].toLowerCase(), full_name: r[1] || null,
+      class_name: r[2] || null, admission_no: r[3] || null, invited_by: user.id,
+    })));
+    setAdding(false);
+    if (error) { alert(error.message); return; }
+    setBulk("");
+    loadOrgDetail(activeOrg);
+  };
+
+  const setMemberClass = async (id: string, value: string) => {
+    await supabase.from("organization_members").update({ class_name: value.trim() || null }).eq("id", id);
+    if (activeOrg) loadOrgDetail(activeOrg);
+  };
+
+  const hostQuiz = async (quizId: string) => {
+    if (!user) return;
+    setHosting(quizId);
+    const pin = String(Math.floor(100000 + Math.random() * 900000));
+    const { data, error } = await supabase.from("game_sessions")
+      .insert({ quiz_id: quizId, pin_code: pin, host_id: user.id, status: "lobby" }).select("id").single();
+    setHosting(null);
+    if (error || !data) { alert(error?.message || "Could not start the race"); return; }
+    navigate({ to: "/launch", search: { sessionId: data.id } as any });
   };
 
   const removeMember = async (id: string) => {
@@ -221,6 +270,7 @@ function OrganisationPage() {
                 <div className="mb-4 grid gap-3 sm:grid-cols-2">
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Learner email" />
                   <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name (optional)" />
+                  <Input value={klass} onChange={(e) => setKlass(e.target.value)} placeholder="Class / stream e.g. S3 Blue" />
                 </div>
                 <Button variant="neon" onClick={addMember} disabled={adding || !email.trim()}>
                   {adding ? "Adding..." : "Add learner"}
@@ -228,6 +278,12 @@ function OrganisationPage() {
                 <p className="mt-2 text-xs text-muted-foreground">
                   They join your organisation automatically the moment they sign in with that email.
                 </p>
+                <div className="mt-5 border-t border-border pt-4">
+                  <p className="mb-2 flex items-center gap-1 text-sm font-medium"><Upload className="h-4 w-4 text-primary" /> Bulk add (paste from Excel)</p>
+                  <Textarea value={bulk} onChange={(e) => setBulk(e.target.value)} className="min-h-[90px] font-mono text-xs"
+                    placeholder={"email, full name, class, admission no\njane@school.ug, Jane Achieng, S3 Blue, 1042"} />
+                  <Button variant="neon-outline" size="sm" className="mt-2" onClick={bulkAdd} disabled={adding || !bulk.trim()}>Add all</Button>
+                </div>
               </GlowCard>
 
               <GlowCard>
@@ -238,13 +294,49 @@ function OrganisationPage() {
                 {shared.length === 0 ? (
                   <p className="py-4 text-sm text-muted-foreground">Nothing shared by your setter yet.</p>
                 ) : (
-                  <div className="space-y-2">
-                    {shared.map((s) => (
-                      <div key={s.id} className="rounded-lg border border-border bg-background/50 p-2.5">
-                        <p className="text-sm font-medium">{s.title}</p>
-                        <p className="text-xs text-muted-foreground">{String(s.resource_type).replace("_", " ")}</p>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    {[
+                      ["folder", "Quiz folders"], ["quiz", "Quizzes"], ["lesson_course", "Lesson courses"], ["flashcard_set", "Flashcards"],
+                    ].map(([type, label]) => {
+                      const items = shared.filter((s) => s.resource_type === type);
+                      if (!items.length) return null;
+                      return (
+                        <div key={type}>
+                          <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+                          <div className="space-y-2">
+                            {items.map((s) => (
+                              <div key={s.id} className="rounded-lg border border-border bg-background/50 p-2.5">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className="flex items-center gap-1.5 text-sm font-medium">
+                                    {type === "folder" && <Folder className="h-4 w-4 text-primary" />}{s.title}
+                                  </p>
+                                  {type === "quiz" && (
+                                    <Button size="sm" variant="neon" disabled={hosting === s.resource_id} onClick={() => hostQuiz(s.resource_id)}>
+                                      <Play className="mr-1 h-3 w-3" /> Host
+                                    </Button>
+                                  )}
+                                  {type === "lesson_course" && <Link to="/learn/course/$courseId" params={{ courseId: s.resource_id }} className="text-xs text-primary hover:underline">Open</Link>}
+                                </div>
+                                {type === "folder" && (
+                                  <div className="mt-2 space-y-1.5 border-l border-primary/30 pl-3">
+                                    {(folderQuizzes[s.resource_id] || []).length === 0 && <p className="text-xs text-muted-foreground">No quizzes in this folder yet.</p>}
+                                    {(folderQuizzes[s.resource_id] || []).map((q) => (
+                                      <div key={q.id} className="flex items-center justify-between gap-2">
+                                        <span className="text-xs">{q.title}</span>
+                                        <Button size="sm" variant="neon-outline" className="h-7 px-2 text-xs" disabled={hosting === q.id} onClick={() => hostQuiz(q.id)}>
+                                          <Play className="mr-1 h-3 w-3" /> Host practice race
+                                        </Button>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <p className="text-xs text-muted-foreground">Hosting opens a live room with a PIN — give it to your learners to join from the Join page.</p>
                   </div>
                 )}
                 <Link to="/chat" className="mt-4 inline-flex items-center gap-1 text-sm text-primary hover:underline">
@@ -258,6 +350,15 @@ function OrganisationPage() {
                 <BarChart3 className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">Learner performance</h2>
               </div>
+              {members.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {["all", ...Array.from(new Set(members.map((m) => m.class_name || "Unassigned"))).sort()].map((c) => (
+                    <Button key={c} size="sm" variant={classFilter === c ? "neon" : "neon-outline"} onClick={() => setClassFilter(c)}>
+                      {c === "all" ? `All (${members.length})` : `${c} (${members.filter((m) => (m.class_name || "Unassigned") === c).length})`}
+                    </Button>
+                  ))}
+                </div>
+              )}
               {members.length === 0 ? (
                 <p className="py-4 text-center text-sm text-muted-foreground">No learners registered yet.</p>
               ) : (
@@ -266,6 +367,7 @@ function OrganisationPage() {
                     <thead>
                       <tr className="border-b border-border text-left text-xs uppercase text-muted-foreground">
                         <th className="py-2">Learner</th>
+                        <th className="py-2">Class</th>
                         <th className="py-2">Status</th>
                         <th className="py-2">Races / tests</th>
                         <th className="py-2">Best score</th>
@@ -274,13 +376,20 @@ function OrganisationPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {members.map((m) => {
+                      {[...members]
+                        .filter((m) => classFilter === "all" || (m.class_name || "Unassigned") === classFilter)
+                        .sort((a, b) => (a.class_name || "~").localeCompare(b.class_name || "~") || (a.full_name || a.email).localeCompare(b.full_name || b.email))
+                        .map((m) => {
                         const p = m.user_id ? perf[m.user_id] : undefined;
                         return (
                           <tr key={m.id} className="border-b border-border/50">
                             <td className="py-2">
                               <p className="font-medium">{m.full_name || m.email}</p>
-                              <p className="text-xs text-muted-foreground">{m.email}</p>
+                              <p className="text-xs text-muted-foreground">{m.email}{m.admission_no ? ` · #${m.admission_no}` : ""}</p>
+                            </td>
+                            <td className="py-2">
+                              <input defaultValue={m.class_name || ""} onBlur={(e) => e.target.value !== (m.class_name || "") && setMemberClass(m.id, e.target.value)}
+                                placeholder="—" className="w-24 rounded border border-border bg-background/50 px-2 py-1 text-xs" />
                             </td>
                             <td className="py-2 text-xs">
                               {m.user_id ? <span className="text-primary">Active</span> : <span className="text-muted-foreground">Not signed up</span>}
