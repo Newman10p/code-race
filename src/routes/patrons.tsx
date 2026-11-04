@@ -40,7 +40,7 @@ interface Org {
 interface ResourceOption {
   id: string;
   title: string;
-  type: "flashcard_set" | "lesson_course" | "quiz";
+  type: "flashcard_set" | "lesson_course" | "quiz" | "folder";
 }
 
 function PatronsPage() {
@@ -96,12 +96,14 @@ function PatronsPage() {
       .eq("shared_by", user!.id);
     setShared(sharedData || []);
 
-    const [sets, courses, quizzes] = await Promise.all([
+    const [folders, sets, courses, quizzes] = await Promise.all([
+      supabase.from("folders").select("id, name").eq("user_id", user!.id),
       supabase.from("flashcard_sets").select("id, title").eq("setter_id", user!.id),
       supabase.from("lesson_courses").select("id, title").eq("setter_id", user!.id),
-      supabase.from("quizzes").select("id, title"),
+      supabase.from("quizzes").select("id, title, folders!inner(user_id)").eq("folders.user_id", user!.id),
     ]);
     setResources([
+      ...((folders.data || []) as any[]).map((f) => ({ id: f.id, title: `📁 ${f.name}`, type: "folder" as const })),
       ...((sets.data || []) as any[]).map((s) => ({ id: s.id, title: s.title, type: "flashcard_set" as const })),
       ...((courses.data || []) as any[]).map((c) => ({ id: c.id, title: c.title, type: "lesson_course" as const })),
       ...((quizzes.data || []) as any[]).map((q) => ({ id: q.id, title: q.title, type: "quiz" as const })),
@@ -253,7 +255,7 @@ function PatronsPage() {
             </div>
             <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <p className="mb-2 text-sm font-medium text-muted-foreground">Your content</p>
+                <p className="mb-2 text-sm font-medium text-muted-foreground">Your content — share whole folders so patrons can host every quiz inside for practice</p>
                 <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
                   {resources.length === 0 && <p className="text-sm text-muted-foreground">Nothing to share yet.</p>}
                   {resources.map((r) => {
