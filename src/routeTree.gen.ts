@@ -15,6 +15,7 @@ import { Route as ChatRouteImport } from './routes/chat'
 import { Route as CollabRouteImport } from './routes/collab'
 import { Route as CriteriaRouteImport } from './routes/criteria'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as LaunchRouteImport } from './routes/launch'
 import { Route as LoginRouteImport } from './routes/login'
@@ -26,6 +27,7 @@ import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as RaceRouteImport } from './routes/race'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as ReportRouteImport } from './routes/report'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StandingsRouteImport } from './routes/standings'
@@ -81,6 +83,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JoinRoute = JoinRouteImport.update({
   id: '/join',
   path: '/join',
@@ -134,6 +141,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const ReportRoute = ReportRouteImport.update({
   id: '/report',
   path: '/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResultsRoute = ResultsRouteImport.update({
@@ -264,6 +276,7 @@ export interface FileRoutesByFullPath {
   '/collab': typeof CollabRouteWithChildren
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
@@ -275,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
@@ -306,6 +320,7 @@ export interface FileRoutesByTo {
   '/chat': typeof ChatRoute
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
@@ -317,6 +332,7 @@ export interface FileRoutesByTo {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
@@ -350,6 +366,7 @@ export interface FileRoutesById {
   '/collab': typeof CollabRouteWithChildren
   '/criteria': typeof CriteriaRoute
   '/dashboard': typeof DashboardRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/join': typeof JoinRoute
   '/launch': typeof LaunchRoute
   '/login': typeof LoginRoute
@@ -361,6 +378,7 @@ export interface FileRoutesById {
   '/race': typeof RaceRoute
   '/register': typeof RegisterRoute
   '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/results': typeof ResultsRoute
   '/settings': typeof SettingsRoute
   '/standings': typeof StandingsRoute
@@ -395,6 +413,7 @@ export interface FileRouteTypes {
     | '/collab'
     | '/criteria'
     | '/dashboard'
+    | '/forgot-password'
     | '/join'
     | '/launch'
     | '/login'
@@ -406,6 +425,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/reset-password'
     | '/results'
     | '/settings'
     | '/standings'
@@ -437,6 +457,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/criteria'
     | '/dashboard'
+    | '/forgot-password'
     | '/join'
     | '/launch'
     | '/login'
@@ -448,6 +469,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/reset-password'
     | '/results'
     | '/settings'
     | '/standings'
@@ -480,6 +502,7 @@ export interface FileRouteTypes {
     | '/collab'
     | '/criteria'
     | '/dashboard'
+    | '/forgot-password'
     | '/join'
     | '/launch'
     | '/login'
@@ -491,6 +514,7 @@ export interface FileRouteTypes {
     | '/race'
     | '/register'
     | '/report'
+    | '/reset-password'
     | '/results'
     | '/settings'
     | '/standings'
@@ -524,6 +548,7 @@ export interface RootRouteChildren {
   CollabRoute: typeof CollabRouteWithChildren
   CriteriaRoute: typeof CriteriaRoute
   DashboardRoute: typeof DashboardRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   JoinRoute: typeof JoinRoute
   LaunchRoute: typeof LaunchRoute
   LoginRoute: typeof LoginRoute
@@ -535,6 +560,7 @@ export interface RootRouteChildren {
   RaceRoute: typeof RaceRoute
   RegisterRoute: typeof RegisterRoute
   ReportRoute: typeof ReportRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ResultsRoute: typeof ResultsRoute
   SettingsRoute: typeof SettingsRoute
   StandingsRoute: typeof StandingsRoute
@@ -595,6 +621,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join': {
@@ -672,6 +705,13 @@ declare module '@tanstack/react-router' {
       path: '/report'
       fullPath: '/report'
       preLoaderRoute: typeof ReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/results': {
@@ -877,6 +917,7 @@ const rootRouteChildren: RootRouteChildren = {
   CollabRoute: CollabRouteWithChildren,
   CriteriaRoute: CriteriaRoute,
   DashboardRoute: DashboardRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   JoinRoute: JoinRoute,
   LaunchRoute: LaunchRoute,
   LoginRoute: LoginRoute,
@@ -888,6 +929,7 @@ const rootRouteChildren: RootRouteChildren = {
   RaceRoute: RaceRoute,
   RegisterRoute: RegisterRoute,
   ReportRoute: ReportRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ResultsRoute: ResultsRoute,
   SettingsRoute: SettingsRoute,
   StandingsRoute: StandingsRoute,
