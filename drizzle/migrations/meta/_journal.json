@@ -71,6 +71,13 @@
       "when": 1793800319256,
       "tag": "0009_class_registry_and_shared_folders",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793885368344,
+      "tag": "0010_allow_folder_shared_resources",
+      "breakpoints": true
     }
   ]
 }

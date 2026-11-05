@@ -1,0 +1,2 @@
+ALTER TABLE public.shared_resources DROP CONSTRAINT shared_resources_resource_type_check;
+ALTER TABLE public.shared_resources ADD CONSTRAINT shared_resources_resource_type_check CHECK (resource_type = ANY (ARRAY['flashcard_set'::text, 'lesson_course'::text, 'quiz'::text, 'folder'::text]));
